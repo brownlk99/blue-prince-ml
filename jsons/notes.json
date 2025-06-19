@@ -1,12 +1,12 @@
 [
   {
-    "title": "Last Will and Challenge at Mount Holly",
+    "title": "Last Will and Challenge",
     "content": "open only in the event of my death\n\nSimon,\nWelcome to Mount Holly.\n\nYou may not remember but I have fond\nmemories of your many visits here as\na young boy and I hope these rooms\nprovide you with as much amusement\nas it did in those lost summer days.\n\nBy the time you read this I will\nassume you are fully aware of my\nlast wishes and all the details of\nthe bequest. Please do not mistake\nmy intentions in giving you this\nchallenge as a lack of confidence. I\nassure you, nothing could have been\nfurther from my mind when I chose\nyou as my heir.\n\nWith that said, there are a few\nground rules of this commission\ncovered in the fine print of my will\nthat I feel I should bring to your\nattention:\n\n• NO TOOLS OR ITEMS MAY BE BROUGHT ONTO\nTHE ESTATE FROM THE OUTSIDE.\n\n• TOOLS & ITEMS FOUND ON THE ESTATE MAY\nNOT of TAKEN OFF THE ESTATE.\n\n• YOU MAY NOT STAY OVERNIGHT.\n\nI don't suspect that any of these\nstipulations should prove an\nimpediment for someone as\nresourceful as yourself but it is\nvery important to me that you \"start\nfresh\" each morning and not rely on\nthe successes of the previous day.\n\nOne final word of advice:\n\nDo not assume the rooms you find today\nwill be the same rooms you find\ntomorrow. These grounds have provided me\na home for the last half century and\neven I am uncertain of which room lies\nbeyond any particular door.\n\nYour grandmother used to say, \"Don't go\nwhere the path leads. Abandon the path\nand go where you want it to lead.\"\n\nWith all love and wishes,\nBest of luck,\n\nHerbert S. Sinclair",
     "found_in_room": "ENTRANCE HALL",
     "color": "WHITE"
   },
   {
-    "title": "West Wing Door Lock Likelihood",
+    "title": "West Wing Door Lock",
     "content": "DOORS IN THE\nWEST WING ARE\nMORE LIKELY TO\nBE LOCKED.",
     "found_in_room": "ENTRANCE HALL",
     "color": "RED"
@@ -18,9 +18,15 @@
     "color": "BLACK"
   },
   {
-    "title": "Request for Fruit Purchase Before Friday",
+    "title": "Request for Fruit Purchase",
     "content": "bridgette,\n\nPLEASE PICK UP SOME\nMORE FRUIT BEFORE FRIDAY AS\nWE HAVE JUST BEEN INFORMED\nTHAT WE MAY HAVE AN EXTRA\nGUEST EXPLORING THE HOUSE\nNEXT WEEK. FIFTY STEPS\nSHOULD BE MORE THAN ENOUGH\nSO I THINK AN EVEN SPREAD\nWOULD BE IDEAL:\nFIVE APPLES\nFIVE BANANAS\nFIVE ORANGES\nTHE ENCLOSED AMOUNT SHOULD\nCOVER EXPENSES BUT PLEASE\nBRING BACK ANY CHANGE FROM\nTHE ORDER AND LEAVE IT IN THE\nPANTRY.",
     "found_in_room": "ENTRANCE HALL",
     "color": "WHITE"
+  },
+  {
+    "title": "Intro Monologue",
+    "content": "I, Herbert S. Sinclair, of the Mount Holly Estate at Reddington,\ndo publish, and declare, this instrument,\nmy last will and testament,\nand hereby revoke all wills and codicils heretofore made by me.\nI give and bequeath to my grandnephew, Simon P. Jones,\nson of my dear niece, Mary Matthew,\nall of my right, title and interest in\nand to the house and land which I own near Mount Holly\nThe above provision and bequest is contingent on my aforementioned grand-nephew discovering\nthe location of the 46th room of my forty-five room estate.\nThe location of the room has been kept a secret from all the staff and servants of the manor,\nbut I am confident that any heir worthy of the Sinclair legacy should have no trouble uncovering its whereabouts\nwithin a timely manner.\nShould my grandnephew fail to uncover this room or provide proof of his discovery\nto the executors of my will then this gift shall lapse.\nIn witness whereof, I have hereunto set my hand this 18th day of March, 1993.\n\nHerbert S. Sinclair",
+    "found_in_room": "N/A",
+    "color": "N/A"
   }
 ]

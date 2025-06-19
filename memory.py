@@ -102,8 +102,9 @@ class TermMemory:
             self.terms = {}
 
     def automated_add_term(self, key, description):
-        self.terms[key.upper()] = description
-        self.save()
+        if key.upper() not in self.terms:
+            self.terms[key.upper()] = description
+            self.save()
 
     def user_facilitated_add_term(self):
         # Combine TERMS and ITEMS for selection

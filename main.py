@@ -18,7 +18,7 @@ from google.cloud import vision
 
 from door import Door
 from house_map import HouseMap
-from room import Room
+from room import Room, ShopRoom, PuzzleRoom, CoatCheck, UtilityCloset
 from terminal import Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal
 
 def print_menu():
@@ -83,6 +83,7 @@ def main(game_state):
             print("Resources captured and saved.")
         elif user_input == '2':
             print("Capturing note...")
+            agent.game_state.current_room = get_current_room(reader, agent.game_state.house)
             note = capture_note(google_client, agent.game_state.current_room)
             response = agent.generate_note_title(note.content)
             parsed_response = agent.parse_note_title_response(response)
@@ -94,7 +95,7 @@ def main(game_state):
             print("Capturing items...")
             current_item = capture_items(google_client)
             agent.game_state.items.update(current_item)                 #update the current items in the game state
-            agent.memory.automated_add_term(current_item)               #add the item to persistent memory in order to make better informed decisions
+            agent.term_memory.automated_add_term(current_item)               #add the item to persistent memory in order to make better informed decisions
             print("Items captured and saved.")
         elif user_input == '4':
             print("Stocking shelves...")
@@ -112,23 +113,25 @@ def main(game_state):
             agent.game_state.edit_resources()
             
             response = agent.take_action()
-            print("\nLLM Response:\n", response)
             action, explanation = agent.parse_action_response(response)
-            print(f"Parsed Action: {action}\nExplanation: {explanation}")
+            print(f"Parsed Response:\nAction: {action}\nExplanation: {explanation}")
             if action == "explore":
                 response = agent.decide_door_to_explore()
-                print("\n LLM Response:\n", response)
                 parsed_response = agent.parse_door_exploration_response(response)
+                print(f"Parsed Explore Response:\nRoom: {parsed_response['room']}\nDoor: {parsed_response['door']}\nPath: {parsed_response['path']}\nExplanation: {parsed_response['explanation']}")
             elif action == "peruse_shop":
                 stock_shelves(reader, agent.game_state.current_room)
+                print("Stocked shelves")
             elif action == "purchase_item":
                 response = agent.decide_purchase_item()
-                print("\nLLM Response:\n", response)
+                parsed_response = agent.parse_purchase_response(response)
+                print(f"Parsed Purchase Response:\nItem: {parsed_response['item']}\nQuantity: {parsed_response['quantity']}\nExplanation: {parsed_response['explanation']}")
                 agent.game_state.purchase_item()       #up to the user to alter the quantity of inventory if an item sells out
             elif action == "solve_puzzle":
                 response = agent.solve_parlor_puzzle(reader)
+                parsed_response = agent.parse_parlor_response(response)
+                print(f"Parsed Parlor Response:\nBox: {parsed_response['box']}\nExplanation: {parsed_response['explanation']}")
                 agent.game_state.current_room.has_been_solved = True
-                print("\nLLM Response:\n", response)
             elif action == "dig":
                 agent.game_state.current_room.set_dig_spots()
             elif action == "open_trunk":
@@ -228,25 +231,26 @@ def main(game_state):
             drafting_options = capture_drafting_options(reader, google_client, room, chosen_door)
             response = agent.decide_drafting_option(drafting_options)
             parsed_response = agent.parse_drafting_response(response)
-            print("\nLLM Response:\n", parsed_response)
-            if parsed_response.get("action", "").upper() == "REDRAW":   # if the LLM requested a redraw
+            if "action" in parsed_response:
+                print(f"LLM Response:\nAction: {parsed_response['action']}\nType: {parsed_response['type']}\nExplanation: {parsed_response['explanation']}")
                 print("\nLLM requested a REDRAW. Returning to menu. Select option 6 again after REDRAW.")
                 time.sleep(1)
                 # TODO: decrement redraw counter (manual for now)
                 break  # return to menu
+            elif "room" in parsed_response:
+                print(f"LLM Response:\nRoom: {parsed_response['room']}\nEnter: {parsed_response['enter']}\nExplanation: {parsed_response['explanation']}")
+                for drafted_room in drafting_options:                       # if no redraw, iterate through the drafted rooms and add the one that matches the LLM's response
+                    if drafted_room.name == parsed_response["room"].upper():
+                        if parsed_response.get("enter", "").upper() == "YES":
+                            drafted_room.has_been_entered = True
+                            drafted_room.edit_doors()
+                        agent.game_state.house.add_room_to_house(drafted_room)
+                        agent.game_state.house.connect_adjacent_doors(drafted_room)
+                        agent.room_memory.add_room(drafted_room)
+                        break       # stop loop, save, and return to menu
+                agent.game_state.save_to_file('./jsons/current_run.json')
 
-            for drafted_room in drafting_options:                       # if no redraw, iterate through the drafted rooms and add the one that matches the LLM's response
-                if drafted_room.name == parsed_response["room"].upper():
-                    if parsed_response.get("enter", "").upper() == "YES":
-                        drafted_room.has_been_entered = True
-                        drafted_room.edit_doors()
-                    agent.game_state.house.add_room_to_house(drafted_room)
-                    agent.game_state.house.connect_adjacent_doors(drafted_room)
-                    agent.room_memory.add_room(drafted_room)
-                    break       # stop loop, save, and return to menu
-            agent.game_state.save_to_file('./jsons/current_run.json')
-
-            print(agent.game_state.house.print_map())
+                print(agent.game_state.house.print_map())
         elif user_input == '7':
             agent.term_memory.user_facilitated_add_term()
         elif user_input == '8':

@@ -11,7 +11,6 @@ from textblob import TextBlob
 from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LOOKUP
 from capture.ocr import easy_ocr
 from capture.screen_capture import ScreenCapture
-from room import Room
 
 
 def best_match(text, options):
@@ -32,7 +31,7 @@ def generic_autocorrect(text):
     return str(corrected)
 
 def edit_text_in_editor(text: str) -> str:
-    logger.info("Editing text in external editor, save and close to continue.")
+    print("Editing text in external editor, save and close to continue.")
     editor_path = os.environ.get("EDITOR_PATH")
     if not editor_path:
         raise EnvironmentError("EDITOR_PATH environment variable not set.")            
@@ -45,7 +44,7 @@ def edit_text_in_editor(text: str) -> str:
     os.remove(tf.name)
     return edited.strip()
 
-def get_current_room(reader, house) -> Room:
+def get_current_room(reader, house):
     if house.count_occupied_rooms() == 2:                           #default set up (no current room displayed when in Entrance Hall on a new run)
         current_room_obj = house.get_room_by_name("ENTRANCE HALL")
         return current_room_obj

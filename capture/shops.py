@@ -1,5 +1,5 @@
 import easyocr
-from room import Room
+from room import Room, ShopRoom
 from capture.constants import REGIONS, DIRECTORY, ALPHANUMERIC_ALLOWLIST
 from capture.screen_capture import ScreenCapture
 import cv2
@@ -8,7 +8,7 @@ from capture.ocr import easy_ocr
 from capture.vision_utils import best_match
 
 
-def stock_shelves(reader: easyocr.Reader, current_room: Room):
+def stock_shelves(reader: easyocr.Reader, current_room: ShopRoom):
     """
         Capture items in stock within the current shop room
 

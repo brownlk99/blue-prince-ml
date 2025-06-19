@@ -39,7 +39,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
                 shape = "UNKNOWN"
                 doors = None
                 rarity = "UNKNOWN"
-                terminal = "UNKNOWN"
+                terminal = "UNKNOWN"    #This might have to change
             else:
                 draft_room_name = get_draft_room_name(reader, draft_screenshot, google_client)
         else:
@@ -75,6 +75,8 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
                 terminal = ShelterTerminal()
             elif draft_room_name == "OFFICE":
                 terminal = OfficeTerminal()
+            else:
+                terminal = None
 
         new_room = Room(
             name=draft_room_name,
@@ -141,7 +143,7 @@ def door_check(room_name: str, actual_number: int) -> bool:
         logger.warning(f"{room_name}: Expected {expected}, Got {actual_number}")
         return False
     else:
-        logger.info(f"{room_name}: Door count matches ({expected})")
+        print(f"{room_name}: Door count matches ({expected})")
     return True
 
 

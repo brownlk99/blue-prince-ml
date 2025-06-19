@@ -33,12 +33,12 @@ def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[
     print()
 
 def capture_note(client: vision.ImageAnnotatorClient, current_room: Room) -> Note:
-    logger.info("Starting note capture with mouse input.")
+    print("Starting note capture with mouse input.")
     pages = []
 
     # Capture the first page immediately
     capture_and_process_helper(client, pages)
-    logger.info("Left click to capture next page. Right click to finish note capture.")
+    print("Left click to capture next page. Right click to finish note capture.")
 
     stop_capture = Event()       # Used to signal when to stop capturing
     hook_ref = [None]            # Holds the current mouse hook reference (list allows mutation in nested scope)
@@ -56,9 +56,9 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room) -> Not
             hook_ref[0] = None  # Clear the reference to prevent unhooking twice
 
         if event.button == 'left':
-            logger.info("Left click detected — capturing next page.")
+            print("Left click detected — capturing next page.")
             capture_and_process_helper(client, pages)
-            logger.info("Left click to capture next page. Right click to finish note capture.")
+            print("Left click to capture next page. Right click to finish note capture.")
             # Delay re-hooking the listener in a background thread (avoids GUI click bleed-over)
             def delayed_rehook():
                 time.sleep(0.5)  # Let the OS settle the click queue
@@ -68,7 +68,7 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room) -> Not
             threading.Thread(target=delayed_rehook, daemon=True).start()
 
         elif event.button == 'right':
-            logger.info("Right click detected — finishing note capture.")
+            print("Right click detected — finishing note capture.")
             stop_capture.set()  # This will break the capture loop below
 
     # Register the initial mouse hook and store its reference

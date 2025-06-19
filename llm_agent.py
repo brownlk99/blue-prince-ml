@@ -188,7 +188,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
 
     def parse_action_response(self, response: str):
@@ -204,7 +204,8 @@ class BluePrinceAgent:
 
     def decide_door_to_explore(self):
         context = self.game_state.summarize_for_llm()
-        notes = self.get_relevant_notes(query="Intro")
+        # notes = self.get_relevant_notes(query="Intro")
+        notes = ""
         terms_section = self._format_term_memory_section()
         rooms_section = self._format_room_memory_section()
         prompt = (
@@ -228,7 +229,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_door_exploration_response(self, response: str):
@@ -274,12 +275,13 @@ class BluePrinceAgent:
             f"{terms_section}\n"
             f"You are in a shop - {self.game_state.current_room.name}.\n"
             f"Items currently for sale:\n{items_str}\n\n"
-            "Which item should you purchase, and how many?\n"
+            "Which item (if any) do you wish to purchase, and how many?\n"
+            "If you do not wish to purchase anything, return 'None' within the item field with a quantity of 0.\n"
             "Return only valid JSON in this exact shape:\n"
             '{\n'
             '  "item": "ITEM NAME",\n'
             '  "quantity": NUMBER,\n'
-            '  "explanation": "why this purchase is best"\n'
+            '  "explanation": "why this decision is the best in your opinion"\n'
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n\n"
         )
@@ -287,8 +289,24 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
+    
+    def parse_purchase_response(self, response: str):
+        try:
+            data = json.loads(response)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Could not parse LLM response as JSON: {e}\nResponse was:\n{response}")
+
+        item = data.get("item", "").strip().upper()
+        quantity = data.get("quantity", 0)
+        explanation = data.get("explanation", "").strip()
+
+        return {
+            "item": item,
+            "quantity": quantity,
+            "explanation": explanation
+        }
     
     def decide_drafting_option(self, draft_options: List[Room]) -> str:
         context = self.game_state.summarize_for_llm()
@@ -321,7 +339,7 @@ class BluePrinceAgent:
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n\n"
             "Make your decision based on available resources, relevant notes, and unexplored paths.\n"
         )
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         messages = [
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
@@ -382,8 +400,22 @@ class BluePrinceAgent:
             SystemMessage(content="You are a logician helping a Blue Prince player solve the Parlor three-boxes puzzle."),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
+    
+    def parse_parlor_response(self, response: str):
+        try:
+            data = json.loads(response)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Could not parse LLM response as JSON: {e}\nResponse was:\n{response}")
+
+        box = data.get("box", "").strip().upper()
+        explanation = data.get("explanation", "").strip()
+
+        return {
+            "box": box,
+            "explanation": explanation
+        }
 
     def use_terminal(self):
         context = self.game_state.summarize_for_llm()
@@ -404,7 +436,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_terminal_response(self, response: str):
@@ -452,7 +484,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
 
     def parse_security_level_response(self, response: str):
@@ -499,7 +531,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_mode_response(self, response: str):
@@ -550,7 +582,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        logger.info("Prompt for LLM:\n" + prompt)
+        print("\nPrompt for LLM:\n" + prompt)
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_lab_experiment_response(self, response: str):

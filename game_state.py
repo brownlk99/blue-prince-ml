@@ -1,7 +1,7 @@
 import time
 from door import Door
 from house_map import HouseMap
-from room import Room
+from room import CoatCheck, PuzzleRoom, Room, ShopRoom, UtilityCloset
 from capture.vision_utils import get_current_room
 import json
 import loguru
@@ -29,11 +29,12 @@ class GameState:
         entrance_hall = Room(
             name="ENTRANCE HALL",
             shape="T",
-            doors=[Door(locked=False, discovered=True, orientation="W"), Door(locked=False, discovered=True, orientation="N"), Door(locked=False, discovered=True, orientation="E")],
+            doors=[Door(locked=False, orientation="W"), Door(locked=False, orientation="N"), Door(locked=False, orientation="E")],
             description="Past the steps and beyond the grand doors, admission to Mount Holly is granted by way of a dark and garish lobby, suitably called the Entrance Hall. From here, each guest's adventure begins; however, the three doors that proceed onward do not always lead to the same adjoining rooms...",
             additional_info="",
             position=(2, 8),
-            rarity="N/A"
+            rarity="N/A",
+            has_been_entered=True
         )
         antechamber = Room(
             name="ANTECHAMBER",
@@ -48,6 +49,12 @@ class GameState:
         self.house.add_room_to_house(antechamber)
 
     def summarize_for_llm(self) -> str:
+        """
+            summarizes the current game state for the LLM
+
+                Returns:
+                    str: a summary of the current state
+        """
         x, y = self.current_position
         current_room = self.house.get_room_by_position(x, y)
         summary = [
@@ -57,27 +64,47 @@ class GameState:
             f"House dimensions: width={self.house.width}, height={self.house.height} (upper left corner (most north-west) is (0,0))",
             "Items:"
         ]
-        summary.extend([f"  - {name}: {desc}" for name, desc in self.items.items()])
+        if self.items:
+            summary.extend([f"  - {name}: {desc}" for name, desc in self.items.items()])
+        else:
+            summary.append("  None")
         summary.append("Rooms Currently in House:")
         for row in self.house.grid:
             for room in row:
                 if room:
-                    doors = "\n      ".join(
-                        f"{door.orientation} (leads_to={door.leads_to}, locked={door.locked}, is_security={door.is_security})"
+                    doors = "      " + " \n      ".join(
+                        f"{door.orientation} (leads_to={getattr(door, 'leads_to', None)}, locked={door.locked}, is_security={door.is_security})"
                         for door in room.doors
                     )
                     summary.append(f"  - {room.name} at {room.position}, type: {room.type}, rarity: {room.rarity}, has_been_entered: {room.has_been_entered}")
-                    if "PUZZLE" in room.type:
-                        summary.append(f"    Puzzle has been solved: {room.puzzle_solved}")
-                    summary.append(f"    Doors: \n{doors}")
-                    if hasattr(room, "items_for_sale") and room.items_for_sale:
+                    # ShopRoom
+                    if isinstance(room, ShopRoom) and room.items_for_sale:
                         summary.append(f"    Items for sale in {room.name}:")
                         for item, price in room.items_for_sale.items():
                             summary.append(f"      - {item}: {price}")
-                    if hasattr(room, "trunks") and getattr(room, "trunks", 0) > 0:
+                    # PuzzleRoom
+                    if isinstance(room, PuzzleRoom):
+                        summary.append(f"    Puzzle has been solved: {room.has_been_solved}")
+                    # UtilityCloset
+                    if isinstance(room, UtilityCloset):
+                        summary.append(
+                            f"    Utility switches: keycard_entry_system_switch={room.keycard_entry_system_switch}, "
+                            f"gymnasium_switch={room.gymnasium_switch}, darkroom_switch={room.darkroom_switch}, "
+                            f"garage_switch={room.garage_switch}"
+                        )
+                    # CoatCheck
+                    if isinstance(room, CoatCheck):
+                        summary.append(f"    Stored item in Coat Check: {room.stored_item if room.stored_item else 'None'}")
+                    # Trunks
+                    if getattr(room, "trunks", 0) > 0:
                         summary.append(f"    Trunks in {room.name}: {room.trunks}")
-                    if hasattr(room, "dig_spots") and getattr(room, "dig_spots", 0) > 0:
+                    # Dig spots
+                    if getattr(room, "dig_spots", 0) > 0:
                         summary.append(f"    Dig spots in {room.name}: {room.dig_spots}")
+                    # Terminal
+                    if getattr(room, "terminal", None) is not None:
+                        summary.append(f"    Terminal present in {room.name}: {room.terminal}")
+                    summary.append(f"     Doors: \n{doors}")
         summary.append("If a ROOM has_been_entered, it means the player has been in that room at least once to collect the initial items and information regarding its DOORS.")
         return "\n".join(summary)
 

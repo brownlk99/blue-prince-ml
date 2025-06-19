@@ -154,7 +154,7 @@ class HouseMap:
         else:
             print(f"Room '{room_name}' not found in DIRECTORY.")
 
-    def edit_room(self, room: Room | ShopRoom | PuzzleRoom | UtilityCloset) -> None:
+    def edit_room(self, room: Union[Room, ShopRoom, PuzzleRoom, UtilityCloset]) -> None:
         """
             Allows the user to view and edit all editable fields of a Room or its subclasses
 
@@ -274,10 +274,8 @@ class HouseMap:
                         break
                 if matching_neighbor_door:
                     door.leads_to = neighbor.name
-                    door.discovered = True
                     door.locked = False
                     matching_neighbor_door.leads_to = new_room.name
-                    matching_neighbor_door.discovered = True
                     matching_neighbor_door.locked = False
                 else:
                     door.leads_to = "DEAD END"

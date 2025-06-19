@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
-from constants import REGIONS
-from screen_capture import ScreenCapture
-from ocr import google_vision
+from capture.constants import REGIONS
+from capture.screen_capture import ScreenCapture
+from capture.ocr import google_vision
 from google.cloud import vision
-from vision_utils import generic_autocorrect, edit_text_in_editor
+from capture.vision_utils import generic_autocorrect, edit_text_in_editor
 
 
 def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient) -> dict:

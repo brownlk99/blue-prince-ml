@@ -25,7 +25,7 @@ def capture_resources(client: vision.ImageAnnotatorClient) -> dict:
         img_hash = image_hash(resource_screenshot)
         if last_resource_hashes.get(resource) == img_hash:
             # No change, return last known value if available
-            print(f"[DEBUG] Resource {resource} unchanged, using cached value.")
+            print(f"Resource {resource} unchanged, using cached value.")
             if resource in last_resource_values:
                 available_resources[resource] = last_resource_values[resource]
             continue
