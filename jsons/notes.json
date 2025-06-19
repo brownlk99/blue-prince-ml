@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Last Will and Challenge at Mount Holly",
+    "content": "open only in the event of my death\n\nSimon,\nWelcome to Mount Holly.\n\nYou may not remember but I have fond\nmemories of your many visits here as\na young boy and I hope these rooms\nprovide you with as much amusement\nas it did in those lost summer days.\n\nBy the time you read this I will\nassume you are fully aware of my\nlast wishes and all the details of\nthe bequest. Please do not mistake\nmy intentions in giving you this\nchallenge as a lack of confidence. I\nassure you, nothing could have been\nfurther from my mind when I chose\nyou as my heir.\n\nWith that said, there are a few\nground rules of this commission\ncovered in the fine print of my will\nthat I feel I should bring to your\nattention:\n\n• NO TOOLS OR ITEMS MAY BE BROUGHT ONTO\nTHE ESTATE FROM THE OUTSIDE.\n\n• TOOLS & ITEMS FOUND ON THE ESTATE MAY\nNOT of TAKEN OFF THE ESTATE.\n\n• YOU MAY NOT STAY OVERNIGHT.\n\nI don't suspect that any of these\nstipulations should prove an\nimpediment for someone as\nresourceful as yourself but it is\nvery important to me that you \"start\nfresh\" each morning and not rely on\nthe successes of the previous day.\n\nOne final word of advice:\n\nDo not assume the rooms you find today\nwill be the same rooms you find\ntomorrow. These grounds have provided me\na home for the last half century and\neven I am uncertain of which room lies\nbeyond any particular door.\n\nYour grandmother used to say, \"Don't go\nwhere the path leads. Abandon the path\nand go where you want it to lead.\"\n\nWith all love and wishes,\nBest of luck,\n\nHerbert S. Sinclair",
+    "found_in_room": "ENTRANCE HALL",
+    "color": "WHITE"
+  },
+  {
+    "title": "West Wing Door Lock Likelihood",
+    "content": "DOORS IN THE\nWEST WING ARE\nMORE LIKELY TO\nBE LOCKED.",
+    "found_in_room": "ENTRANCE HALL",
+    "color": "RED"
+  },
+  {
+    "title": "Your Adventure Journal",
+    "content": "A JOURNEY\nNOTEWORTHY\n\nAS YOU CONTINUE ON YOUR ADVENTURE, YOU\nMAY WANT TO CONSIDER GETTING SOMETHING\nTO SCRIBBLE DOWN YOUR NOTES AND\nOBSERVATIONS.\n\nA PAD, SCRAP OF PAPER OR, PERHAPS MOST\nFITTINGLY, A JOURNAL WILL PROVE TO\nBE AN INVALUABLE TOOL YOU\nWILL NOT REGRET HAVING beside\nYOU ON YOUR JOURNEY.",
+    "found_in_room": "HALLWAY",
+    "color": "BLACK"
+  },
+  {
+    "title": "Request for Fruit Purchase Before Friday",
+    "content": "bridgette,\n\nPLEASE PICK UP SOME\nMORE FRUIT BEFORE FRIDAY AS\nWE HAVE JUST BEEN INFORMED\nTHAT WE MAY HAVE AN EXTRA\nGUEST EXPLORING THE HOUSE\nNEXT WEEK. FIFTY STEPS\nSHOULD BE MORE THAN ENOUGH\nSO I THINK AN EVEN SPREAD\nWOULD BE IDEAL:\nFIVE APPLES\nFIVE BANANAS\nFIVE ORANGES\nTHE ENCLOSED AMOUNT SHOULD\nCOVER EXPENSES BUT PLEASE\nBRING BACK ANY CHANGE FROM\nTHE ORDER AND LEAVE IT IN THE\nPANTRY.",
+    "found_in_room": "ENTRANCE HALL",
+    "color": "WHITE"
+  }
+]

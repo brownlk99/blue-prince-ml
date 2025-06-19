@@ -1,0 +1,1578 @@
+{
+  "FLOORPLANS": {
+    "ROOMS": {
+      "THE FOUNDATION": {
+        "COST": 0,
+        "TYPE": [
+          "PERMANENT",
+          "BLUEPRINT"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "The cornerstone of the house, unvarying and unchanging, The Foundation is one of the only constants in the ESTATE on which you can truly rely. This natural cavity was hollowed directly out of the mountain itself, with its stone and earth walls displaying an underlying coarseness that the rest of the mansion conceals.",
+        "ADDITIONAL INFORMATION":"",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "ENTRANCE HALL": {
+        "COST": 0,
+        "TYPE": [
+          "PERMANENT",
+          "BLUEPRINT"
+        ],
+        "RARITY": "N/A",
+        "DESCRIPTION": "Past the steps and beyond the grand doors, admission to Mount Holly is granted by way of a dark and garish lobby, suitably called the Entrance Hall. From here, each guest's adventure begins; however, the three doors that proceed onward do not always lead to the same adjoining rooms...",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "T",
+        "NUM_DOORS": 3
+      },
+      "SPARE ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "An unfurnished, unfinished and otherwise unremarkable empty room. If there had at some point been plans for this spare room, it would seem those designs are now long forgotten.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "ROTUNDA": {
+        "COST": 3,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A circular chamber with a domed ceiling adorned with an array of mechanical gears. In the center of the room, a stone podium serves as a central pivot point for the chamber's true purpose: rotation. A fitting function for a room named Rotunda, which means \"clockwise room\" in Erajan.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "PARLOR": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "PUZZLE"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "This cozy lounge furnished with couches and armchairs serves as the perfect social setting for receptions and after parties. Consequently this was one of the most popular rooms for entertaining and the late H. S. Sinclair was known to supply a myriad of parlor games to encourage his guests to think and conversate.",
+        "ADDITIONAL INFORMATION": "contains a puzzle that can be solved for a reward",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "BILLIARD ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "PUZZLE"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "This smoky backroom, featuring a pool table and fully stocked bar, has served as a retreat on more than one occasion for guests lacking the social wit required for after-dinner conversation. A rather curious game of darts provided the less competitive players a unique opportunity to ponder over its unusual rules.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "GALLERY": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "PUZZLE"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A small chamber dedicated to the exhibition of art, ideal for showcasing smaller series and collections. Before his passing, H.S. Sinclair personally selected the artwork that was displayed here each year, purposefully omitting the composition titles to leave the interpretations of each piece for the viewers themselves to realize.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "ROOM 8": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "PUZZLE"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "Unsurprisingly, Key 8 unlocked a door leading to a familiar looking room, a cryptic room that had been previewed in the final 8-letter artwork exhibited in the Gallery. It is now time to ruminate over the bins, sins and pins contained within.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "CLOSET": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A very modest recessed space used for storage. This particular closet is favored by the junior members of the staff, who utilize it to stash away assorted articles and knicknacks whose proper place in the ESTATE is yet unknown to them.",
+        "ADDITIONAL INFORMATION": "2 items", 
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "WALK-IN CLOSET": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "The stylish and smart clothes in this generously sized closet belong to the former Mistress of the ESTATE, Lady Epsen. Though the small dressing room has not been used in many years, it is nevertheless kept up and preserved in the state you now find it.",
+        "ADDITIONAL INFORMATION": "4 items",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "ATTIC": {
+        "COST": 3,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "High above the mansion in its lofty perch, Mt. Holly's Attic provides curious explorers with a cache of dusty keepsakes, trinkets, and clues from a long-forgotten past.",
+        "ADDITIONAL INFORMATION": "8 items",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "STOREROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A dedicated storage space filled from end to end with a surplus of chairs, carpets, paintings and a handful of other things that had at one time been in vogue and on display elsewhere in the house.",
+        "ADDITIONAL INFORMATION": "+1 KEY, +1 GEM, +1 COIN",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "NOOK": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A snug corner reading room which serves as a quiet, private place for guests to spend a few hours of their afternoon away from the hustle and bustle of the staff.",
+        "ADDITIONAL INFORMATION": "+1 KEY",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "GARAGE": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "\"Dead End\""
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Entering and exiting out through the west facing private drive, the Garage serves as a more practical and informal entrance point into the ESTATE.",
+        "ADDITIONAL INFORMATION": "+3 KEYS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "MUSIC ROOM": {
+        "COST": 2,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A small recital hall providing an ideal setup for musical performers and accompanists. It is not uncommon for at least a few recitals and performances to be held in this intimate setting each year.",
+        "ADDITIONAL INFORMATION": "1 MAJOR KEY, 1 MINOR KEY",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "LOCKER ROOM": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "SPREAD",
+          "ADDITION"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "This poolside Locker Room is of course not always poolside, but it is much more convenient for guests when it is; and much less annoying for the servant who must follow the dripping swimmer across the house searching for their locker.",
+        "ADDITIONAL INFORMATION": "Spread KEYS throughout the house.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "DEN": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
+        "ADDITIONAL INFORMATION": "+1 GEM",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "WINE CELLAR": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A short staircase leads down to this below ground cellar revealing an impressive collection of bottles from every respectable vintage of the last 200 years. To the seasoned wine aficionado, the labels displayed here would indicate a preference for prioritizing extravagance and rarity over quality.",
+        "ADDITIONAL INFORMATION": "+3 GEMS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "TROPHY ROOM": {
+        "COST": 5,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "The polished brass of the treasured laurels filling the trophy cases of this room reveal the pride their owner must feel having earned them. Achievements is its own reward but a gold cup is also nice.",
+        "ADDITIONAL INFORMATION": "+8 GEMS",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "BALLROOM": {
+        "COST": 2,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An opulent hall with a polished mirror floor. In the old days, numerous balls and dances were held in this splendid room. However, as he aged, the Baron began to prefer private parties in the Parlor over the grand formal receptions of his youth.",
+        "ADDITIONAL INFORMATION": "Whenever you enter BALLROOM, set your GEMS to 2",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "PANTRY": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A well stocked pantry is always the true test of a large ESTATE, and keeping Mt. Holly's wide gamut of ingredients and supplies stocked has always been one of the primary priorities of the house staff.",
+        "ADDITIONAL INFORMATION": "+4 COINS",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "RUMPUS ROOM": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A uniquely modern fashioned gaming room, the Rumpus Room has provided many guests of the ESTATE with countless hours of recreation. The room is outfitted with a record player, two television sets, a collection of board games and a mysterious antique fortune telling automaton named \"Alzara\".",
+        "ADDITIONAL INFORMATION": "+8 COINS",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "VAULT": {
+        "COST": 3,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A secure onsite depository fitted with steel walls and numbered lockers. This fortified strongroom holds a good portion of the Sinclair fortune despite the fact that several inventories have led accountants to assume the true legacy is hidden elsewhere.",
+        "ADDITIONAL INFORMATION": "+40 COINS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "OFFICE": {
+        "COST": 2,
+        "TYPE": [
+          "BLUEPRINT",
+          "SPREAD"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "The late Sinclair's personal home office, a room he used exclusively for business affairs and the running of the ESTATE, a task he took increasingly more satisfaction in overseeing in his later years.",
+        "ADDITIONAL INFORMATION": "Opportunity to earn and spread COINS",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "DRAWING ROOM": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "DRAFTING"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A social sitting room adorned wall to wall with artwork and drawings. An unfinished sketch of your uncle sits on an easel in the middle of the room, providing a vivid image of what were presumably his final days (depending on when the project was abandoned).",
+        "ADDITIONAL INFORMATION": "You may draw new Floor Plans while drafting in this room.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "STUDY": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DRAFTING",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "After the passing of Baroness Auravei, her private study was claimed by her eldest son, Herbert Sinclair. For years, he immersed himself in the countless notebooks she left behind, drawing inspiration from her discarded ideas. From mechanical puzzles to architectural blueprints, each endeavor he pursued in this room was realized in the shade of her creative legacy.",
+        "ADDITIONAL INFORMATION": "While drafting you may spend GEMS to redraw floorplans up to 8 times.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "LIBRARY": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DRAFTING"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Two stories of wall-to-wall books surround the reader in this room, exhibiting either a bountiful spring of knowledge or typical interior design sensibilities of the wealthy. A few books have been withdrawn from the shelves and placed on rostrum stands in various corners of the library.",
+        "ADDITIONAL INFORMATION": "Discover less common Floor Plans while drafting in the LIBRARY.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "CHAMBER OF MIRRORS": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END",
+          "DRAFTING"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "Reflections of reflections, this confusing room can sometimes prove disorienting to the wayward guest. However, upon closer inspection, they quickly realize that viewing this room from more than one perspective is key to unraveling its secrets.",
+        "ADDITIONAL INFORMATION": "You can now draft second copies of rooms you already have in your house.",
+        "SHAPE": "CROSS",
+        
+        "NUM_DOORS": 4
+      },
+      "THE POOL": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "DRAFTING"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "An indoor Orindian pool was one of the more modern additions to the ESTATE, the inclusion of which provided a convenient excuse for building a handful of other rooms which not only complement an indoor pool, but are often compulsory inclusions.",
+        "ADDITIONAL INFORMATION": "Adds LOCKER ROOM, SAUNA, and PUMP ROOM to today's Draft Pool.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "DRAFTING STUDIO": {
+        "COST": 2,
+        "TYPE": [
+          "BLUEPRINT",
+          "DRAFTING"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "As an architect and engineer, it was not uncommon to find your great uncle spending the better part of his weekends here, at a drafting table with a t-square and compass in hand. Over half of the floorplans of Mt. Holly were conceptualized, refined and drafted in this studio.",
+        "ADDITIONAL INFORMATION": "Select a new floorplan to permanently add to your estate's draft pool.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "UTILITY CLOSET": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "MECHANICAL",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "One benefit of the restoration of old buildings is that it allows the owners to update and add modern amenities. The utility closet and the circuit breaker box within were set up when gas powered lighting was retired and replaced by a more fashionable home electrical system.",
+        "ADDITIONAL INFORMATION": "Breaker Box",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "BOILER ROOM": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "MECHANICAL"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A utility room serving as a central hub for controlling the heating and steam power supplied to various rooms of the ESTATE. Steam power is conveyed in the ESTATE through steam ducts that run through select rooms. These floorplans must be drafted in an alignment that will facilitate the steam traveling through the house to reach its intended destination.",
+        "ADDITIONAL INFORMATION": "Power Source",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "PUMP ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "MECHANICAL",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "This facility, dedicated to the filtration and flow of water throughout the ESTATE, houses five water pumps and three oversized tanks. The Pump Room can be utilized for a number of maintenance tasks, from draining the pool to activating the sprinkler system.",
+        "ADDITIONAL INFORMATION": "Control water flow throughout the Estate.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "SECURITY": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "MECHANICAL"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A control room with state of the art surveillance equipment, inventory system, and access control via an electronic computer terminal. This room is where the ESTATE's patrol guards kick up their feet and thank their stares they are living in a modern era.",
+        "ADDITIONAL INFORMATION": "View inventory of all items currently in the house.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "WORKSHOP": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "MECHANICAL"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Springs, screws and coils scattered atop the workbench show signs of this room's frequent use. A craftsman's studio dedicated to creativity and invention, this room was used by your uncle regularly whenever he needed to fix (or improve) a gadget or contraption.",
+        "ADDITIONAL INFORMATION": "Combine inventory items to create new items.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "LABORATORY": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "MECHANICAL"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A fully staffed research facility furnished with all manner of scientific equipment and measurement devices. This home laboratory provides a controlled environment in a remote location, far from prying eyes and traditional safety regulations.",
+        "ADDITIONAL INFORMATION": "Experimental House Features",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "SAUNA": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END",
+          "ADDITION",
+          "TOMORROW"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A traditional wood-lined Corarican style sauna, temperature controlled and exceptionally relaxing. The invigorating effects of this room will leave you waking up the next day feeling rejuvenated.",
+        "ADDITIONAL INFORMATION": "Tomorrow, you will start the day with 20 extra STEPS.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "COAT CHECK": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "TOMORROW",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A cloakroom where guests may leave their coats, bags or hats in exchange for a claim ticket. This floor plan was usually drafted adjoining the Entrance Hall during larger social events such as a ball or gala.",
+        "ADDITIONAL INFORMATION": "Check one item and choose to retrieve it on another day (separate run).",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "MAIL ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "TOMORROW",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A dedicated mailing room in which incoming and outgoing post and packages are sorted and then delivered within the ESTATE to their intended recipients.",
+        "ADDITIONAL INFORMATION": "A package will be delivered here the day after drafting this room.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "FREEZER": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "DEAD END",
+          "TOMORROW"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "Dedicated to deep freeze and cold storage, Mt. Holly's freezer is an insulated space kept almost as frigid as the snowy mountains of Corarica. Sustaining a subzero temperature is vital for keeping the items in this room under ice.",
+        "ADDITIONAL INFORMATION": "Freezes your accounts. (COIN and GEM amounts will not reset at the end of the day and they cannot be adjusted or used until tomorrow.)",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "DINING ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "An intimate and warm room with a large dining table boasting a serving tray with a silver dome cover. Dinner is served here each evening.",
+        "ADDITIONAL INFORMATION": "Each day, a meal is served in the DINING ROOM after Rank 8 has been reached.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "OBSERVATORY": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "Housing an impressively large telescope, Mount Holly's observatory is a window to the world above and beyond the clouds and sky. Through its mirrored lens, even a novice stargazer will be able to distinctly appreciate the wonder, signs and constellations that punctuate the tapestry of night.",
+        "ADDITIONAL INFORMATION": "+1 Star for each time you've drafted OBSERVATORY.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "CONFERENCE ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "SPREAD"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "In his later years, H. S. Sinclair had become withdrawn from public life and conducted all business from the comfort and privacy of home. This included the occasional board meetings which were held in the professional setting of this room.",
+        "ADDITIONAL INFORMATION": "Whenever items would be spread throughout the house, they are placed in this room instead.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "AQUARIUM": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "BEDROOM",
+          "HALLWAY",
+          "GREEN ROOM",
+          "SHOP",
+          "RED ROOM",
+          "BLACKPRINT"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "In addition to having a bouquet of colorful fish swimming within them, each tank in the Aquarium is also inspired by the decor and colors of the various types of rooms found throughout the ESTATE, including one or two red herrings.",
+        "ADDITIONAL INFORMATION": "AQUARIUM is every color of room.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "ANTECHAMBER": {
+        "COST": 2,
+        "TYPE": [
+          "BLUEPRINT",
+          "OBJECTIVE"
+        ],
+        "RARITY": "N/A",
+        "DESCRIPTION": "From its root meaning \"The Room Before\", all signs and paths point toward the Antechamber. This mysterious sealed room -resting on the 9th Rank- may prove, however, quite an initial challenge to even each, let alone enter. Still, you can't help but draw a connection between this chamber and Room 46.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "CROSS",
+        "NUM_DOORS": 4
+      },
+      "ROOM 46": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "OBJECTIVE"
+        ],
+        "RARITY": "N/A",
+        "DESCRIPTION": "The mysterious room mentioned in H. S. Sinclair's will, named only by a number. Despite the house's official blueprint only showing a total of 45 rooms, the words of the legal document make it apparent that a 46th room in the house in fact exists. Finding this room is your primary objective while on the ESTATE. It is after all, your bequest.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "?",
+        
+        "NUM_DOORS": "?"
+      }
+    },
+    "BEDROOMS": {
+      "BEDROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BEDROOM",
+          "ENTRY"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A familiar room that you may have slept in at some prior visit in the past. Like most bedrooms of the ESTATE, these quarters offer you a little rest and recuperation during your long days exploring the surrounding rooms.",
+        "ADDITIONAL INFORMATION": "Whenever you enter this room, gain 2 STEPS",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "BOUDOIR": {
+        "COST": 0,
+        "TYPE": [
+          "BEDROOM"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A private salon with a plethora of fainting couches and chaise lounges that served both as a dressing room for her Ladyship in the mornings and a cozy sitting room for her in the evenings.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "GUEST BEDROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BEDROOM",
+          "DEAD END"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A small bedroom maintained and kept available for accommodating weekend guests and impromptu visitors who find themselves compelled to stay the night.",
+        "ADDITIONAL INFORMATION": "+10 STEPS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "NURSERY": {
+        "COST": 1,
+        "TYPE": [
+          "BEDROOM",
+          "DEAD END",
+          "DRAFTING"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "One of the few rooms you vividly remember from your visits here in your youth. Though even at that time, you remember feeling a little old for the activities provided here. The twin cribs found in this room might suggest that at one point in time there had been some hopeful expectations of a sudden growth of the family tree.",
+        "ADDITIONAL INFORMATION": "Whenever you draft a Bedroom (type), gain 5 STEPS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "SERVANT'S QUARTERS": {
+        "COST": 1,
+        "TYPE": [
+          "BEDROOM",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A cold empty room, devoid of ornamentation and personal effects. This suspiciously humble bedroom belonged to the Baron's personal valet, Hartley Ruota, who had unchallenged access to even the most clandestine areas of the ESTATE.",
+        "ADDITIONAL INFORMATION": "+1 KEY for each Bedroom (type) in your house.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "BUNK ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "BEDROOM",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "The rustic, wooden stacked bunk beds evoke the enticing promise of campfire stories and childhood adventures. This bedroom served as a pillowfort and bedroom to the young Sinclair boys, and has remained faithfully unchanged over the years.",
+        "ADDITIONAL INFORMATION": "This room counts as 2 BEDROOMS.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "HER LADYSHIP'S CHAMBER": {
+        "COST": 0,
+        "TYPE": [
+          "BEDROOM",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "Tucked quietly away in the west wing of Mount Holly is the decorative bedroom of your grandmother, Lady Epsen. The style you find, unique in the house, a fitting tribute to her childhood home in Eraja.",
+        "ADDITIONAL INFORMATION": "The next time you enter BOUDOIR, gain 10 STEPS. The next time you enter WALK-IN-CLOSET, gain 3 GEMS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "MASTER BEDROOM": {
+        "COST": 2,
+        "TYPE": [
+          "BEDROOM",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "H. S. Sinclair's own room. Though perhaps soon you may consider it your own.",
+        "ADDITIONAL INFORMATION": "+1 STEP for each room in your house.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      }
+    },
+    "HALLWAYS": {
+      "HALLWAY": {
+        "COST": 0,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "WEST WING HALL": {
+        "COST": 0,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "The west wing of the ESTATE has been closed since the death of Lady Epsen. It is unsurprising therefore, that this hallway in its neglected state features boarded windows and dust smothered furniture.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "EAST WING HALL": {
+        "COST": 0,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "This fenestrated hallway overlooks the east side of the ESTATE grounds and is warmed in the early day by the light of the rising afternoon sun.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "CORRIDOR": {
+        "COST": 0,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
+        "ADDITIONAL INFORMATION": "CORRIDOR is always left unlocked.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "PASSAGEWAY": {
+        "COST": 2,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A long series of unfinished passages used primarily by the servant staff to traverse the ESTATE quickly.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "CROSS",
+        "NUM_DOORS": 4
+      },
+      "SECRET PASSAGE": {
+        "COST": 1,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A small \"Dead End\" room with an ordinary bookcase, that exemplifies that the best means to escape the confinements of our world has always been through books.",
+        "ADDITIONAL INFORMATION": "Leads to a room of a color of your choice.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "FOYER": {
+        "COST": 2,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "The grand baroque hall of Mt. Holly is impressive to behold. This ornamented passage is flanked with marble pillars and bust statues of the more prominent figures of the Sinclair family legacy.",
+        "ADDITIONAL INFORMATION": "Hallway Doors are always unlocked.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "GREAT HALL": {
+        "COST": 0,
+        "TYPE": [
+          "HALLWAY"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A room of many doors and even more choices. The Great Hall is unquestionably the largest hallway of the house but it is also the least useful, for the doors \"lining\" its walls are always locked. Perhaps for a reason.",
+        "ADDITIONAL INFORMATION": "7 Locked Doors",
+        "SHAPE": "CROSS",
+        
+        "NUM_DOORS": 4
+      }
+    },
+    "GREEN ROOMS": {
+      "TERRACE": {
+        "COST": 0,
+        "TYPE": [
+          "GREEN ROOM",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A terrace balcony overlooking the grounds providing an ideal spot for appreciating all the verdure and greenery that the ESTATE offers.",
+        "ADDITIONAL INFORMATION": "Green Rooms do not cost GEMS to draft.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "PATIO": {
+        "COST": 1,
+        "TYPE": [
+          "GREEN ROOM",
+          "SPREAD"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A roofed outdoor seating area located along the perimeter of the ESTATE. During the summer evenings, it is not unusual for the grill to be employed while entertaining acquaintances of a more informal nature.",
+        "ADDITIONAL INFORMATION": "Spread GEMS in each Green Room.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "COURTYARD": {
+        "COST": 1,
+        "TYPE": [
+          "GREEN ROOM"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A charming spot granting guests a bit of fresh air and open skies within the privacy of the manor walls.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "CLOISTER": {
+        "COST": 3,
+        "TYPE": [
+          "GREEN ROOM"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A covered walk and colonnade surrounding an enclosed and seemingly inaccessible garden. A solitary angelic statue in the center of the grassy patch provides this secluded court a hallowed atmosphere.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "CROSS",
+        "NUM_DOORS": 4
+      },
+      "VERANDA": {
+        "COST": 2,
+        "TYPE": [
+          "GREEN ROOM"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "This relaxing breezeway serves as an ideal spot for rocking chairs and lemonade.",
+        "ADDITIONAL INFORMATION": "Greater chance of finding items in Green Rooms.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "GREENHOUSE": {
+        "COST": 1,
+        "TYPE": [
+          "GREEN ROOM",
+          "DEAD END",
+          "DRAFTING"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "This room is always warm as its glass walls and roof help to retain the sun's rays. The gardener should be pleased that the long-neglected flower beds have finally been blessed with the glistening gift from the sprinklers installed above.",
+        "ADDITIONAL INFORMATION": "You are more likely to draw GREEN ROOMS while drafting.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "MORNING ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "GREEN ROOM",
+          "TOMORROW"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "The best thing to go with breakfast is a morning newspaper and a coffee.",
+        "ADDITIONAL INFORMATION": "+2 GEMS. Tomorrow you will start with 2 GEMS",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "SECRET GARDEN": {
+        "COST": 0,
+        "TYPE": [
+          "GREEN ROOM",
+          "SPREAD"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A floorplan so secretive it had been removed from the drafting pool to avoid anyone unwanted accidentally stumbling on it. This secluded garden, flanked by a variety of Mora Jai fruit trees, has served as a private retreat to at least two other generations of Sinclairs.",
+        "ADDITIONAL INFORMATION": "Spread Fruit throughout the House.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      }
+    },
+    "SHOPS": {
+      "COMMISSARY": {
+        "COST": 1,
+        "TYPE": [
+          "SHOP"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "The staff commissary is always stocked with household goods and supplies at a reasonable cost. This provides the servants of the ESTATE an invaluable service, especially to the live-in staff who may only expect to leave the property once or twice a month.",
+        "ADDITIONAL INFORMATION": "Items for Sale",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2,
+        "POTENTIAL_ITEMS": {"GEM": 3, "BANANA": 3, "MAGNIFYING GLASS": 4, "SALT SHAKER": 5, "SHOVEL":6, "SLEDGEHAMMER": 8, "SLEEPING MASK": 8, "RUNNING SHOES": 8, "METAL DETECTOR": 10, "SET OF GEMS (3)": 10, "SET OF GEMS (4)": 10, "KEY": 10, "UPGRADE DISK": 15}
+      },
+      "KITCHEN": {
+        "COST": 1,
+        "TYPE": [
+          "SHOP"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A standard kitchenette with all the typical amenities: a stove, refrigerator, oven and sink. This gallery is where the cooking staff prepares the daily cuisine that will later be served in the Dining Room.",
+        "ADDITIONAL INFORMATION": "Food for Sale",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2,
+        "POTENTIAL_ITEMS": {"BANANA": 2, "CLUB SANDWICH": 8, "BACON & EGGS": 8, "CHEF SALAD":5, "TOMATO SOUP": 5}
+      },
+      "LOCKSMITH": {
+        "COST": 1,
+        "TYPE": [
+          "SHOP",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Considering the amount of floor plans and different doors that can appear on any given day, it was only a matter of time before a fulltime locksmith service became an essential requisite on the ESTATE.",
+        "ADDITIONAL INFORMATION": "Keys for Sale",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1,
+        "POTENTIAL_ITEMS": {"KEY": 5, "SET OF KEYS (3)": 12, "SPECIAL KEY": 8, "LOCKPICK": 10}
+      },
+      "SHOWROOM": {
+        "COST": 2,
+        "TYPE": [
+          "SHOP"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "An array of jewelry display cabinets showcasing an impressive selection of high-priced items, each unique and one of a kind. This exclusive collection is not for the faint of purse.",
+        "ADDITIONAL INFORMATION": "Luxury Items for Sale",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2,
+        "POTENTIAL_ITEMS": {"MOON PENDANT": 30, "SILVER SPOON": 30, "CHRONOGRAPH": 30, "ORNATE COMPASS": 50, "EMERALD BRACELET": 60, "MASTER KEY": 80, "THE TROPHY OF WEALTH": 100}
+      },
+      "LAUNDRY ROOM": {
+        "COST": 1,
+        "TYPE": [
+          "SHOP",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A standard hub of domestic toil complete with washers, dryers and a state of the art steampowered unit leveraging the newly installed steam ducts leading from the boiler room. Despite its innocent appearance, this inconspicuous place is rumored to launder more than just linen.",
+        "ADDITIONAL INFORMATION": "Launder Currency",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1,
+        "SERVICES": {"SPIN CYCLE": 5, "WASH & DRY": 5, "FLUFF & FOLD":10}
+      },
+      "BOOKSHOP": {
+        "COST": 1,
+        "TYPE": [
+          "SHOP"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "This cozy little bookstore is often tucked away in the more secluded corners of the ESTATE, giving guests little opportunity to appreciate the curated selection of equally rare books it offers. Titles purchased in the Bookshop will be automatically added to the Library's book request form, which fittingly, is the only room in which this rare floorplan can be drawn.",
+        "ADDITIONAL INFORMATION": "Books for sale",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2,
+        "POTENTIAL_ITEMS": {"The History of Orindia (1st ed.)": 50, "A New Clue": 50, "The Curse of Black Bride": 40, "Realm & Rune": 20, "Drafting Strategy Vol. 4": 8, "Drafting Strategy Vol. 5": 8}
+      },
+      "THE ARMORY": {
+        "COST": 0,
+        "TYPE": [
+          "SHOP",
+          "BLACKPRINT"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A stone chamber fitted with ancient weapons and armor from the Second Era. This room appears to predate almost every other room in the house directory and may in fact be an authentic floorplan from one of the lost strongholds of Orinda Aries.",
+        "ADDITIONAL INFORMATION": "Weapons & Armor for sale",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2,
+        "POTENTIAL_ITEMS": {"MORNING STAR": 8, "THE AXE": 32, "SELF IGNITING TORCH": 8, "KNIGHT'S SHIELD": 8}
+      },
+      "MOUNT HOLLY GIFT SHOP": {
+        "COST": 0,
+        "TYPE": [
+          "SHOP",
+          "ADDITION"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "Thank you for visiting Mount Holly. We hope you enjoyed your stay here!",
+        "ADDITIONAL INFORMATION": "Souvenirs for Sale",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3,
+        "POTENTIAL_ITEMS": {"MOUNT HOLLY TEE": 10, "LUNCH BOX": 15, "SWIM TRUNKS": 40, "DIRIGIBLOCKS": 10000, "SWIM BIRD PLUSHIE": 110, "BLUE TENTS":400}
+      }
+    },
+    "RED ROOMS": {
+      "LAVATORY": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A room one might go to great lengths to avoid showing guests despite them always probing for its location.",
+        "ADDITIONAL INFORMATION": "",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "CHAPEL": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM",
+          "ENTRY"
+        ],
+        "RARITY": "COMMONPLACE",
+        "DESCRIPTION": "A private sacristy, as ornate as the most lavish rooms of the ESTATE, is watched over by eight Ajeran Angels depicited in stained glass. This room was more a tribute to your uncle's vanity than it was to his faith.",
+        "ADDITIONAL INFORMATION": "Whenever you enter CHAPEL, lose 1 COIN.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "MAID'S CHAMBER": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM",
+          "BEDROOM"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A typical example of the accommodations for the live-in staff on the ESTATE. It appears this particular bedroom belongs to one of the maids.",
+        "ADDITIONAL INFORMATION": "Less likely to find items laying around in your house.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "ARCHIVES": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Countless shelves of documents and towering file cabinets make this otherwise immense space seem small and cramped. These archives contain almost a century of records and files pertaining to the Sinclair family's numerous interests, many of which are sealed and unable to be accessed.",
+        "ADDITIONAL INFORMATION": "While drafting, you will no longer be able to see all 3 of your potential Floor Plans.",
+        "SHAPE": "CROSS",
+        
+        "NUM_DOORS": 4
+      },
+      "GYMNASIUM": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM",
+          "ENTRY"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A half-court intended for basketball and racquetball which is seldom used by anyone apart from the junior staff during their lunch hour. At least they did before Mrs. Babbage disallowed the practice after noticing how worn out staff members were after a game.",
+        "ADDITIONAL INFORMATION": "Whenever you enter GYMNASIUM, lose 2 STEPS.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "DARKROOM": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "A room dedicated to photo processing, development and print-making. This room is outfitted with safelights which provide red illumination to which the photographic material is insensitive. However, due to a faulty installation the safelights often overload their circuit capacity and blow a fuse.",
+        "ADDITIONAL INFORMATION": "You cannot see the Floor Plans while drafting in this room.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "WEIGHT ROOM": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "An exercise room outfitted with weightlifting equipment. A good workout session here will wipe you out and leave you with little energy left for exploring.",
+        "ADDITIONAL INFORMATION": "Lose half your STEPS",
+        "SHAPE": "CROSS",
+        
+        "NUM_DOORS": 4
+      },
+      "FURNACE": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "The main centralized heat source for the ESTATE. You may find yourself starting to sweat after drafting this room.",
+        "ADDITIONAL INFORMATION": "You are more likely to draw Red Rooms while drafting.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      }
+    },
+    "STUDIO ADDITIONS": {
+      "DOVECOTE": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A towering loft serving home to many of the feathered locals of Mount Holly. As a devout bird-watcher and amateur ornithologist Mary had petitioned her uncle for years for this to be built on the ESTATE.",
+        "ADDITIONAL INFORMATION": "Whenever you draw DOVECOTE while drafting, you may rotate floorplans.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "THE KENNEL": {
+        "COST": 0,
+        "TYPE": [
+          "BLUEPRINT",
+          "ADDITION"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "Home to several of Sinclair's hunting companions. It can be assumed these friendly hounds have been anxious to meet their new master.",
+        "ADDITIONAL INFORMATION": "Each time you dig a room, unlock all doors in that room.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "CLOCK TOWER": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "TOMORROW",
+          "DEAD END",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Access to Mt. Holly's clock tower has always been heavily restricted. Time is sacred and any tampering of the ESTATE's governing timepiece has never been risked.",
+        "ADDITIONAL INFORMATION": "Tomorrow, you will start with 1 KEY for each 'TOMORROW' room you draft today.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "CLASSROOM": {
+        "COST": 1,
+        "TYPE": [
+          "BLUEPRINT",
+          "DRAFTING",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An exact copy of the floorplan used in the architectural design of Reddington Elementary. These copies were deployed in Mt. Holly as a short term solution, to allow the curriculum to continue uninterrupted while the new school was being built in town.",
+        "ADDITIONAL INFORMATION": "While drafting in CLASSROOM, you may draw new Floorplans one time for each 'DRAWING' (type) room in your house. ",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "SOLARIUM": {
+        "COST": 1,
+        "TYPE": [
+          "ADDITION",
+          "DEAD END",
+          "GREEN ROOM"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A quaint floral sitting room surrounded entirely by tinted glass panes. This room is ideal for tea in the afternoons or getting some sun without the hassle of going outside.",
+        "ADDITIONAL INFORMATION": "You are more likely to draw Unusual and Rare rooms while drafting.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "DORMITORY": {
+        "COST": 1,
+        "TYPE": [
+          "ADDITION",
+          "BEDROOM",
+          "ENTRY",
+          "DEAD END"
+        ],
+        "RARITY": "STANDARD",
+        "DESCRIPTION": "These small sleeping quarters, devoid of frills and distractions, are ideal for the student, scholar or denizen of academia who wish to focus on their studies without interruption. Study and sleep. Rinse and repeat.",
+        "ADDITIONAL INFORMATION": "Each time you enter DORMITORY after drafting a 'DRAWING' (type) room, gain 10 STEPS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "VESTIBULE": {
+        "COST": 2,
+        "TYPE": [
+          "ADDITION",
+          "HALLWAY",
+          "ENTRY"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An ornately framed yet modestly sized hall. It had served as the original antechamber in the old days before eventually being removed from the ESTATE for having doors that were prone to becoming stuck.",
+        "ADDITIONAL INFORMATION": "Whenever you enter VESTIBULE, 3 of the doors in this room unlock and the fourth one becomes locked.",
+        "SHAPE": "CROSS",
+        
+        "NUM_DOORS": 4
+      },
+      "CASINO": {
+        "COST": 2,
+        "TYPE": [
+          "ADDITION",
+          "SHOP"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "The Mount Holly Casino offers an intimate and exciting setting for wagers of any scale, and guests may be surprised to discover how much strategy is involved in the games featured here. A buy-in of two Gems is required for admittance into this exclusive room.",
+        "ADDITIONAL INFORMATION": "Games of Chance",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      }
+    },
+    "FOUND FLOORPLANS": {
+      "PLANETARIUM": {
+        "COST": 0,
+        "TYPE": [
+          "TOMORROW",
+          "ADDITION",
+          "BLUEPRINT",
+          "DEAD END"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A circular theatre featuring a dome shaped projection screen upon which scenes of the stars and galaxies allow viewers to experience the splendor of the heavens.",
+        "ADDITIONAL INFORMATION": "If you call it a day in PLANETARIUM, gain 2 STARS",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "CONSERVATORY": {
+        "COST": 1,
+        "TYPE": [
+          "DRAFTING",
+          "GREEN ROOM",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "This baroque arboretum showcases and preserves the rarest specimens of every type and variety. Through selective propogation, the gardener here may influence which flora (or floora) will be considered commonplace during the next season.",
+        "ADDITIONAL INFORMATION": "Adjust the rarity of the Floorplans in your house",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "CLOSED EXHIBIT": {
+        "COST": 0,
+        "TYPE": [
+          "RED ROOM",
+          "ADDITION"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "A painstakingly produced accurate reproduction of one of the so-called \"Closed\" Exhibits of the Fenn Aries Royal Museum.",
+        "ADDITIONAL INFORMATION": "The doors in this room are security locked.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "MECHANARIUM": {
+        "COST": 0,
+        "TYPE": [
+          "MECHANICAL",
+          "BLUEPRINT",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An iron vaulted mechanical chamber affixed with motorized panels that can reveal up to 8 different doors depending on the parameters at the time of creation.",
+        "ADDITIONAL INFORMATION": "The MECHANARIUM has one door for each 'MECHANICAL' type room in your house.",
+        "SHAPE": "VARIABLE",
+        
+        "NUM_DOORS": "?"
+      },
+      "LOST AND FOUND": {
+        "COST": 0,
+        "TYPE": [
+          "ENTRY",
+          "RED ROOM",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "There has always been a history of things disappearing on the ESTATE, including this very floorplan, which had been lost for many years itself and missing from the directory. Now that is has been found, some long lost items from Mount Holly's past might finally resurface...",
+        "ADDITIONAL INFORMATION": "2 rare items. Whenever you enter this room, you will lose one random inventory item.",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "TREASURE TROVE": {
+        "COST": 1,
+        "TYPE": [
+          "BLACKPRINT",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Turns out the oft rumored \"Treasure of Mount Holly\" was more than just a rumor.",
+        "ADDITIONAL INFORMATION": "+5 COINS for each time you have drafted TREASURE TROVE",
+        "SHAPE": "L",
+        
+        "NUM_DOORS": 2
+      },
+      "TUNNEL": {
+        "COST": 0,
+        "TYPE": [
+          "DRAFTING",
+          "HALLWAY",
+          "ADDITION"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Going under all obstacles, the tunnel pierces through walls and rooms alike. This crudely excavated passage looks to be the work of someone determined to get where they are going regardless of whether the house's floor plan is accommodating or not.",
+        "ADDITIONAL INFORMATION": "Always draw TUNNEL while drafting in this room.",
+        "SHAPE": "STRAIGHT",
+        
+        "NUM_DOORS": 2
+      },
+      "THRONE ROOM": {
+        "COST": 5,
+        "TYPE": [
+          "BLACKPRINT",
+          "ADDITION"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "The former seat of power of Orinda Aries before the current era and the rise of the red banner.",
+        "ADDITIONAL INFORMATION": "Reclaim the crown.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      },
+      "THRONE OF THE BLUE PRINCE": {
+        "COST": 5,
+        "TYPE": [
+          "DRAFTING",
+          "BLUEPRINT",
+          "ADDITION"
+        ],
+        "RARITY": "RARE",
+        "DESCRIPTION": "?",
+        "ADDITIONAL INFORMATION": "The next time you draft 8 Blueprints in a row, permanently unlock all blue sealed doors.",
+        "SHAPE": "T",
+        
+        "NUM_DOORS": 3
+      }
+    },
+    "OUTER ROOMS": {
+      "HOVEL": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "BEDROOM",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A squalid dwelling on the edge of the ESTATE belonging to one of the groundskeepers.",
+        "ADDITIONAL INFORMATION": "Special Floorplans now cost additional STEPS instead of GEMS.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "ROOT CELLAR": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "GREEN ROOM",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An underground store of jarred vegetables and fruits from Mount Holly's gardens. It's always amazing what great things come from a little digging around in the dirt.",
+        "ADDITIONAL INFORMATION": "Rooms in your house will be more likely to contain dig spots today.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "SCHOOLHOUSE": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "BLUEPRINT",
+          "DRAFTING",
+          "DEAD END",
+          "OUTER ROOM"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "Long before Reddington Elementary was opened, school convened in a single small building. As the student body grew over the years, the need for separate classrooms for each grade arose and the Mt. Holly Schoolhouse was officially closed down.",
+        "ADDITIONAL INFORMATION": "Adds 8 CLASSROOMS to today's Draft Pool.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "SHELTER": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "DEAD END",
+          "BLUEPRINT"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An underground bunker located away from the main house. This fallout shelter was designed specifically for air raids and features thick walls made from lead and other materials intended to block radiation. A computer terminal within has been connected to the house's network system should an emergency necessitate remote access.",
+        "ADDITIONAL INFORMATION": "SHELTER protects you from the negative effects of the next 3 RED ROOMS drafted.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "SHRINE": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "DEAD END",
+          "BLUEPRINT"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A sacred silence permeates this candlelit cavern, whose flickering lights add to the holy aura shining down upon a meditative statue. His stone hands present forth a stone bowl to the devout pilgrim who may wish to make an offering of gold.",
+        "ADDITIONAL INFORMATION": "Make an offering. Receive a blessing.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "TOMB": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "BLACKPRINT",
+          "SPREAD",
+          "DEAD END"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "This Sinclair family crypt is as gloomy as it is immense. The true Sinclair legacy lies here, resting underneath the stones, a parade of distant relations and forgotten ancestors.",
+        "ADDITIONAL INFORMATION": "Each time you draft a Dead End in your house, spread 5 COINS in the TOMB.",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "TOOLSHED": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "DEAD END",
+          "BLUEPRINT"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "A simple shed with a variety of tools used by the groundskeepers in the course of their duties.",
+        "ADDITIONAL INFORMATION": "2 special items",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      },
+      "TRADING POST": {
+        "COST": 0,
+        "TYPE": [
+          "OUTER ROOM",
+          "DEAD END",
+          "SHOP"
+        ],
+        "RARITY": "UNUSUAL",
+        "DESCRIPTION": "An outpost established on the outskirts of Mount Holly in the era before the new realms. This station allowed the frontiersmen and trappers of these mountains to trade goods and services with the state, the locals and one another.",
+        "ADDITIONAL INFORMATION": "Items for Trade",
+        "SHAPE": "DEAD END",
+        
+        "NUM_DOORS": 1
+      }
+    }
+  },
+  "TERMS": {
+    "ADDITION": "Additions are rooms that are added to the draft pool.",
+    "ADJOINING": "Rooms are considered adjoined if they are connected to each other via a doorway.",
+    "ALLOWANCE": "A set amount of gold granted at the beginning of each day. (left in the ENTRANCE HALL)",
+    "ARCHIVED FLOORPLAN": "Floorplans that are hidden from view after drafting ARCHIVES are considered 'ARCHIVED FLOORPLANS'.",
+    "BEDROOM": "One of the most common type of rooms. BEDROOMS are typically used for resting and regaining steps, and are identifiable by the violet borders of their floorplans.",
+    "BLACKPRINT": "Ancient floorplans from eras long past, excavated from the depths of history.",
+    "SHRINE": "A blessing is a persistent benefit that lasts for several days, typically bestowed from SHRINE after an offering of gold has been made.",
+    "CALL IT A DAY": "You may CALL IT A DAY at any time. This will end the current day and reset the rooms on the ESTATE, your inventory and your steps. When you run out of steps, you will be forced to CALL IT A DAY.",
+    "CHECKED ITEM": "If, on your ESTATE, you have drafted a COAT CHECK, you may use it to check an item. This will allow you to retrieve that item on any day you have a COAT CHECK on your ESTATE.",
+    "COLOR": "The color of a floorplan will usually indicate the type of room: VIOLET for BEDROOMS, ORANGE for HALLWAYS, GREEN for GREEN ROOMS, YELLOW for SHOPS, RED for RED ROOMS, and BLUE for BLUEPRINTS (default type)",
+    "CONTRAPTION": "WORKSHOP is a useful room in which you can experiment trying out different combinations of inventory items in an attempt to create a new and unique contraption.",
+    "DEAD END": "A DEAD END is any room lacking a second doorway. If a room ever has additional doorways it is not considered a dead end, even if those doorways are blocked.",
+    "DIG": "Occasionally, you may find piles of dirt on the ESTATE. These 'dig spots', often found in GREEN ROOMS, can be dug up with the help of a SHOVEL and may contain hidden ITEMS.",
+    "DIRT": "Occasionally, you may find piles of dirt on the ESTATE. These 'dig spots', often found in GREEN ROOMS, can be dug up with the help of a SHOVEL and may contain hidden ITEMS.",
+    "DRAFTING": "The action of selecting a floorplan from the three options presented to you after clicking a door is known as DRAFTING.",
+    "DRAFTING (TYPE)": "Certain rooms can affect the drafting pool and the drafting process. This type of room is fittingly known as a \"DRAFTING ROOM\" are are noted on their floorplans by the compass symbol.",
+    "DRAFT POOL": "The total collection of currently available floorplans, from which three are drawn at the beginning of each draft.",
+    "DRAW": "Drawing is the initial pulling of the three floorplans from the draft pool at the beginning of drafting. To illustrate the difference between drawing and drafting, remember that \"Three floorplans are drawn, but only one is drafted.\"",
+    "EAST WING": "The EAST WING rooms of the house are the nine rooms that border the very right edge of the house.",
+    "ENTRY": "Certain rooms have an effect that is only triggered upon physically entering the room. These rooms are marked on their floorplans by an icon of an open door.",
+    "ESTATE": "Refers to all the explorable areas of Mt. Holly including the rooms currently drafted, as well as the GROUNDS. The HOUSE, on the other hand, is only referring to the current rooms, as shown on the Mt. Holly Blueprint.",
+    "EXHAUST": "When your steps reach zero, you are exhausted and too tired to continue exploring. At this point, you must call it a day.",
+    "EXPERIMENT": "From the terminal located in the LABORATORY, scientists and technicians can create experimental house features by selecting a \"trigger\" and an \"effect\".",
+    "FLOORPLAN": "The life of every room begins as a floorplan, a square paper sketch, drawn by an architect, from a pool of potential ideas - the draft pool.",
+    "GEMS": "A valuable resources used to draft special FLOORPLANS (the \"cost\" of drafting a particular FLOORPLAN).",
+    "GOLD (COINS)": "The currency by which you can purchase goods and services from the SHOP rooms on the ESTATE.",
+    "GREEN ROOM": "FLOORPLANS that have a green border are known as GREEN ROOMS, These rooms are associated with outdoor areas and gardens, and are naturally synergistic with one another.",
+    "GROUNDS": "The outdoor area of the ESTATE immediately surrounding the HOUSE. The GROUNDS include many areas of interest, including the CAMPSITE, APPLE ORCHARD, and WEST PATH.",
+    "HALLWAY": "Orange FLOORPLANS, known as HALLWAYS, are rooms that often contain many doors. They provide architects the means to branch off into different paths, allowing for greater flexibility.",
+    "HOUSE": "The house refers to the 45-floorplan grid of Mount Holly. Only the rooms currently drafted are considered to be part of the HOUSE.",
+    "INVENTORY": "The ITEMS you have collected on any given day",
+    "ITEMS": "ITEMS refer both to SPECIAL ITEMS (unique items in your inventory), as well as RESOURCE ITEMS such as KEYS, GEMS, GOLD etc.",
+    "KEYS": "KEYS are a common resource used to open up LOCKED doors on the ESTATE. There are also some unique SPECIAL KEYS that can unlock special doors or rooms that only appear in specific locations in the HOUSE.",
+    "KEYCARD DOOR": "Electric powered doors of reinforced steel that can only be accessed via KEYCARD and are considered SECURITY LOCKED. These doors appear with more frequency the higher up in RANK you are in the HOUSE.",
+    "LOCKED": "As you explore the house you will find that some doors are LOCKED. To continue exploring, you will need to use a KEY to unlock them.",
+    "MECHANICAL": "These rooms are often heavy in mechanics and often contain control systems that can interact with other elements on the ESTATE. These rooms are marked by the symbol of a gear.",
+    "NETWORK": "Each terminal on the ESTATE is connected to a local network named \"BLACKBRIDGE\". This network allows users to remotely connect to other active terminals, as well as providing access to staff services and other handy features, like this glossary!",
+    "OUTER ROOM": "Rooms draftable only from a door located outside of the HOUSE, on the grounds of Mt. Holly. West Path access is required before these rooms are accessible.",
+    "PERMANENT": "Most things on the ESTATE reset from one day to the next. It's the nature of the HOUSE. However, a few things are PERMANENT and are usually marked as such. PERMANENT changes do not reset each day.",
+    "POWER SOURCE": "The ESTATE's BOILER ROOM is known as a POWER SOURCE because it provides steam power to various rooms in the HOUSE. Steam power is conveyed room-to-room via ducts that run across the ceiling, and power can be transported across great distances as long as you continue to string together rooms that contain power ducts.",
+    "RANK": "Each row of rooms in your HOUSE make up a RANK. As you progress north, the RANK increases. There are nine ranks listed on Mount Holly's official blueprint. However, among the staff, whispers of a tenth Rank can often be heard.",
+    "RARITY": "How often a FLOORPLAN is drawn from the drafting pool is determined by its RARITY. There are four rarities: COMMONPLACE, NORMAL, UNCOMMON, and RARE",
+    "REDRAW": "Some rooms and ITEMS allow you to throw back the first three options drawn from the drafting pool for a fresh set of potential rooms. This is known as drawing new FLOORPLANS.",
+    "RED ROOM": "Beware the rooms of red! They offer powerful expansion options but come at a dangerous cost.",
+    "RESET": "Each morning, the house returns to its default position and all drafted rooms, inventory and resources are RESET. PERMANENT changes, however, do not RESET.",
+    "SHOP": "FLOORPLANS adorned by borders of golden yellow are SHOPS that typically offer goods or a service in exchange for COINS.",
+    "SPECIAL FLOORPLAN": "These FLOORPLANS are slightly more rare and cost GEMS to draft. They often offer more unique, complex and exciting effects.",
+    "SPECIAL ITEM": "An item that is unique and inventory bound, as opposed to resource items such as KEYS, GEMS or COINS.",
+    "SPREAD": "When a SPREAD occurs, ITEMS are randomly distributed across all rooms currently active on the ESTATE. The more rooms in your HOUSE, the larger the spread.",
+    "STARS": "There are several ways to increase the amount of STARS visible in the night sky. The easiest method, of course, is drafting OBSERVATORIES. Each additional STAR creates new formations of constellations, which in turn provide beneficial effects.",
+    "TERMINAL": "Mt. Holly is equipped with several state of the art computer TERMINAL stations that control various systems on the ESTATE electronically. Each terminal is also connected to a central local NETWORK.",
+    "TOMORROW": "Rooms that provide benefits in the future belong to a special category of floorplans: TOMORROW ROOMS. They are marked with a clock symbol.",
+    "TRUNK": "A small wooden chest often found in rooms, always LOCKED, and usually containing a few items of interest.",
+    "UPGRADE": "There are a number of data disks that can be found on the ESTATE that contain potential room upgrades that were planned but never executed by the Baron.",
+    "WEST WING": "The WEST WING rooms of the house are the nine rooms that border the very left edge of the HOUSE."
+  },
+  "ITEMS": {
+    "BATTERY PACK": "Provides juice to contraptions made in the Workshop.",
+    "BROKEN LEVER": "What appears to be a broken lever. Could prove to be useful.",
+    "COIN PURSE": "Each time you collect 3 Coins, earn an additional 1 Coin.",
+    "COMPASS": "Draw floorplans leading North more frequently.",
+    "DISCOUNT COUPON BOOK": "Save 1 gold coin on each purchase you make in the ESTATE.",
+    "GEAR WRENCH": "When drafting and entering a Mechanical Room, adjust the rarity rate of that room.",
+    "HALL PASS": "You will not lose Steps between two adjoining Hallways. Hallways drafted from an adjoining Hallway do not cost Gems to draft.",
+    "LOCKPICK": "Will occasionally be able to open some locked doors.",
+    "LUCKY RABBIT'S FOOT": "Greater chance of finding Items.",
+    "MAGNIFYING GLASS": "Inspect documents of the ESTATE more closely.",
+    "METAL DETECTOR": "Detects Coins, Keys, and other items that can be picked up in a room.",
+    "RUNNING SHOES": "Lose fewer steps when traveling longer distances",
+    "SALT SHAKER": "Gain an extra step when eating any food item",
+    "TELESCOPE": "Gain an additional effect of each constellation observed in the OBSERVATORY.",
+    "MOON PENDANT": "If you CALL IT A DAY while wearing the MOON PENDANT, tomorrow you will start with two of the items in your inventory.",
+    "SHOVEL": "Can be used to DIG up ITEMS concealed in DIG SPOTS.",
+    "SLEDGEHAMMER": "Can shatter padlocks on locked trunks.",
+    "TREASURE MAP": "Marks the spot of buried treasure somewhere in the ESTATE that requires a SHOVEL to dig up.",
+    "UPGRADE DISK": "Insert into one of the ESTATE TERMINALS to permanently upgrade one of your FLOORPLANS.",
+    "SLEEP MASK": "The first time you enter each BEDROOM with the SLEEP MASK, gain 5 STEPS.",
+    "WATERING CAN": "The first time you enter a GREEN ROOM, use 1 Water to gain 1 GEM.",
+    "ORNATE COMPASS": "Rotate the first three FLOORPLANS you DRAW while DRAFRING",
+    "CHRONOGRAPH": "While DRAFTING, you may rewind time after drawing new FLOORPLANS. You are more likely to draw \"tomorrow\" rooms while DRAFTING.",
+    "SILVER SPOON": "Whenever you gain STEPS from eating, gain twice the many steps.",
+    "EMERALD BRACELET": "You don't have to pay GEM costs of FLOORPLANS.",
+    "DETECTOR SHOVEL": "Greater chance of finding COINS and KEYS. Much greater chance of finding COINS and KEYS while digging.",
+    "BURNING GLASS": "Can ignite certain surfaces and light candles.",
+    "DOWSING ROD": "While DRAFTING, DOWSING ROD points toward rooms that may contain more ITEMS today than usual.",
+    "JACK HAMMER": "Gain much better chance of finding ITEMS in DIG SPOTS.",
+    "LUCKY PURSE": "Doubles all COINS you find.",
+    "PICK SOUND AMPLIFIER": "Greater chance of picking high-sensitivity locks.",
+    "POWER HAMMER": "A stronger SLEDGEHAMMER that can also knock down weaker brick walls",
+    "POWERED ELECTROMAGNET": "You are more likely to draft MECHANICAL ROOMS. Automatically collect COINS and KEYS when entering a room."
+  },
+  "SERVICES":{
+    "SPIN CYCLE": "exchange ALL of your GEMS with ALL of your GOLD, at a 1:1 rate",
+    "WASH & DRY": "exchange ALL of your KEYS with ALL of your GEMS , at a 1:1 rate",
+    "FLUFF & FOLD": "exchange ALL of your KEYS with ALL of your GOLD , at a 1:1 rate"
+  }
+}

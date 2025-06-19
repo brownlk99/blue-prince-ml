@@ -1,0 +1,116 @@
+{
+  "CORRIDOR": {
+    "cost": 0,
+    "type": [
+      "HALLWAY"
+    ],
+    "description": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
+    "additional_info": "CORRIDOR is always left unlocked.",
+    "shape": "STRAIGHT",
+    "rarity": "COMMONPLACE"
+  },
+  "SPARE ROOM": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT"
+    ],
+    "description": "An unfurnished, unfinished and otherwise unremarkable empty room. If there had at some point been plans for this spare room, it would seem those designs are now long forgotten.",
+    "additional_info": "",
+    "shape": "STRAIGHT",
+    "rarity": "COMMONPLACE"
+  },
+  "BEDROOM": {
+    "cost": 0,
+    "type": [
+      "BEDROOM",
+      "ENTRY"
+    ],
+    "description": "A familiar room that you may have slept in at some prior visit in the past. Like most bedrooms of the ESTATE, these quarters offer you a little rest and recuperation during your long days exploring the surrounding rooms.",
+    "additional_info": "Whenever you enter this room, gain 2 STEPS",
+    "shape": "L",
+    "rarity": "COMMONPLACE"
+  },
+  "HALLWAY": {
+    "cost": 0,
+    "type": [
+      "HALLWAY"
+    ],
+    "description": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
+    "additional_info": "",
+    "shape": "T",
+    "rarity": "COMMONPLACE"
+  },
+  "NOOK": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT"
+    ],
+    "description": "A snug corner reading room which serves as a quiet, private place for guests to spend a few hours of their afternoon away from the hustle and bustle of the staff.",
+    "additional_info": "+1 KEY",
+    "shape": "L",
+    "rarity": "COMMONPLACE"
+  },
+  "PANTRY": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT"
+    ],
+    "description": "A well stocked pantry is always the true test of a large ESTATE, and keeping Mt. Holly's wide gamut of ingredients and supplies stocked has always been one of the primary priorities of the house staff.",
+    "additional_info": "+4 COINS",
+    "shape": "L",
+    "rarity": "COMMONPLACE"
+  },
+  "DEN": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT"
+    ],
+    "description": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
+    "additional_info": "+1 GEM",
+    "shape": "T",
+    "rarity": "COMMONPLACE"
+  },
+  "STOREROOM": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT",
+      "DEAD END"
+    ],
+    "description": "A dedicated storage space filled from end to end with a surplus of chairs, carpets, paintings and a handful of other things that had at one time been in vogue and on display elsewhere in the house.",
+    "additional_info": "+1 KEY, +1 GEM, +1 COIN",
+    "shape": "DEAD END",
+    "rarity": "COMMONPLACE"
+  },
+  "CLOSET": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT",
+      "DEAD END"
+    ],
+    "description": "A very modest recessed space used for storage. This particular closet is favored by the junior members of the staff, who utilize it to stash away assorted articles and knicknacks whose proper place in the ESTATE is yet unknown to them.",
+    "additional_info": "2 items",
+    "shape": "DEAD END",
+    "rarity": "COMMONPLACE"
+  },
+  "SECURITY": {
+    "cost": 1,
+    "type": [
+      "BLUEPRINT",
+      "MECHANICAL"
+    ],
+    "description": "A control room with state of the art surveillance equipment, inventory system, and access control via an electronic computer terminal. This room is where the ESTATE's patrol guards kick up their feet and thank their stares they are living in a modern era.",
+    "additional_info": "View inventory of all items currently in the house.",
+    "shape": "T",
+    "rarity": "STANDARD"
+  },
+  "DARKROOM": {
+    "cost": 0,
+    "type": [
+      "RED ROOM"
+    ],
+    "description": "A room dedicated to photo processing, development and print-making. This room is outfitted with safelights which provide red illumination to which the photographic material is insensitive. However, due to a faulty installation the safelights often overload their circuit capacity and blow a fuse.",
+    "additional_info": "You cannot see the Floor Plans while drafting in this room.",
+    "shape": "T",
+    "rarity": "STANDARD"
+  }
+}
