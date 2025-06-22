@@ -29,17 +29,16 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
         draft_room_name = None
         if current_room.name == "DARKROOM":                 #edge case for dark room
             avg_brightness = np.mean(draft_screenshot)
-            print(f"Average brightness of draft screenshot: {avg_brightness}")
             if avg_brightness < 15:                         #if dark room effect is active, we will not be able to read the draft.. if inactive, continue as normal
                 draft_room_name = "UNKNOWN"
                 cost = get_unknown_room_gem_requirement(draft)
-                room_type = []
+                type = []
                 description = "UNKNOWN"
                 additional_info = "UNKNOWN"
                 shape = "UNKNOWN"
                 doors = None
                 rarity = "UNKNOWN"
-                terminal = "UNKNOWN"    #This might have to change
+                terminal = "UNKNOWN"    #TODO: This might have to change
             else:
                 draft_room_name = get_draft_room_name(reader, draft_screenshot, google_client)
         else:
@@ -47,7 +46,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
 
         if draft_room_name == "ARCHIVED FLOOR PLAN":
             cost = get_unknown_room_gem_requirement(draft)
-            room_type = []
+            type = []
             description = "ARCHIVED FLOOR PLAN"
             additional_info = "ARCHIVED FLOOR PLAN"
             shape = "UNKNOWN"
@@ -61,7 +60,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             orientation = get_orientation(chosen_door, list(detected_doors))  #get the orientation of the doors based on the chosen door from the previous room and detected doors
             room = ROOM_LOOKUP[draft_room_name]                               #get the room data from the ROOM_LOOKUP dictionary
             cost = room["COST"]
-            room_type = room["TYPE"]
+            type = room["TYPE"]
             description = room["DESCRIPTION"]
             additional_info = room["ADDITIONAL INFORMATION"]
             shape = room["SHAPE"]
@@ -81,7 +80,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
         new_room = Room(
             name=draft_room_name,
             cost=cost,
-            room_type=room_type,
+            type=type,
             description=description,
             additional_info=additional_info,
             shape=shape,
@@ -91,10 +90,10 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             terminal=terminal
         )
         
-        if draft_room_name not in ("ARCHIVED FLOOR PLAN", "UNKNOWN") and not valid:
+        if draft_room_name not in ["ARCHIVED FLOOR PLAN", "UNKNOWN"] and not valid:
             new_room.edit_doors()  # if the door count is invalid, allow manual editing of doors
 
-        HouseMap.specialize_room(new_room)  # TODO: change this to add any special characteristics to the room based on its type
+        new_room = HouseMap.specialize_room(new_room)  # TODO: change this to add any special characteristics to the room based on its type
         drafting_options.append(new_room)
     return drafting_options
 
@@ -105,7 +104,6 @@ def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: 
     for _, text in results:
         found_room_name = best_match(text, ROOM_LIST)
         if found_room_name:
-            logger.debug(f"Found room name: {found_room_name}")
             return found_room_name
     
     #for "ARCHIVED FLOOR PLAN"
@@ -116,7 +114,7 @@ def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: 
 
     if "ARCHIVED" in results.strip().upper():
         return "ARCHIVED FLOOR PLAN"
-    logger.debug("No room name found in draft.")
+    print("No room name found in draft.")
     return None
 
 
@@ -306,7 +304,7 @@ def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: 
     # Group overlapping matches (non-max suppression)
     total_matches, _ = cv2.groupRectangles(total_matches, groupThreshold=1, eps=0.5)
 
-    logger.debug(f"Total gem matches: {len(total_matches)}")
+    print(f"\nTotal GEM matches: {len(total_matches)}")
     return len(total_matches)
 
 def isolate_pink(image: np.ndarray) -> np.ndarray:

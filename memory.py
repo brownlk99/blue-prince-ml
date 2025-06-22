@@ -154,7 +154,7 @@ class TermMemory:
             "ESTATE": "Refers to all the explorable areas of Mt. Holly including the rooms currently drafted, as well as the GROUNDS. The HOUSE, on the other hand, is only referring to the current rooms, as shown on the Mt. Holly Blueprint.",
             "EXHAUST": "When your steps reach zero, you are exhausted and too tired to continue exploring. At this point, you must call it a day.",
             "FLOORPLAN": "The life of every room begins as a floorplan, a square paper sketch, drawn by an architect, from a pool of potential ideas - the draft pool.",
-            "GEMS": "A valuable resources used to draft special FLOORPLANS (the \"cost\" of drafting a particular FLOORPLAN).",
+            "GEMS": "A valuable resources used to draft special FLOORPLANS (the \"COST\" of drafting a particular FLOORPLAN).",
             "GOLD (COINS)": "The currency by which you can purchase goods and services from the SHOP rooms on the ESTATE.",
             "GREEN ROOM": "FLOORPLANS that have a green border are known as GREEN ROOMS, These rooms are associated with outdoor areas and gardens, and are naturally synergistic with one another.",
             "HALLWAY": "Orange FLOORPLANS, known as HALLWAYS, are rooms that often contain many doors. They provide architects the means to branch off into different paths, allowing for greater flexibility.",
@@ -268,3 +268,35 @@ class PreviousRunMemory:
         if self.previous_runs:
             return self.previous_runs[-1]
         return {}
+    
+class BookMemory():
+    def __init__(self, path: str = "./jsons/book_memory.json"):
+        """
+            initializes the BookMemory
+
+                Args:
+                    path (str): the path to the book memory file
+        """
+        self.path = path
+        if os.path.exists(self.path):
+            with open(self.path, "r", encoding="utf-8") as f:
+                self.books: List[Dict[str, Any]] = json.load(f)
+        else:
+            self.books: List[Dict[str, Any]] = []
+
+    def add_book(self, book: Dict[str, Any]) -> None:
+        """
+            adds a book to the memory
+
+                Args:
+                    book (dict): the book to add
+        """
+        self.books.append(book)
+        self.save()
+
+    def save(self) -> None:
+        """
+            saves the books to disk
+        """
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump(self.books, f, indent=2, ensure_ascii=False)

@@ -1,14 +1,4 @@
 {
-  "CORRIDOR": {
-    "cost": 0,
-    "type": [
-      "HALLWAY"
-    ],
-    "description": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
-    "additional_info": "CORRIDOR is always left unlocked.",
-    "shape": "STRAIGHT",
-    "rarity": "COMMONPLACE"
-  },
   "SPARE ROOM": {
     "cost": 0,
     "type": [
@@ -17,27 +7,6 @@
     "description": "An unfurnished, unfinished and otherwise unremarkable empty room. If there had at some point been plans for this spare room, it would seem those designs are now long forgotten.",
     "additional_info": "",
     "shape": "STRAIGHT",
-    "rarity": "COMMONPLACE"
-  },
-  "BEDROOM": {
-    "cost": 0,
-    "type": [
-      "BEDROOM",
-      "ENTRY"
-    ],
-    "description": "A familiar room that you may have slept in at some prior visit in the past. Like most bedrooms of the ESTATE, these quarters offer you a little rest and recuperation during your long days exploring the surrounding rooms.",
-    "additional_info": "Whenever you enter this room, gain 2 STEPS",
-    "shape": "L",
-    "rarity": "COMMONPLACE"
-  },
-  "HALLWAY": {
-    "cost": 0,
-    "type": [
-      "HALLWAY"
-    ],
-    "description": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
-    "additional_info": "",
-    "shape": "T",
     "rarity": "COMMONPLACE"
   },
   "NOOK": {
@@ -50,23 +19,13 @@
     "shape": "L",
     "rarity": "COMMONPLACE"
   },
-  "PANTRY": {
+  "HALLWAY": {
     "cost": 0,
     "type": [
-      "BLUEPRINT"
+      "HALLWAY"
     ],
-    "description": "A well stocked pantry is always the true test of a large ESTATE, and keeping Mt. Holly's wide gamut of ingredients and supplies stocked has always been one of the primary priorities of the house staff.",
-    "additional_info": "+4 COINS",
-    "shape": "L",
-    "rarity": "COMMONPLACE"
-  },
-  "DEN": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT"
-    ],
-    "description": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
-    "additional_info": "+1 GEM",
+    "description": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
+    "additional_info": "",
     "shape": "T",
     "rarity": "COMMONPLACE"
   },
@@ -81,6 +40,16 @@
     "shape": "DEAD END",
     "rarity": "COMMONPLACE"
   },
+  "DEN": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT"
+    ],
+    "description": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
+    "additional_info": "+1 GEM",
+    "shape": "T",
+    "rarity": "COMMONPLACE"
+  },
   "CLOSET": {
     "cost": 0,
     "type": [
@@ -92,16 +61,48 @@
     "shape": "DEAD END",
     "rarity": "COMMONPLACE"
   },
-  "SECURITY": {
-    "cost": 1,
+  "BILLIARD ROOM": {
+    "cost": 0,
     "type": [
       "BLUEPRINT",
-      "MECHANICAL"
+      "PUZZLE"
     ],
-    "description": "A control room with state of the art surveillance equipment, inventory system, and access control via an electronic computer terminal. This room is where the ESTATE's patrol guards kick up their feet and thank their stares they are living in a modern era.",
-    "additional_info": "View inventory of all items currently in the house.",
+    "description": "This smoky backroom, featuring a pool table and fully stocked bar, has served as a retreat on more than one occasion for guests lacking the social wit required for after-dinner conversation. A rather curious game of darts provided the less competitive players a unique opportunity to ponder over its unusual rules.",
+    "additional_info": "",
+    "shape": "L",
+    "rarity": "COMMONPLACE"
+  },
+  "CHAPEL": {
+    "cost": 0,
+    "type": [
+      "RED ROOM",
+      "ENTRY"
+    ],
+    "description": "A private sacristy, as ornate as the most lavish rooms of the ESTATE, is watched over by eight Ajeran Angels depicited in stained glass. This room was more a tribute to your uncle's vanity than it was to his faith.",
+    "additional_info": "Whenever you enter CHAPEL, lose 1 COIN.",
     "shape": "T",
-    "rarity": "STANDARD"
+    "rarity": "COMMONPLACE"
+  },
+  "CORRIDOR": {
+    "cost": 0,
+    "type": [
+      "HALLWAY"
+    ],
+    "description": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
+    "additional_info": "CORRIDOR is always left unlocked.",
+    "shape": "STRAIGHT",
+    "rarity": "COMMONPLACE"
+  },
+  "PARLOR": {
+    "cost": 0,
+    "type": [
+      "BLUEPRINT",
+      "PUZZLE"
+    ],
+    "description": "This cozy lounge furnished with couches and armchairs serves as the perfect social setting for receptions and after parties. Consequently this was one of the most popular rooms for entertaining and the late H. S. Sinclair was known to supply a myriad of parlor games to encourage his guests to think and conversate.",
+    "additional_info": "contains a puzzle that can be solved for a reward",
+    "shape": "L",
+    "rarity": "COMMONPLACE"
   },
   "DARKROOM": {
     "cost": 0,

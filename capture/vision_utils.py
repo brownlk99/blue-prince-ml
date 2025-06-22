@@ -22,7 +22,7 @@ def best_match(text, options):
     if match:
         return match[0]
     else:
-        print(f"No close match found for '{text}' in options.")
+        print(f"\nNo close match found for '{text}' in AVAILABLE OPTIONS.")
         return None
     
 def generic_autocorrect(text):
@@ -55,7 +55,7 @@ def get_current_room(reader, house):
         if current_room_obj:
             return current_room_obj
         else:
-            print(f"Current room '{current_room_name}' not found in house map. Prompting user for manual input.")
+            print(f"\nCurrent room '{current_room_name}' not found in HOUSE. Prompting user for manual input...")
             current_room_obj = house.prompt_for_room_name(current_room_name)
             return current_room_obj
 
@@ -69,7 +69,7 @@ def get_current_room_name(reader) -> str:
         current_room = best_match(text, list(ROOM_LOOKUP.keys()))
         if current_room:
             return current_room
-    print("No room detected by OCR. Prompting user for manual input.")
+    print("CURRENT ROOM unable to be detected by OCR. Prompting user for manual input...")
     time.sleep(1) 
     while True:
         room_name = input("\nPlease enter the room name: ").strip().upper()

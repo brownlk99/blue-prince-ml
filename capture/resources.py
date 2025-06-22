@@ -8,12 +8,11 @@ from capture.screen_capture import ScreenCapture
 from capture.constants import NUMERIC_ALLOWLIST, REGIONS
 
 last_resource_hashes = {}
-last_resource_values = {}
 
 def image_hash(img):
     return hashlib.md5(img.tobytes()).hexdigest()
 
-def capture_resources(client: vision.ImageAnnotatorClient) -> dict:
+def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_resources: dict) -> dict:
     available_resources = {}
     for resource, bbox in REGIONS["resources"].items():
         resource_screenshot = ScreenCapture(bbox).run()
@@ -26,17 +25,21 @@ def capture_resources(client: vision.ImageAnnotatorClient) -> dict:
         if last_resource_hashes.get(resource) == img_hash:
             # No change, return last known value if available
             print(f"Resource {resource} unchanged, using cached value.")
-            if resource in last_resource_values:
-                available_resources[resource] = last_resource_values[resource]
+            if resource in current_game_state_resources:
+                available_resources[resource] = current_game_state_resources[resource]
             continue
 
         result = google_vision(client, resource_screenshot)
         last_resource_hashes[resource] = img_hash
         if result == "":
             # Keep the resource value the same as before if result is empty
-            value = last_resource_values.get(resource, 0)
+            value = current_game_state_resources.get(resource, 0)
         else:
-            value = int(result)
-        last_resource_values[resource] = value
+            try:
+                value = int(result)
+            except ValueError:
+                # If conversion fails, keep the last known value
+                print(f"Failed to convert resource {resource} value to int, using cached value.")
+                value = current_game_state_resources.get(resource, 0)
         available_resources[resource] = value
     return available_resources

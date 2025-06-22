@@ -29,7 +29,11 @@ class GameState:
         entrance_hall = Room(
             name="ENTRANCE HALL",
             shape="T",
-            doors=[Door(locked=False, orientation="W"), Door(locked=False, orientation="N"), Door(locked=False, orientation="E")],
+            type=[
+                "PERMANENT",
+                "BLUEPRINT"
+            ],
+            doors=[Door(locked=False, orientation="W", is_security=False), Door(locked=False, orientation="N", is_security=False), Door(locked=False, orientation="E", is_security=False)],
             description="Past the steps and beyond the grand doors, admission to Mount Holly is granted by way of a dark and garish lobby, suitably called the Entrance Hall. From here, each guest's adventure begins; however, the three doors that proceed onward do not always lead to the same adjoining rooms...",
             additional_info="",
             position=(2, 8),
@@ -39,6 +43,10 @@ class GameState:
         antechamber = Room(
             name="ANTECHAMBER",
             shape="CROSS",
+            type=[
+                "BLUEPRINT",
+                "OBJECTIVE"
+            ],
             doors=[Door(orientation="W"), Door(orientation="N"), Door(orientation="S"), Door(orientation="E")],
             description="From its root meaning \"The Room Before\", all signs and paths point toward the Antechamber. This mysterious sealed room -resting on the 9th Rank- may prove, however, quite an initial challenge to even each, let alone enter. Still, you can't help but draw a connection between this chamber and Room 46.",
             additional_info="",
@@ -109,7 +117,7 @@ class GameState:
         return "\n".join(summary)
 
     def edit_resources(self):
-        print("\n\n--- Edit Game Resources ---")
+        print("\n\n----- EDIT GAME RESOURCES -----")
 
         while True:
             print("\nCurrent Resources:")

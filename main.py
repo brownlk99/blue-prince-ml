@@ -9,7 +9,7 @@ from capture.resources import capture_resources
 from capture.note_capture import capture_note
 from capture.vision_utils import get_current_room, get_current_room_name
 from capture.drafting import capture_drafting_options
-from capture.items import capture_items
+from capture.items import capture_items, manually_obtain_item
 from capture.shops import stock_shelves
 from capture.constants import ROOM_LOOKUP, DIRECTORY, ROOM_LIST
 from capture.lab import capture_lab_experiment_options
@@ -23,7 +23,7 @@ from terminal import Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, Sh
 
 def print_menu():
     print("""
-=== Blue Prince ML Control Menu ===
+=========== Blue Prince ML Control Menu ===========
 1. Capture Resources        - Use OCR to capture and update resource counts.
 2. Capture Note             - Capture a note for the current room.
 3. Capture Items            - Use OCR to capture and update items.
@@ -47,7 +47,7 @@ def main(game_state):
     agent = BluePrinceAgent(game_state)
 
     #if loading a game state, set the LLM's last decision
-    if agent.game_state.house.count_occupied_rooms() > 2:
+    if agent.game_state.house.count_occupied_rooms() > 2:   # TODO: clarify this a little more
         while True:
             prev_room = input("Previously chosen room: ").upper()
             if prev_room in ROOM_LIST:
@@ -78,7 +78,7 @@ def main(game_state):
 
         if user_input == '1':
             print("Capturing resources...")
-            current_resources = capture_resources(google_client)
+            current_resources = capture_resources(google_client, agent.game_state.resources)
             agent.game_state.resources.update(current_resources)
             print("Resources captured and saved.")
         elif user_input == '2':
@@ -93,10 +93,23 @@ def main(game_state):
             print("Note captured and saved.")
         elif user_input == '3':
             print("Capturing items...")
-            current_item = capture_items(google_client)
-            agent.game_state.items.update(current_item)                 #update the current items in the game state
-            agent.term_memory.automated_add_term(current_item)               #add the item to persistent memory in order to make better informed decisions
-            print("Items captured and saved.")
+            item_val = capture_items(google_client)     #TODO: this is so gross
+            if item_val == "Screenshot capture was cancelled.":
+                print(item_val)
+            elif item_val is not None:
+                current_item, item_description = next(iter(item_val.items()))
+                agent.game_state.items.update({current_item:item_description})                 #update the current items in the game state
+                agent.term_memory.automated_add_term(current_item, item_description)
+                print("Items captured and saved.")           #add the item to persistent memory in order to make better informed decisions
+            else:
+                print("OCR did not recognize the item. Please enter manually.")
+                manual_item, manual_description = manually_obtain_item()
+                if manual_item is not None:
+                    agent.game_state.items.update({manual_item: manual_description})
+                    agent.term_memory.automated_add_term(manual_item, manual_description)
+                    print("Item manually entered and saved.")
+                else:
+                    print("No item was entered.")
         elif user_input == '4':
             print("Stocking shelves...")
             stock_shelves(reader, agent.game_state.current_room)        #add items to the current room's shop
@@ -108,17 +121,19 @@ def main(game_state):
             agent.game_state.current_position = current_room.position
 
             #always capture the current resources before making a decision
-            current_resources = capture_resources(google_client)
+            current_resources = capture_resources(google_client, agent.game_state.resources)
             agent.game_state.resources.update(current_resources)
             agent.game_state.edit_resources()
             
             response = agent.take_action()
             action, explanation = agent.parse_action_response(response)
             print(f"Parsed Response:\nAction: {action}\nExplanation: {explanation}")
+            time.sleep(2)
             if action == "explore":
                 response = agent.decide_door_to_explore()
                 parsed_response = agent.parse_door_exploration_response(response)
                 print(f"Parsed Explore Response:\nRoom: {parsed_response['room']}\nDoor: {parsed_response['door']}\nPath: {parsed_response['path']}\nExplanation: {parsed_response['explanation']}")
+                time.sleep(2)
             elif action == "peruse_shop":
                 stock_shelves(reader, agent.game_state.current_room)
                 print("Stocked shelves")
@@ -132,6 +147,11 @@ def main(game_state):
                 parsed_response = agent.parse_parlor_response(response)
                 print(f"Parsed Parlor Response:\nBox: {parsed_response['box']}\nExplanation: {parsed_response['explanation']}")
                 agent.game_state.current_room.has_been_solved = True
+            elif action == "open_secret_passage":
+                response = agent.open_secret_passage()
+                parsed_response = agent.parse_secret_passage_response(response)
+                print(f"Parsed Secret Passage Response:\nRoom Type: {parsed_response['room_type']}\nExplanation: {parsed_response['explanation']}")
+                current_room.has_been_used = True
             elif action == "dig":
                 agent.game_state.current_room.set_dig_spots()
             elif action == "open_trunk":
@@ -235,21 +255,55 @@ def main(game_state):
                 print(f"LLM Response:\nAction: {parsed_response['action']}\nType: {parsed_response['type']}\nExplanation: {parsed_response['explanation']}")
                 print("\nLLM requested a REDRAW. Returning to menu. Select option 6 again after REDRAW.")
                 time.sleep(1)
-                # TODO: decrement redraw counter (manual for now)
+                # TODO: decrement redraw counter? (manual for now)
                 break  # return to menu
             elif "room" in parsed_response:
                 print(f"LLM Response:\nRoom: {parsed_response['room']}\nEnter: {parsed_response['enter']}\nExplanation: {parsed_response['explanation']}")
-                for drafted_room in drafting_options:                       # if no redraw, iterate through the drafted rooms and add the one that matches the LLM's response
-                    if drafted_room.name == parsed_response["room"].upper():
-                        if parsed_response.get("enter", "").upper() == "YES":
-                            drafted_room.has_been_entered = True
-                            drafted_room.edit_doors()
-                        agent.game_state.house.add_room_to_house(drafted_room)
-                        agent.game_state.house.connect_adjacent_doors(drafted_room)
-                        agent.room_memory.add_room(drafted_room)
-                        break       # stop loop, save, and return to menu
-                agent.game_state.save_to_file('./jsons/current_run.json')
+                
+                # Check if we're dealing with unknown rooms
+                all_unknown = all(option.name == "UNKNOWN" for option in drafting_options)
+                selected_room = None
+                
+                if all_unknown:
+                    # Handle case where all rooms are UNKNOWN (dark room effect)
+                    print("All drafts are UNKNOWN due to dark room effect. Using generic UNKNOWN room.")
+                    selected_room = drafting_options[0]
+                else:
+                    # Find the room that matches the LLM's selection
+                    room_name = parsed_response["room"].upper()
+                    selected_room = next((room for room in drafting_options if room.name == room_name), None)
+                    
+                    if not selected_room:
+                        print(f"Error: Selected room '{room_name}' not found in drafting options.")
+                        time.sleep(1)
+                        break
+                
+                # Check if player can afford the room
+                if selected_room.cost > agent.game_state.resources.get("GEMS", 0):
+                    print(f"\nNot enough resources to draft {selected_room.name}. Cost: {selected_room.cost}, Available: {agent.game_state.resources.get('GEMS', 0)}")
+                    print("Returning to menu. Please select option 6 again to draft a room.")
+                    time.sleep(1)
+                    break
 
+                if selected_room.name == "UNKNOWN" or selected_room.name == "ARCHIVED FLOOR PLAN":
+                    room_name = input("Please enter the name of the newly drafted room: ").strip().upper()
+                    agent.game_state.house.autofill_room_attributes(selected_room, room_name)
+                    selected_room = agent.game_state.house.specialize_room(selected_room)      
+
+                # Add room to house and handle additional operations
+                agent.game_state.house.add_room_to_house(selected_room)
+                
+                # Handle room entry if requested
+                if parsed_response.get("enter", "").upper() == "YES":
+                    selected_room.has_been_entered = True
+                    if len(selected_room.doors) > 1:  # If multiple doors, prompt for editing
+                        print("\nPlease enter the room and edit the doors within the newly drafted room to ensure accuracy.")
+                        selected_room.edit_doors()
+                
+                agent.game_state.house.connect_adjacent_doors(selected_room)
+                agent.room_memory.add_room(selected_room) # add to room memory and save game state
+
+                agent.game_state.save_to_file('./jsons/current_run.json')
                 print(agent.game_state.house.print_map())
         elif user_input == '7':
             agent.term_memory.user_facilitated_add_term()
@@ -262,32 +316,58 @@ def main(game_state):
         elif user_input == '10':
             agent.game_state.current_room = get_current_room(reader, agent.game_state.house)
             agent.game_state.current_room.edit_doors()
+            agent.game_state.house.connect_adjacent_doors(agent.game_state.current_room)  # ensure doors are connected after editing
         elif user_input == '11':
             agent.game_state.current_room = get_current_room(reader, agent.game_state.house)
             agent.game_state.current_room.edit_items_for_sale()
-        elif user_input == '12':
+        elif user_input == '12':    # can update without being within the room
+            # get all rooms with name "UNKNOWN" that need attributes filled
             potential_rooms_to_edit = agent.game_state.house.get_rooms_by_name("UNKNOWN")
+            
+            # early exit if no UNKNOWN rooms exist
             if not potential_rooms_to_edit:
                 print("No rooms to autofill attributes for.")
                 time.sleep(1)
                 break
+            
+            # select the room to edit
+            room_to_edit = None
+            if len(potential_rooms_to_edit) == 1:
+                # single room case - use it directly
+                room_to_edit = potential_rooms_to_edit[0]
             else:
-                print("Select a room to edit:")
+                # multiple rooms case - ask user to select one
+                print("Select a room to edit:") 
                 for idx, room in enumerate(potential_rooms_to_edit):
                     print(f"{idx + 1}: Position: {room.position}")
-                selection = input("Enter the number of the room to edit based off of position (upper left corner is 0,0): ").strip()
+                    
+                selection = input("Enter the number of the room to edit: ").strip()
                 if selection.isdigit() and 1 <= int(selection) <= len(potential_rooms_to_edit):
                     room_to_edit = potential_rooms_to_edit[int(selection) - 1]
-                    room_name = input("Please enter the name of the room to edit attributes for: ").strip().upper()
-                    agent.game_state.house.autofill_room_attributes(room_to_edit, room_name)
-                    agent.game_state.house.specialize_room(room_to_edit)
                 else:
                     print("Invalid selection.")
+                    time.sleep(1)
+                    break
+            
+            # proceed with room editing if a valid room was selected
+            if room_to_edit:
+                # get the new room name
+                room_name = input("Please enter the name of the room: ").strip().upper()
+                
+                # update room attributes and specialized type
+                agent.game_state.house.autofill_room_attributes(room_to_edit, room_name)
+                room_to_edit = agent.game_state.house.specialize_room(room_to_edit)
+                agent.game_state.house.update_room_in_house(room_to_edit)
+                print(f"Room updated to {room_name}.")
+                
+                # update room memory
+                agent.room_memory.add_room(room_to_edit)
         elif user_input == '13':
             agent.game_state.save_to_file('./jsons/current_run.json')
         else:
-            print("Invalid input. Please enter a number between 1 and 10, or 'q' to quit.")
+            print("Invalid input. Please enter a number between 1 and 13, or 'q' to quit.")
             time.sleep(1)
+        agent.game_state.save_to_file('./jsons/current_run.json')   #always save to file after
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

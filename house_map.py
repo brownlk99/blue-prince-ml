@@ -1,7 +1,7 @@
 import time
 from typing import Union
 from capture.constants import DIRECTORY
-from room import CoatCheck, PuzzleRoom, Room, ShopRoom, UtilityCloset
+from room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
 from terminal import LabTerminal, OfficeTerminal, SecurityTerminal, ShelterTerminal
 
 
@@ -18,7 +18,19 @@ class HouseMap:
             raise ValueError("Room position out of bounds.")
         self.grid[y][x] = room
 
-    def get_room_by_position(self, x, y) -> Room:
+    def update_room_in_house(self, room: Room):
+        """
+            Updates the room in the house map at its current position by removing and adding.
+        """
+        x, y = room.position
+        if not (0 <= x < self.width and 0 <= y < self.height):
+            raise ValueError("Room position out of bounds.")
+        existing_room = self.grid[y][x]
+        if existing_room is None:
+            raise ValueError("No room exists at the specified position to update.")
+        self.grid[y][x] = room
+
+    def get_room_by_position(self, x, y) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]:
         if not (0 <= x < self.width and 0 <= y < self.height):
             return None
         return self.grid[y][x]
@@ -44,7 +56,7 @@ class HouseMap:
             room = self.get_room_by_name(name)
             if room:
                 return room
-            name = input(f"\nDetected room '{name}' - but not found. Please enter a valid room name: ").strip().upper()
+            name = input(f"Detected room '{name}' - but not found. Please enter a valid room name: ").strip().upper()
 
     def get_position_by_room(self, room: Room) -> tuple:
         for y in range(self.height):
@@ -71,7 +83,8 @@ class HouseMap:
             "dig_spot_present": False,
             "terminal_present": False,
             "coat_check_present": False,
-            "utility_closet_present": False
+            "utility_closet_present": False,
+            "secret_passage_present": False
         }
 
         # exit early if all flags are True
@@ -84,7 +97,7 @@ class HouseMap:
                 if not flag_dict["shop_room_present"] and isinstance(room, ShopRoom):
                     flag_dict["shop_room_present"] = True
                 # check for PuzzleRoom
-                elif not flag_dict["puzzle_room_present"] and isinstance(room, PuzzleRoom):
+                elif not flag_dict["puzzle_room_present"] and isinstance(room, PuzzleRoom) and not room.has_been_solved:
                     flag_dict["puzzle_room_present"] = True
                 # check for CoatCheck
                 elif not flag_dict["coat_check_present"] and isinstance(room, CoatCheck):
@@ -92,6 +105,8 @@ class HouseMap:
                 # check for UtilityCloset
                 elif not flag_dict["utility_closet_present"] and isinstance(room, UtilityCloset):
                     flag_dict["utility_closet_present"] = True
+                elif not flag_dict["secret_passage_present"] and room.name == "SECRET PASSAGE" and not room.has_been_used:
+                    flag_dict["secret_passage_present"] = True
                 # check for trunks
                 if not flag_dict["trunk_present"] and getattr(room, "trunks", 0) > 0:
                     flag_dict["trunk_present"] = True
@@ -110,15 +125,20 @@ class HouseMap:
         return flag_dict
 
     @staticmethod
-    def specialize_room(room: Room) -> Union[ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck]:
+    def specialize_room(room: Room) -> Union[ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]:
         if room.name in ["KITCHEN", "COMMISSARY", "LOCKSMITH", "SHOWROOM"]:
-            return ShopRoom(**room.to_dict())
+            return ShopRoom.from_dict(room.to_dict())
         elif room.name == "PARLOR":
-            return PuzzleRoom(**room.to_dict())
+            return PuzzleRoom.from_dict(room.to_dict())
         elif room.name == "UTILITY CLOSET":
-            return UtilityCloset(**room.to_dict())
+            return UtilityCloset.from_dict(room.to_dict())
         elif room.name == "COAT CHECK":
-            return CoatCheck(**room.to_dict())
+            return CoatCheck.from_dict(room.to_dict())
+        elif room.name == "SECRET PASSAGE":
+            return SecretPassage.from_dict(room.to_dict())
+        else:
+            # If the room is not a special type, return it as is
+            return room
 
     @staticmethod
     def autofill_room_attributes(room: Room, room_name: str) -> None:
@@ -150,6 +170,7 @@ class HouseMap:
                 room.rarity = info.get("RARITY", "")
                 room.type = info.get("TYPE", [])
                 room.cost = info.get("COST", 0)
+                room.add_door_interactive(info.get("NUM_DOORS", 0))
                 break
         else:
             print(f"Room '{room_name}' not found in DIRECTORY.")
@@ -165,10 +186,10 @@ class HouseMap:
                     None
         """
         # gather all editable fields, including subclass-specific ones
+        #TODO: maybe add type back in
         editable_fields = [
             "name",
             "cost",
-            "type",
             "description",
             "additional_info",
             "shape",
@@ -275,6 +296,7 @@ class HouseMap:
                 if matching_neighbor_door:
                     door.leads_to = neighbor.name
                     door.locked = False
+                    door.is_security = matching_neighbor_door.is_security
                     matching_neighbor_door.leads_to = new_room.name
                     matching_neighbor_door.locked = False
                 else:

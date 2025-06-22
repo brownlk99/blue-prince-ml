@@ -9,10 +9,10 @@ from capture.constants import DIRECTORY
 
 
 class Room:
-    def __init__(self, name="", cost=0, room_type="", description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
+    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
         self.name = name.upper()
         self.cost = cost
-        self.type = room_type  # could be list or string
+        self.type = type if isinstance(type, list) else [type]  # Ensure type is a list
         self.description = description
         self.additional_info = additional_info
         self.shape = shape
@@ -26,7 +26,8 @@ class Room:
         self.terminal = terminal
 
     def edit_doors(self):
-        print(f"\nEditing doors for room: {self.name}")
+        print(f"\n\n ----- DOOR EDITOR ----- \n")
+        print(f"Editing doors for room: {self.name}")
         while True:
             print("\nCurrent doors:")
             for idx, door in enumerate(self.doors):
@@ -37,9 +38,9 @@ class Room:
             print("2. Add a new door")
             print("3. Remove a door")
             print("4. Mark all doors as not security")
-            print("q. Quit door editing")
+            print("\nq. Quit door editing")
 
-            choice = input("Select an option: ").strip().lower()
+            choice = input("\n\nSelect an option: ").strip().lower()
             if choice == "1":
                 self.edit_single_door_interactive()
             elif choice == "2":
@@ -49,47 +50,68 @@ class Room:
             elif choice == "4":
                 for door in self.doors:
                     door.is_security = "False"
-                print("All doors marked as not security.")
+                print("\nAll doors marked as not security.")
             elif choice == "q":
-                print("Exiting door editor.")
+                print("\nExiting door editor.")
                 break
             else:
-                print("Invalid option.")
+                print("\nInvalid option.")
 
-    def edit_single_door_interactive(self): # not really any input validation but useful for manual corrections
+    def edit_single_door_interactive(self):
+        """
+            interactively edits a door by orientation instead of by number
+        """
         try:
-            door_idx = int(input("Enter door number to edit: ")) - 1
-            if 0 <= door_idx < len(self.doors):
-                door = self.doors[door_idx]
-                print(f"Editing door: {door}")
-                print("Fields you can edit: orientation, locked, is_security, discovered")
-                field = input("Enter field to edit: ").strip().lower()
-                if field == "orientation":
-                    new_val = input(f"Orientation [{door.orientation}]: ").strip().upper()
-                    if new_val:
-                        door.orientation = new_val
-                elif field == "locked":
-                    new_val = input(f"Locked (True/False) [{door.locked}]: ").strip()
-                    if new_val:
-                        door.locked = new_val.lower() == "true"
-                elif field == "is_security":
-                    new_val = input(f"Is Security (True/False) [{door.is_security}]: ").strip()
-                    if new_val:
-                        door.is_security = new_val.lower() == "true"
-                else:
-                    print("Invalid field.")
-                print("Door updated.")
+            if not self.doors:
+                print("No doors to edit in this room.")
+                return
+                
+            print("\nAvailable doors:")
+            for idx, door in enumerate(self.doors):
+                print(f"{door.orientation}: {door}")
+                
+            door_orientation = input("Enter door orientation to edit (N/S/E/W): ").strip().upper()
+            matching_doors = [d for d in self.doors if d.orientation == door_orientation]
+            
+            if not matching_doors:
+                print(f"No door with orientation {door_orientation} found.")
+                return
+                
+            # In case there are multiple doors with the same orientation (shouldn't happen normally)
+            door = matching_doors[0]
+            print(f"Editing door: {door}")
+            print("Fields you can edit: orientation, locked, is_security")
+            
+            field = input("Enter field to edit: ").strip().lower()
+            if field == "orientation":
+                new_val = input(f"Orientation [{door.orientation}]: ").strip().upper()
+                if new_val:
+                    door.orientation = new_val
+            elif field == "locked":
+                new_val = input(f"Locked (True/False) [{door.locked}]: ").strip()
+                if new_val:
+                    door.locked = new_val.lower() in ["true", "t", "yes", "y", "1"]
+            elif field == "is_security":
+                new_val = input(f"Is Security (True/False) [{door.is_security}]: ").strip()
+                if new_val:
+                    door.is_security = new_val.lower() in ["true", "t", "yes", "y", "1"]
             else:
-                print("Invalid door number.")
+                print("Invalid field.")
+                return
+                
+            print("Door updated.")
         except ValueError:
             print("Invalid input.")
             
-    def add_door_interactive(self):
-        orientation = input("Orientation (N/S/E/W): ").strip().upper()
-        locked = input("Locked (True/False) [False]: ").strip().lower()
-        is_security = input("Is Security (True/False) [False]: ").strip().lower()
-        self.doors.append(Door(orientation=orientation, locked=locked, is_security=is_security))
-        print("Door added.")
+    def add_door_interactive(self, count: int = 1) -> None:
+        print(f"Adding {count} door(s) to room: {self.name}")
+        #TODO: add input validation for orientation, locked, is_security.. is in ["true", "t", "yes", "y", "1"]
+        for i in range(count):
+            orientation = input("Orientation (N/S/E/W): ").strip().upper()
+            locked = input("Locked (True/False) [False]: ").strip().lower()
+            is_security = input("Is Security (True/False) [False]: ").strip().lower()
+            self.doors.append(Door(orientation=orientation, locked=locked, is_security=is_security))
+            print(f"Door {i+1} added.")
 
     def remove_door_interactive(self):
         try:
@@ -107,6 +129,26 @@ class Room:
         if not door:
             raise ValueError(f"Door '{door_dir}' not found in room '{self.name}'.")
         return door
+    
+    def get_door_count_from_shape(self):
+        """
+            returns the number of doors for a given room shape
+
+                Args:
+                    shape (str): the shape of the room (DEAD END, STRAIGHT, L, T, CROSS)
+
+                Returns:
+                    int: the number of doors for the given shape
+        """
+        shape_to_door_count = {
+            "DEAD END": 1,
+            "STRAIGHT": 2,
+            "L": 2,
+            "T": 3,
+            "CROSS": 4
+        }
+        
+        return shape_to_door_count.get(self.shape.upper(), 0)  # default to 0 if shape not found
     
     def set_trunks(self):
         try:
@@ -154,7 +196,7 @@ class Room:
         return cls(
             name=data.get("name", ""),
             cost=data.get("cost", 0),
-            room_type=data.get("type", ""),
+            type=data.get("type", []),
             description=data.get("description", ""),
             additional_info=data.get("additional_info", ""),
             shape=data.get("shape", ""),
@@ -172,8 +214,8 @@ class Room:
         return f"Room(name={self.name}, cost={self.cost}, type={self.type}, description={self.description}, additional_info={self.additional_info}, shape={self.shape}, doors={self.doors}, position={self.position}, rank={self.rank}, trunks={self.trunks}, dig_spots={self.dig_spots}, rarity={self.rarity}, has_been_entered={self.has_been_entered}, terminal={self.terminal})"
 
 class ShopRoom(Room):
-    def __init__(self, name="", cost=0, room_type="", description="", additional_info="", shape="", doors=None, position=None, rank=0, items_for_sale=None, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
-        super().__init__(name, cost, room_type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, items_for_sale=None, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
         self.items_for_sale = items_for_sale if items_for_sale else {}
 
     def edit_items_for_sale(self):
@@ -249,8 +291,8 @@ class ShopRoom(Room):
         return super().__str__() + f", items_for_sale={self.items_for_sale})"
 
 class PuzzleRoom(Room):
-    def __init__(self, name="", cost=0, room_type="", description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, has_been_solved=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
-        super().__init__(name, cost, room_type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, has_been_solved=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
         self.has_been_solved = has_been_solved  # Indicates if the puzzle in this room has been solved
 
     def parlor_puzzle(self, reader: easyocr.Reader):
@@ -261,7 +303,7 @@ class PuzzleRoom(Room):
         colors = ["BLUE", "WHITE", "BLACK"]
         results = {}
         for color in colors:
-            input(f"Please get into position to screenshot the {color} box, press Enter to continue...")
+            input(f"\nPlease get into position to screenshot the {color} box, press Enter to continue...")
             # Capture the hint using your existing OCR/parlor logic
             box_result = parlor.capture_hint(reader)
             print(f"OCR result for {color} box: {box_result}")
@@ -302,8 +344,8 @@ class UtilityCloset(Room):
 
             Args: True means on, False means off
     """
-    def __init__(self, name="", cost=0, room_type="", description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, keycard_entry_system_switch=True, gymnasium_switch=True, darkroom_switch=False, garage_switch=False):
-        super().__init__(name, cost, room_type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, keycard_entry_system_switch=True, gymnasium_switch=True, darkroom_switch=False, garage_switch=False):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
         self.keycard_entry_system_switch = keycard_entry_system_switch
         self.gymnasium_switch = gymnasium_switch
         self.darkroom_switch = darkroom_switch
@@ -354,8 +396,8 @@ class CoatCheck(Room):
     """
         Allows the player to store and retrieve an item across runs
     """
-    def __init__(self, name="", cost=0, room_type="", description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, stored_item: Optional[str] = None):
-        super().__init__(name, cost, room_type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, stored_item: Optional[str] = None):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
         self.stored_item = stored_item
 
     def store_item(self, item: str):
@@ -378,3 +420,40 @@ class CoatCheck(Room):
 
     def __str__(self):
         return super().__str__() + f", stored_item={self.stored_item})"
+    
+# class Library(Room):
+#     """
+#         Represents a library room with bookshelves
+#     """
+#     def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, avialable_books=None):
+#         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+#         self.available_books = avialable_books if avialable_books is not None else []
+        
+
+#     def to_dict(self):
+#         return super().to_dict()
+    
+#     @classmethod
+#     def from_dict(cls, data):
+#         return super().from_dict(data)
+    
+#     def __str__(self):
+#         return super().__str__()
+
+class SecretPassage(Room):
+    """
+        Represents a secret passage room with a hidden door
+    """
+    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, has_been_used=False):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+        self.has_been_used = has_been_used
+
+    def to_dict(self):
+        return super().to_dict()
+    
+    @classmethod
+    def from_dict(cls, data):
+        return super().from_dict(data)
+    
+    def __str__(self):
+        return super().__str__()

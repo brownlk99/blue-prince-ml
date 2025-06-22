@@ -52,6 +52,7 @@ class BluePrinceAgent:
             )
             if room.additional_info:
                 summary.append(f"   Additional Info: {room.additional_info}")
+            summary.append("Remember, the COST associated with a room is the amount of GEMS you must spend to DRAFT it; if you do not have enough GEMS, you must choose a different room.")
         return "\n".join(summary)
     
     def _format_redraw_count(self) -> str:
@@ -75,7 +76,7 @@ class BluePrinceAgent:
             redraw_text += f" - ROOM-BASED: {redraw_dict['room']} (these are free redraws granted by the current room and can only be used while DRAFTING IN THE CURRENT ROOM)\n"
         if redraw_dict.get("study", 0) > 0:
             redraw_text += f" - STUDY: {redraw_dict['study']} (due to the STUDY being within your current HOUSE, you may spend a GEM to REDRAW up to the number listed here)\n"
-        return redraw_text
+        return redraw_text + "\n"
     
     def _format_terminal_menu(self):
         """
@@ -131,6 +132,8 @@ class BluePrinceAgent:
         # puzzle
         if flags["puzzle_room_present"]:
             actions.append('"solve_puzzle": You must be in the Parlor room to solve the puzzle.')
+        if flags["secret_passage_present"]:
+            actions.append('"open_secret_passage": You must be in the SECRET PASSAGE to perform this action.')
         # trunk
         if flags["trunk_present"]:
             actions.append('"open_trunk": You must be in the room with a trunk to open it AND have the necessary item/resource.')
@@ -215,6 +218,7 @@ class BluePrinceAgent:
             f"RELEVANT NOTES:\n{notes}\n\n"
             "Based on the above context and notes, what door should the player open?\n\n"
             "Choose a route that begins in the **current room** and ultimately leads to the **door you want to access within the TARGET ROOM of your choice** (TARGET ROOM **MUST** be a room that has currently been discovered and is currently accessible).\n"
+            "If there is NOT a currently available path to the TARGET ROOM based upon the ROOMS currently in the HOUSE, you must choose a different option.\n"
             "Return **only** valid JSON in this exact shape:\n"
             '{\n'
             '  "target_room": "ROOM NAME",\n'
@@ -321,10 +325,10 @@ class BluePrinceAgent:
             f"{rooms_section}\n"
             f"RELEVANT NOTES:\n{notes}\n\n"
             f"You are choosing between 3 rooms to draft through the {self.previously_chosen_room} {self.previously_chosen_door} door.\n"
-            f"Drafting Options:\n{draft_summary}\n\n"
+            f"Drafting Options:\n{draft_summary}\n"
             f"{redraw_section}"
             f"Which should the player choose and why?\n"
-            "If you do not like any of the available options and have available REDRAWS, return only this JSON:\n"
+            "If you do not like any of the available options, have REDRAWS available, and wish to draft new rooms, return only this JSON:\n"
             '{\n'
             '  "action": "REDRAW",\n'
             '  "type": "DICE|ROOM|STUDY",\n'
@@ -336,7 +340,7 @@ class BluePrinceAgent:
             '  "explanation": "why this room is best given resources / notes",\n'
             '  "enter": "YES|NO"  # do you wish to enter the newly discovered room (in order to obtain a room\'s items you must enter)?\n'
             '}\n\n'
-            "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n\n"
+            "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
             "Make your decision based on available resources, relevant notes, and unexplored paths.\n"
         )
         print("\nPrompt for LLM:\n" + prompt)
@@ -670,6 +674,46 @@ class BluePrinceAgent:
 
         return {
             "item": item,
+            "explanation": explanation
+        }
+    
+    def open_secret_passage(self):
+        """
+            Decide whether to open the secret passage based on the current GAME STATE.
+
+                Args:
+                    None
+
+                Returns:
+                    str: JSON string with the decision to open the secret passage and explanation.
+        """
+        context = self.game_state.summarize_for_llm()
+        terms_section = self._format_term_memory_section()
+        rooms_section = self._format_room_memory_section()
+        prompt = (
+            f"GAME STATE:\n{context}\n"
+            f"{terms_section}\n"
+            f"{rooms_section}\n"
+            "Based on the above context, what TYPE of ROOM would you like to open the SECRET PASSAGE to?\n\n"
+            "Return only valid JSON in this exact shape:\n"
+            '{\n'
+            '  "room_type": RED|GREEN|ORANGE|YELLOW|PURPLE,\n'
+            '  "explanation": "why this decision is best given the current context"\n'
+            '}\n'
+            "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n\n"
+        )
+
+    def parse_secret_passage_response(self, response: str):
+        try:
+            data = json.loads(response)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Could not parse LLM response as JSON: {e}\nResponse was:\n{response}")
+
+        room_type = data.get("room_type", "").strip().upper()
+        explanation = data.get("explanation", "").strip()
+
+        return {
+            "room_type": room_type,
             "explanation": explanation
         }
 
