@@ -8,7 +8,7 @@ from capture.screen_capture import ScreenCapture
 from capture.vision_utils import edit_text_in_editor, generic_autocorrect
 
 
-def capture_hint(reader: easyocr.Reader):
+def capture_hint(reader: easyocr.Reader, editor_path: str = None):
     puzzle_hint_screenshot = ScreenCapture().run()
     puzzle_hint_screenshot = np.array(puzzle_hint_screenshot)
     puzzle_hint_screenshot = cv2.cvtColor(puzzle_hint_screenshot, cv2.COLOR_RGB2BGR)
@@ -16,7 +16,7 @@ def capture_hint(reader: easyocr.Reader):
     for _, text in results:
         if text:
             autocorrected_text = generic_autocorrect(text).upper()
-            edited_text = edit_text_in_editor(autocorrected_text)
+            edited_text = edit_text_in_editor(autocorrected_text, editor_path)
         else:
             edited_text = ""
     return edited_text

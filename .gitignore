@@ -10,3 +10,4 @@ __pycache__/
 screenshots/
 note_db/
 *.txt
+.cursorignore

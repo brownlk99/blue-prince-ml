@@ -7,7 +7,7 @@ from google.cloud import vision
 from capture.vision_utils import generic_autocorrect, edit_text_in_editor
 
 
-def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient) -> dict:
+def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient, editor_path: str = None) -> dict:
     """
     Capture options for the lab experiment.
     
@@ -22,7 +22,7 @@ def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient) -
             screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
             text = google_vision(google_client, screenshot)
             autocorrected_text = generic_autocorrect(text)
-            edited_text = edit_text_in_editor(autocorrected_text)
+            edited_text = edit_text_in_editor(autocorrected_text, editor_path)
             if edited_text:
                 edited_text = edited_text.strip()
                 if type == "causes":

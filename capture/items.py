@@ -35,7 +35,7 @@ def manually_obtain_item():
         item_details = item_dict.get(item_name, None)
         if item_name == 'Q':
             print("Item capture cancelled.")
-            return None
+            return None, None
         elif item_details is None:
             print(f"Item '{item_name}' not recognized or not in directory.")
             item_name = input("\nPlease re-enter a valid item name: ").strip().upper()

@@ -6,23 +6,26 @@ import easyocr
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import HumanMessage, SystemMessage
+from nltk.corpus.reader import str2tuple
 from game_state import GameState
-from memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory
+from memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory, DecisionMemory
 from terminal import Terminal, SecurityTerminal, ShelterTerminal, OfficeTerminal, LabTerminal
 from room import Room
 from loguru import logger
 
 class BluePrinceAgent:
-    def __init__(self, game_state: GameState = None):
+    def __init__(self, game_state: GameState = None, verbose: bool = False):
         self.llm_o4_mini = ChatOpenAI(model="o4-mini")
         self.llm_gpt_4_1_nano = ChatOpenAI(model="gpt-4.1-nano")
         self.note_memory = NoteMemory()
         self.term_memory = TermMemory()
         self.room_memory = RoomMemory()
         self.previous_run_memory = PreviousRunMemory()
+        self.decision_memory = DecisionMemory()
         self.game_state = game_state if game_state else GameState()
         self.previously_chosen_room = ""
         self.previously_chosen_door = ""
+        self.verbose = verbose
 
     def _format_term_memory_section(self):
         if self.term_memory.terms:
@@ -158,7 +161,7 @@ class BluePrinceAgent:
         # format as a string for the prompt
         return "AVAILABLE ACTIONS:\n" + "\n".join(f" - {a}" for a in actions) + "\n\n"
 
-    def take_action(self):
+    def take_action(self, context: str):
         """
             Decide the next action for the agent based on the current GAME STATE and RELEVANT NOTES.
 
@@ -168,7 +171,6 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the action to take.
         """
-        context = self.game_state.summarize_for_llm()
         notes = ""  #TODO: change this in the future
         terms_section = self._format_term_memory_section()
         rooms_section = self._format_room_memory_section()
@@ -191,7 +193,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding next action")
         return self.llm_o4_mini.invoke(messages).content
 
     def parse_action_response(self, response: str):
@@ -203,10 +208,9 @@ class BluePrinceAgent:
         action = data.get("action", "").strip()
         explanation = data.get("explanation", "").strip()
 
-        return action, explanation
+        return {"action": action, "explanation": explanation}
 
-    def decide_door_to_explore(self):
-        context = self.game_state.summarize_for_llm()
+    def decide_door_to_explore(self, context: str):
         # notes = self.get_relevant_notes(query="Intro")
         notes = ""
         terms_section = self._format_term_memory_section()
@@ -219,6 +223,7 @@ class BluePrinceAgent:
             "Based on the above context and notes, what door should the player open?\n\n"
             "Choose a route that begins in the **current room** and ultimately leads to the **door you want to access within the TARGET ROOM of your choice** (TARGET ROOM **MUST** be a room that has currently been discovered and is currently accessible).\n"
             "If there is NOT a currently available path to the TARGET ROOM based upon the ROOMS currently in the HOUSE, you must choose a different option.\n"
+            "Keep in mind that if a DOOR leads to a \"?\" then it is a valid option to choose to explore.\n"
             "Return **only** valid JSON in this exact shape:\n"
             '{\n'
             '  "target_room": "ROOM NAME",\n'
@@ -233,7 +238,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding door to explore")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_door_exploration_response(self, response: str):
@@ -257,7 +265,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
     
-    def decide_purchase_item(self):
+    def decide_purchase_item(self, context: str):
         """
             Decide which item to purchase based on the current GAME STATE and available items in the shop.
                 
@@ -267,7 +275,6 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the item to purchase and quantity.
         """
-        context = self.game_state.summarize_for_llm()
         items_for_sale = self.game_state.current_room.items_for_sale
         if not items_for_sale:
             items_str = "No items are currently for sale in this shop."
@@ -293,7 +300,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding purchase item")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_purchase_response(self, response: str):
@@ -312,8 +322,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
     
-    def decide_drafting_option(self, draft_options: List[Room]) -> str:
-        context = self.game_state.summarize_for_llm()
+    def decide_drafting_option(self, draft_options: List[Room], context: str) -> str:
         notes = ""
         draft_summary = self._format_draft_summary(draft_options)
         terms_section = self._format_term_memory_section()
@@ -343,7 +352,10 @@ class BluePrinceAgent:
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
             "Make your decision based on available resources, relevant notes, and unexplored paths.\n"
         )
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding drafting option")
         messages = [
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
@@ -373,9 +385,8 @@ class BluePrinceAgent:
                 "enter": enter
             }
     
-    def solve_parlor_puzzle(self, reader: easyocr.Reader):
-        context = self.game_state.summarize_for_llm()
-        boxes = self.game_state.current_room.parlor_puzzle(reader)
+    def solve_parlor_puzzle(self, reader: easyocr.Reader, context: str):
+        boxes = self.game_state.current_room.parlor_puzzle(reader, editor_path)
         terms_section = self._format_term_memory_section()
         prompt = (
             f"GAME STATE:\n{context}\n"
@@ -404,7 +415,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are a logician helping a Blue Prince player solve the Parlor three-boxes puzzle."),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Solving parlor puzzle")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_parlor_response(self, response: str):
@@ -421,8 +435,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
 
-    def use_terminal(self):
-        context = self.game_state.summarize_for_llm()
+    def use_terminal(self, context: str):
         terms_section = self._format_term_memory_section()
         terminal_section = self._format_terminal_menu()
         prompt = (
@@ -440,7 +453,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Using terminal")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_terminal_response(self, response: str):
@@ -457,7 +473,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
     
-    def decide_security_level(self):
+    def decide_security_level(self, context: str):
         """
             Decide the security level for the estate based on the current GAME STATE and available security levels.
 
@@ -467,7 +483,6 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen security level and explanation.
         """
-        context = self.game_state.summarize_for_llm()
         terms_section = self._format_term_memory_section()
         prompt = (
             f"GAME STATE:\n{context}\n"
@@ -488,7 +503,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding security level")
         return self.llm_o4_mini.invoke(messages).content
 
     def parse_security_level_response(self, response: str):
@@ -505,7 +523,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
     
-    def decide_mode(self):
+    def decide_mode(self, context: str):
         """
             Decide the offline mode for security doors based on the current GAME STATE and available modes.
 
@@ -515,7 +533,6 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen mode and explanation.
         """
-        context = self.game_state.summarize_for_llm()
         terms_section = self._format_term_memory_section()
         prompt = (
             f"GAME STATE:\n{context}\n"
@@ -535,7 +552,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding mode")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_mode_response(self, response: str):
@@ -552,7 +572,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
 
-    def decide_lab_experiment(self, options: dict[str, list[str]]) -> str:
+    def decide_lab_experiment(self, options: dict[str, list[str]], context: str) -> str:
         """
             Choose a lab experiment based on the current GAME STATE and available experiments.
 
@@ -562,7 +582,6 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen experiment and explanation.
         """
-        context = self.game_state.summarize_for_llm()
         terms_section = self._format_term_memory_section()
         lab_section = self._format_lab_experiment_section(options)
         prompt = (
@@ -586,7 +605,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
-        print("\nPrompt for LLM:\n" + prompt)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding lab experiment")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_lab_experiment_response(self, response: str):
@@ -630,7 +652,7 @@ class BluePrinceAgent:
     #         "Based on the above context, what time should the safe in the shelter be locked?\n\n"
     #         "AVAI
 
-    def coat_check_prompt(self, action: str):
+    def coat_check_prompt(self, action: str, context: str):
         """
             Decide whether to store or retrieve an item from the coat check based on the current GAME STATE.
 
@@ -640,7 +662,6 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen action and explanation.
         """
-        context = self.game_state.summarize_for_llm()
         notes = ""
         terms_section = self._format_term_memory_section()
         rooms_section = self._format_room_memory_section()
@@ -661,6 +682,10 @@ class BluePrinceAgent:
             SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
             HumanMessage(content=prompt)
         ]
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print(f"LLM Taking Action: Coat check {action.lower()}")
         return self.llm_o4_mini.invoke(messages).content
     
     def parse_coat_check_response(self, response: str):
@@ -677,7 +702,7 @@ class BluePrinceAgent:
             "explanation": explanation
         }
     
-    def open_secret_passage(self):
+    def open_secret_passage(self, context: str):
         """
             Decide whether to open the secret passage based on the current GAME STATE.
 
@@ -687,9 +712,9 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the decision to open the secret passage and explanation.
         """
-        context = self.game_state.summarize_for_llm()
         terms_section = self._format_term_memory_section()
         rooms_section = self._format_room_memory_section()
+        #TODO: add more context here
         prompt = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
@@ -702,6 +727,15 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n\n"
         )
+        messages = [
+            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
+            HumanMessage(content=prompt)
+        ]
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Deciding secret passage")
+        return self.llm_o4_mini.invoke(messages).content
 
     def parse_secret_passage_response(self, response: str):
         try:
@@ -750,3 +784,33 @@ class BluePrinceAgent:
         title = data.get("title", "").strip()
 
         return title
+
+    def manual_llm_follow_up(self):
+        if not self.decision_memory.decisions:
+            return "No previous decisions to follow up on."
+
+        most_recent_decision = self.decision_memory.decisions[-1].copy()
+        most_recent_context = most_recent_decision['context']
+        most_recent_decision.pop("context", None)           # remove context from decision
+        terms_section = self._format_term_memory_section()
+        rooms_section = self._format_room_memory_section()
+        input_section = input("Please enter any additional specific questions that may be relevant to the previous LLM decision: ")
+        notes = ""
+        prompt = (f"GAME STATE:\n{most_recent_context}\n"
+            f"{terms_section}\n"
+            f"{rooms_section}\n"
+            f"RELEVANT NOTES:\n{notes}\n"
+            f"Previous Response:\n{most_recent_decision}\n\n"
+            f"Based on the above context, what is the most likely reason for the previous LLM decision? {input_section}"
+        )
+        messages = [
+            SystemMessage(content="You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."),
+            HumanMessage(content=prompt)
+        ]
+
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + prompt)
+        else:
+            print("LLM Taking Action: Analyzing previous decision")
+
+        return self.llm_o4_mini.invoke(messages).content

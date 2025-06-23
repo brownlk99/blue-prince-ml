@@ -268,6 +268,28 @@ class PreviousRunMemory:
         if self.previous_runs:
             return self.previous_runs[-1]
         return {}
+
+class DecisionMemory:
+    def __init__(self, path: str = "./jsons/decision_memory.json"):
+        self.path = path
+        if os.path.exists(self.path):
+            with open(self.path, "r", encoding="utf-8") as f:
+                self.decisions: List[Dict[str, Any]] = json.load(f)
+        else:
+            self.decisions: List[Dict[str, Any]] = []
+
+    def add_decision(self, decision: Dict[str, Any]) -> None:
+        self.decisions.append(decision)
+        self.save()
+
+    def reset(self) -> None:
+        self.decisions = []
+        self.save()
+
+    def save(self) -> None:
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump(self.decisions, f, indent=2, ensure_ascii=False)
+
     
 class BookMemory():
     def __init__(self, path: str = "./jsons/book_memory.json"):

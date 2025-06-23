@@ -1,13 +1,13 @@
 {
   "resources": {
-    "footprints": 28,
-    "gems": 5,
-    "dice": 0,
-    "keys": 3,
-    "coins": 0
+    "footprints": 29,
+    "gems": 0,
+    "dice": 1,
+    "keys": 0,
+    "coins": 6
   },
   "current_position": {
-    "x": 3,
+    "x": 4,
     "y": 5
   },
   "current_room": {
@@ -21,26 +21,26 @@
     "shape": "T",
     "doors": [
       {
-        "leads_to": "PARLOR",
+        "leads_to": "CHAPEL",
         "locked": false,
-        "is_security": false,
-        "orientation": "E"
+        "is_security": "False",
+        "orientation": "W"
       },
       {
         "leads_to": "?",
         "locked": "?",
-        "is_security": false,
-        "orientation": "N"
+        "is_security": "False",
+        "orientation": "S"
       },
       {
-        "leads_to": "?",
-        "locked": true,
-        "is_security": true,
-        "orientation": "W"
+        "leads_to": "BOUDOIR",
+        "locked": false,
+        "is_security": "False",
+        "orientation": "N"
       }
     ],
     "position": [
-      3,
+      4,
       5
     ],
     "rank": 4,
@@ -51,7 +51,8 @@
     "terminal": null
   },
   "items": {
-    "COIN PURSE": "Each time you collect 3 Coins, earn an additional 1 Coin."
+    "SHOVEL": "Can be used to DIG up ITEMS concealed in DIG SPOTS.",
+    "MAGNIFYING GLASS": "Inspect documents of the ESTATE more closely."
   },
   "house": {
     "width": 5,
@@ -127,21 +128,413 @@
       [
         null,
         null,
-        null,
-        null,
+        {
+          "name": "PANTRY",
+          "cost": 0,
+          "type": [
+            "BLUEPRINT"
+          ],
+          "description": "A well stocked pantry is always the true test of a large ESTATE, and keeping Mt. Holly's wide gamut of ingredients and supplies stocked has always been one of the primary priorities of the house staff.",
+          "additional_info": "+4 COINS",
+          "shape": "L",
+          "doors": [
+            {
+              "leads_to": "DINING ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "S"
+            },
+            {
+              "leads_to": "COURTYARD",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            }
+          ],
+          "position": [
+            2,
+            3
+          ],
+          "rank": 6,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "COURTYARD",
+          "cost": 1,
+          "type": [
+            "GREEN ROOM"
+          ],
+          "description": "A charming spot granting guests a bit of fresh air and open skies within the privacy of the manor walls.",
+          "additional_info": "",
+          "shape": "T",
+          "doors": [
+            {
+              "leads_to": "PANTRY",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            },
+            {
+              "leads_to": "DEAD END",
+              "locked": "?",
+              "is_security": "False",
+              "orientation": "S"
+            },
+            {
+              "leads_to": "?",
+              "locked": true,
+              "is_security": "False",
+              "orientation": "E"
+            }
+          ],
+          "position": [
+            3,
+            3
+          ],
+          "rank": 6,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "STANDARD",
+          "has_been_entered": true,
+          "terminal": null
+        },
         null
       ],
       [
-        null,
-        null,
-        null,
-        null,
-        null
+        {
+          "name": "BILLIARD ROOM",
+          "cost": 0,
+          "type": [
+            "BLUEPRINT",
+            "PUZZLE"
+          ],
+          "description": "This smoky backroom, featuring a pool table and fully stocked bar, has served as a retreat on more than one occasion for guests lacking the social wit required for after-dinner conversation. A rather curious game of darts provided the less competitive players a unique opportunity to ponder over its unusual rules.",
+          "additional_info": "",
+          "shape": "L",
+          "doors": [
+            {
+              "leads_to": "WEST WING HALL",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "S"
+            },
+            {
+              "leads_to": "DRAWING ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            }
+          ],
+          "position": [
+            0,
+            4
+          ],
+          "rank": 5,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "DRAWING ROOM",
+          "cost": 1,
+          "type": [
+            "BLUEPRINT",
+            "DRAFTING"
+          ],
+          "description": "A social sitting room adorned wall to wall with artwork and drawings. An unfinished sketch of your uncle sits on an easel in the middle of the room, providing a vivid image of what were presumably his final days (depending on when the project was abandoned).",
+          "additional_info": "You may draw new Floor Plans while drafting in this room.",
+          "shape": "T",
+          "doors": [
+            {
+              "leads_to": "COMMISSARY",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "S"
+            },
+            {
+              "leads_to": "DINING ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            },
+            {
+              "leads_to": "BILLIARD ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            }
+          ],
+          "position": [
+            1,
+            4
+          ],
+          "rank": 5,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "DINING ROOM",
+          "cost": 0,
+          "type": [
+            "BLUEPRINT"
+          ],
+          "description": "An intimate and warm room with a large dining table boasting a serving tray with a silver dome cover. Dinner is served here each evening.",
+          "additional_info": "Each day, a meal is served in the DINING ROOM after Rank 8 has been reached.",
+          "shape": "T",
+          "doors": [
+            {
+              "leads_to": "DRAWING ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            },
+            {
+              "leads_to": "PANTRY",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "N"
+            },
+            {
+              "leads_to": "CLOSET",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            }
+          ],
+          "position": [
+            2,
+            4
+          ],
+          "rank": 5,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "STANDARD",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "CLOSET",
+          "cost": 0,
+          "type": [
+            "BLUEPRINT",
+            "DEAD END"
+          ],
+          "description": "A very modest recessed space used for storage. This particular closet is favored by the junior members of the staff, who utilize it to stash away assorted articles and knicknacks whose proper place in the ESTATE is yet unknown to them.",
+          "additional_info": "2 items",
+          "shape": "DEAD END",
+          "doors": [
+            {
+              "leads_to": "DINING ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            }
+          ],
+          "position": [
+            3,
+            4
+          ],
+          "rank": 5,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "BOUDOIR",
+          "cost": 0,
+          "type": [
+            "BEDROOM"
+          ],
+          "description": "A private salon with a plethora of fainting couches and chaise lounges that served both as a dressing room for her Ladyship in the mornings and a cozy sitting room for her in the evenings.",
+          "additional_info": "",
+          "shape": "L",
+          "doors": [
+            {
+              "leads_to": "DARKROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "S"
+            },
+            {
+              "leads_to": "DEAD END",
+              "locked": "false",
+              "is_security": "false",
+              "orientation": "W"
+            }
+          ],
+          "position": [
+            4,
+            4
+          ],
+          "rank": 5,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": "UNKNOWN"
+        }
       ],
       [
-        null,
-        null,
-        null,
+        {
+          "name": "WEST WING HALL",
+          "cost": 0,
+          "type": [
+            "HALLWAY"
+          ],
+          "description": "The west wing of the ESTATE has been closed since the death of Lady Epsen. It is unsurprising therefore, that this hallway in its neglected state features boarded windows and dust smothered furniture.",
+          "additional_info": "",
+          "shape": "T",
+          "doors": [
+            {
+              "leads_to": "DEAD END",
+              "locked": "?",
+              "is_security": "False",
+              "orientation": "E"
+            },
+            {
+              "leads_to": "BILLIARD ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "N"
+            },
+            {
+              "leads_to": "GUEST BEDROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "S"
+            }
+          ],
+          "position": [
+            0,
+            5
+          ],
+          "rank": 4,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "STANDARD",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "COMMISSARY",
+          "cost": 1,
+          "type": [
+            "SHOP"
+          ],
+          "description": "The staff commissary is always stocked with household goods and supplies at a reasonable cost. This provides the servants of the ESTATE an invaluable service, especially to the live-in staff who may only expect to leave the property once or twice a month.",
+          "additional_info": "Items for Sale",
+          "shape": "L",
+          "doors": [
+            {
+              "leads_to": "CORRIDOR",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            },
+            {
+              "leads_to": "DRAWING ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "N"
+            }
+          ],
+          "position": [
+            1,
+            5
+          ],
+          "rank": 4,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "STANDARD",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "CORRIDOR",
+          "cost": 0,
+          "type": [
+            "HALLWAY"
+          ],
+          "description": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
+          "additional_info": "CORRIDOR is always left unlocked.",
+          "shape": "STRAIGHT",
+          "doors": [
+            {
+              "leads_to": "COMMISSARY",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            },
+            {
+              "leads_to": "CHAPEL",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            }
+          ],
+          "position": [
+            2,
+            5
+          ],
+          "rank": 4,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "CHAPEL",
+          "cost": 0,
+          "type": [
+            "RED ROOM",
+            "ENTRY"
+          ],
+          "description": "A private sacristy, as ornate as the most lavish rooms of the ESTATE, is watched over by eight Ajeran Angels depicited in stained glass. This room was more a tribute to your uncle's vanity than it was to his faith.",
+          "additional_info": "Whenever you enter CHAPEL, lose 1 COIN.",
+          "shape": "T",
+          "doors": [
+            {
+              "leads_to": "CORRIDOR",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            },
+            {
+              "leads_to": "SPARE ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "S"
+            },
+            {
+              "leads_to": "DARKROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
+            }
+          ],
+          "position": [
+            3,
+            5
+          ],
+          "rank": 4,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
         {
           "name": "DARKROOM",
           "cost": 0,
@@ -153,57 +546,22 @@
           "shape": "T",
           "doors": [
             {
-              "leads_to": "PARLOR",
+              "leads_to": "CHAPEL",
               "locked": false,
-              "is_security": false,
-              "orientation": "E"
+              "is_security": "False",
+              "orientation": "W"
             },
             {
               "leads_to": "?",
               "locked": "?",
-              "is_security": false,
-              "orientation": "N"
-            },
-            {
-              "leads_to": "?",
-              "locked": true,
-              "is_security": true,
-              "orientation": "W"
-            }
-          ],
-          "position": [
-            3,
-            5
-          ],
-          "rank": 4,
-          "trunks": 0,
-          "dig_spots": 0,
-          "rarity": "STANDARD",
-          "has_been_entered": true,
-          "terminal": null
-        },
-        {
-          "name": "PARLOR",
-          "cost": 0,
-          "type": [
-            "BLUEPRINT",
-            "PUZZLE"
-          ],
-          "description": "This cozy lounge furnished with couches and armchairs serves as the perfect social setting for receptions and after parties. Consequently this was one of the most popular rooms for entertaining and the late H. S. Sinclair was known to supply a myriad of parlor games to encourage his guests to think and conversate.",
-          "additional_info": "contains a puzzle that can be solved for a reward",
-          "shape": "L",
-          "doors": [
-            {
-              "leads_to": "CORRIDOR",
-              "locked": false,
               "is_security": "False",
               "orientation": "S"
             },
             {
-              "leads_to": "DARKROOM",
+              "leads_to": "BOUDOIR",
               "locked": false,
               "is_security": "False",
-              "orientation": "W"
+              "orientation": "N"
             }
           ],
           "position": [
@@ -213,45 +571,32 @@
           "rank": 4,
           "trunks": 0,
           "dig_spots": 0,
-          "rarity": "COMMONPLACE",
+          "rarity": "STANDARD",
           "has_been_entered": true,
-          "terminal": null,
-          "has_been_solved": true
+          "terminal": null
         }
       ],
       [
-        null,
         {
-          "name": "DEN",
+          "name": "GUEST BEDROOM",
           "cost": 0,
           "type": [
-            "BLUEPRINT"
+            "BEDROOM",
+            "DEAD END"
           ],
-          "description": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
-          "additional_info": "+1 GEM",
-          "shape": "T",
+          "description": "A small bedroom maintained and kept available for accommodating weekend guests and impromptu visitors who find themselves compelled to stay the night.",
+          "additional_info": "+10 STEPS",
+          "shape": "DEAD END",
           "doors": [
             {
-              "leads_to": "NOOK",
+              "leads_to": "WEST WING HALL",
               "locked": false,
               "is_security": "False",
-              "orientation": "E"
-            },
-            {
-              "leads_to": "?",
-              "locked": "?",
-              "is_security": "False",
-              "orientation": "S"
-            },
-            {
-              "leads_to": "?",
-              "locked": "?",
-              "is_security": "False",
-              "orientation": "W"
+              "orientation": "N"
             }
           ],
           "position": [
-            1,
+            0,
             6
           ],
           "rank": 3,
@@ -272,20 +617,20 @@
           "shape": "L",
           "doors": [
             {
-              "leads_to": "SPARE ROOM",
+              "leads_to": "DEAD END",
+              "locked": "?",
+              "is_security": "False",
+              "orientation": "W"
+            },
+            {
+              "leads_to": "PARLOR",
               "locked": false,
               "is_security": "False",
               "orientation": "S"
-            },
-            {
-              "leads_to": "DEN",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "W"
             }
           ],
           "position": [
-            2,
+            1,
             6
           ],
           "rank": 3,
@@ -295,44 +640,6 @@
           "has_been_entered": true,
           "terminal": null
         },
-        null,
-        {
-          "name": "CORRIDOR",
-          "cost": 0,
-          "type": [
-            "HALLWAY"
-          ],
-          "description": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
-          "additional_info": "CORRIDOR is always left unlocked.",
-          "shape": "STRAIGHT",
-          "doors": [
-            {
-              "leads_to": "CHAPEL",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "S"
-            },
-            {
-              "leads_to": "PARLOR",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "N"
-            }
-          ],
-          "position": [
-            4,
-            6
-          ],
-          "rank": 3,
-          "trunks": 0,
-          "dig_spots": 0,
-          "rarity": "COMMONPLACE",
-          "has_been_entered": true,
-          "terminal": null
-        }
-      ],
-      [
-        null,
         null,
         {
           "name": "SPARE ROOM",
@@ -345,16 +652,95 @@
           "shape": "STRAIGHT",
           "doors": [
             {
-              "leads_to": "ENTRANCE HALL",
+              "leads_to": "CHAPEL",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "N"
+            },
+            {
+              "leads_to": "BEDROOM",
               "locked": false,
               "is_security": "False",
               "orientation": "S"
+            }
+          ],
+          "position": [
+            3,
+            6
+          ],
+          "rank": 3,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        null
+      ],
+      [
+        null,
+        {
+          "name": "PARLOR",
+          "cost": 0,
+          "type": [
+            "BLUEPRINT",
+            "PUZZLE"
+          ],
+          "description": "This cozy lounge furnished with couches and armchairs serves as the perfect social setting for receptions and after parties. Consequently this was one of the most popular rooms for entertaining and the late H. S. Sinclair was known to supply a myriad of parlor games to encourage his guests to think and conversate.",
+          "additional_info": "contains a puzzle that can be solved for a reward",
+          "shape": "L",
+          "doors": [
+            {
+              "leads_to": "HALLWAY",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
             },
             {
               "leads_to": "NOOK",
               "locked": false,
               "is_security": "False",
               "orientation": "N"
+            }
+          ],
+          "position": [
+            1,
+            7
+          ],
+          "rank": 2,
+          "trunks": 0,
+          "dig_spots": 0,
+          "rarity": "COMMONPLACE",
+          "has_been_entered": true,
+          "terminal": null
+        },
+        {
+          "name": "HALLWAY",
+          "cost": 0,
+          "type": [
+            "HALLWAY"
+          ],
+          "description": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
+          "additional_info": "",
+          "shape": "T",
+          "doors": [
+            {
+              "leads_to": "PARLOR",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "W"
+            },
+            {
+              "leads_to": "ENTRANCE HALL",
+              "locked": false,
+              "is_security": false,
+              "orientation": "S"
+            },
+            {
+              "leads_to": "BEDROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "E"
             }
           ],
           "position": [
@@ -369,21 +755,27 @@
           "terminal": null
         },
         {
-          "name": "CLOSET",
+          "name": "BEDROOM",
           "cost": 0,
           "type": [
-            "BLUEPRINT",
-            "DEAD END"
+            "BEDROOM",
+            "ENTRY"
           ],
-          "description": "A very modest recessed space used for storage. This particular closet is favored by the junior members of the staff, who utilize it to stash away assorted articles and knicknacks whose proper place in the ESTATE is yet unknown to them.",
-          "additional_info": "2 items",
-          "shape": "DEAD END",
+          "description": "A familiar room that you may have slept in at some prior visit in the past. Like most bedrooms of the ESTATE, these quarters offer you a little rest and recuperation during your long days exploring the surrounding rooms.",
+          "additional_info": "Whenever you enter this room, gain 2 STEPS",
+          "shape": "L",
           "doors": [
+            {
+              "leads_to": "SPARE ROOM",
+              "locked": false,
+              "is_security": "False",
+              "orientation": "N"
+            },
             {
               "leads_to": "HALLWAY",
               "locked": false,
-              "is_security": "?",
-              "orientation": "S"
+              "is_security": "False",
+              "orientation": "W"
             }
           ],
           "position": [
@@ -397,65 +789,36 @@
           "has_been_entered": true,
           "terminal": null
         },
+        null
+      ],
+      [
+        null,
         {
-          "name": "CHAPEL",
+          "name": "DEN",
           "cost": 0,
           "type": [
-            "RED ROOM",
-            "ENTRY"
+            "BLUEPRINT"
           ],
-          "description": "A private sacristy, as ornate as the most lavish rooms of the ESTATE, is watched over by eight Ajeran Angels depicited in stained glass. This room was more a tribute to your uncle's vanity than it was to his faith.",
-          "additional_info": "Whenever you enter CHAPEL, lose 1 COIN.",
+          "description": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
+          "additional_info": "+1 GEM",
           "shape": "T",
           "doors": [
             {
-              "leads_to": "BILLIARD ROOM",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "S"
-            },
-            {
-              "leads_to": "DEAD END",
+              "leads_to": "?",
               "locked": "?",
               "is_security": "False",
               "orientation": "W"
             },
             {
-              "leads_to": "CORRIDOR",
-              "locked": false,
+              "leads_to": "DEAD END",
+              "locked": "?",
               "is_security": "False",
-              "orientation": "N"
-            }
-          ],
-          "position": [
-            4,
-            7
-          ],
-          "rank": 2,
-          "trunks": 0,
-          "dig_spots": 0,
-          "rarity": "COMMONPLACE",
-          "has_been_entered": true,
-          "terminal": null
-        }
-      ],
-      [
-        null,
-        {
-          "name": "STOREROOM",
-          "cost": 0,
-          "type": [
-            "BLUEPRINT",
-            "DEAD END"
-          ],
-          "description": "A dedicated storage space filled from end to end with a surplus of chairs, carpets, paintings and a handful of other things that had at one time been in vogue and on display elsewhere in the house.",
-          "additional_info": "+1 KEY, +1 GEM, +1 COIN",
-          "shape": "DEAD END",
-          "doors": [
+              "orientation": "S"
+            },
             {
               "leads_to": "ENTRANCE HALL",
               "locked": false,
-              "is_security": "?",
+              "is_security": false,
               "orientation": "E"
             }
           ],
@@ -482,19 +845,19 @@
           "shape": "T",
           "doors": [
             {
-              "leads_to": "STOREROOM",
+              "leads_to": "DEN",
               "locked": false,
               "is_security": false,
               "orientation": "W"
             },
             {
-              "leads_to": "SPARE ROOM",
+              "leads_to": "HALLWAY",
               "locked": false,
               "is_security": false,
               "orientation": "N"
             },
             {
-              "leads_to": "HALLWAY",
+              "leads_to": "STOREROOM",
               "locked": false,
               "is_security": false,
               "orientation": "E"
@@ -512,32 +875,21 @@
           "terminal": null
         },
         {
-          "name": "HALLWAY",
+          "name": "STOREROOM",
           "cost": 0,
           "type": [
-            "HALLWAY"
+            "BLUEPRINT",
+            "DEAD END"
           ],
-          "description": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
-          "additional_info": "",
-          "shape": "T",
+          "description": "A dedicated storage space filled from end to end with a surplus of chairs, carpets, paintings and a handful of other things that had at one time been in vogue and on display elsewhere in the house.",
+          "additional_info": "+1 KEY, +1 GEM, +1 COIN",
+          "shape": "DEAD END",
           "doors": [
             {
               "leads_to": "ENTRANCE HALL",
               "locked": false,
-              "is_security": "False",
+              "is_security": false,
               "orientation": "W"
-            },
-            {
-              "leads_to": "CLOSET",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "N"
-            },
-            {
-              "leads_to": "BILLIARD ROOM",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "E"
             }
           ],
           "position": [
@@ -551,41 +903,7 @@
           "has_been_entered": true,
           "terminal": null
         },
-        {
-          "name": "BILLIARD ROOM",
-          "cost": 0,
-          "type": [
-            "BLUEPRINT",
-            "PUZZLE"
-          ],
-          "description": "This smoky backroom, featuring a pool table and fully stocked bar, has served as a retreat on more than one occasion for guests lacking the social wit required for after-dinner conversation. A rather curious game of darts provided the less competitive players a unique opportunity to ponder over its unusual rules.",
-          "additional_info": "",
-          "shape": "L",
-          "doors": [
-            {
-              "leads_to": "HALLWAY",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "W"
-            },
-            {
-              "leads_to": "CHAPEL",
-              "locked": false,
-              "is_security": "False",
-              "orientation": "N"
-            }
-          ],
-          "position": [
-            4,
-            8
-          ],
-          "rank": 1,
-          "trunks": 0,
-          "dig_spots": 0,
-          "rarity": "COMMONPLACE",
-          "has_been_entered": true,
-          "terminal": null
-        }
+        null
       ]
     ]
   },

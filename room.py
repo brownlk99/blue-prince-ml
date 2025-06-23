@@ -30,8 +30,11 @@ class Room:
         print(f"Editing doors for room: {self.name}")
         while True:
             print("\nCurrent doors:")
-            for idx, door in enumerate(self.doors):
-                print(f"{idx+1}: {door}")
+            if self.doors:
+                for idx, door in enumerate(self.doors):
+                    print(f"{idx+1}: {door}")
+            else:
+                print(f"No doors currently within {self.name}")
 
             print("\nOptions:")
             print("1. Edit a door")
@@ -67,8 +70,8 @@ class Room:
                 return
                 
             print("\nAvailable doors:")
-            for idx, door in enumerate(self.doors):
-                print(f"{door.orientation}: {door}")
+            for door in (self.doors):
+                print(door)
                 
             door_orientation = input("Enter door orientation to edit (N/S/E/W): ").strip().upper()
             matching_doors = [d for d in self.doors if d.orientation == door_orientation]
@@ -295,33 +298,47 @@ class PuzzleRoom(Room):
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
         self.has_been_solved = has_been_solved  # Indicates if the puzzle in this room has been solved
 
-    def parlor_puzzle(self, reader: easyocr.Reader):
+    def parlor_puzzle(self, reader: easyocr.Reader, editor_path: str = None):
         """
-        Interactive parlor puzzle solver.
-        Prompts the user to screenshot each box and confirm correctness.
+            interactive parlor puzzle solver
+
+                Args:
+                    reader (easyocr.Reader): the OCR reader to capture text
+                    editor_path (str): path to text editor for manual editing
+
+                Returns:
+                    dict: the results for each color box
         """
         colors = ["BLUE", "WHITE", "BLACK"]
         results = {}
+        
         for color in colors:
-            input(f"\nPlease get into position to screenshot the {color} box, press Enter to continue...")
-            # Capture the hint using your existing OCR/parlor logic
-            box_result = parlor.capture_hint(reader)
-            print(f"OCR result for {color} box: {box_result}")
-            confirm = input(f"Is the {color} box result correct? (y/n): ").strip().lower()
-            if confirm == "y":
-                results[color] = box_result
-            else:
-                print(f"Please retry the {color} box.")
-                # Optionally, you could loop until confirmed
-                while True:
-                    input(f"Prepare to screenshot the {color} box again, press Enter to do so...")
-                    box_result = parlor.capture_hint(reader)
+            while True:
+                print(f"\nFor the {color} box:")
+                print("1. Capture with screenshot")
+                print("2. Enter manually")
+                
+                capture_choice = input("Enter your choice (1/2): ").strip()
+                
+                if capture_choice == "1":
+                    # Screenshot capture path
+                    input(f"Please get into position to screenshot the {color} box, press Enter to continue...")
+                    box_result = parlor.capture_hint(reader, editor_path)
                     print(f"OCR result for {color} box: {box_result}")
-                    confirm = input(f"Is the {color} box result correct? (y/n): ").strip().lower()
-                    if confirm == "y":
-                        results[color] = box_result
-                        break
-        print("Parlor puzzle results:", results)
+                elif capture_choice == "2":
+                    # Manual entry path
+                    box_result = input(f"\nEnter the text for the {color} box: ").strip()
+                else:
+                    print("Invalid choice. Please enter 1 or 2.")
+                    continue
+                
+                confirm = input(f"Is the {color} box result '{box_result}' correct? (Y/n): ").strip().lower()
+                if confirm in ["y", "yes"]:
+                    results[color] = box_result
+                    break
+                else:
+                    print(f"Let's try again for the {color} box.")
+        
         return results
     
     def to_dict(self):

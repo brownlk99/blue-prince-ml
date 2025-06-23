@@ -24,4 +24,4 @@ class Door:
         )
     
     def __str__(self):
-        return f"Door(orientation={self.orientation}, leads_to={self.leads_to}, locked={self.locked}, is_security={self.is_security})"
+        return f"{self.orientation}, leads_to={self.leads_to}, locked={self.locked}, is_security={self.is_security}"

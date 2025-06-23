@@ -30,11 +30,20 @@ def generic_autocorrect(text):
     corrected = blob.correct()
     return str(corrected)
 
-def edit_text_in_editor(text: str) -> str:
+def edit_text_in_editor(text: str, editor_path: str = None) -> str:
     print("Editing text in external editor, save and close to continue.")
-    editor_path = os.environ.get("EDITOR_PATH")
+    
+    # Priority: 1. Function argument, 2. Environment variable, 3. Default
+    if editor_path is None:
+        editor_path = os.environ.get("EDITOR_PATH")
+    
     if not editor_path:
-        raise EnvironmentError("EDITOR_PATH environment variable not set.")            
+        # Platform-specific defaults
+        if os.name == 'nt':  # Windows
+            editor_path = "notepad"
+        else:  # Unix/Linux/Mac
+            editor_path = "nano"
+    
     with tempfile.NamedTemporaryFile(suffix=".txt", delete=False, mode='w+', encoding='utf-8') as tf:
         tf.write(text)
         tf.flush()

@@ -17,7 +17,7 @@ from capture.vision_utils import edit_text_in_editor, generic_autocorrect
 from loguru import logger
 
 
-def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str]) -> None:
+def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str], editor_path: str = None) -> None:
     time.sleep(1)  # Allow time so there's no overlap with clicking to activate and triggering the capture
     note_screenshot = ScreenCapture().run()
     if note_screenshot is None:
@@ -28,16 +28,16 @@ def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[
     note_screenshot = cv2.cvtColor(note_screenshot, cv2.COLOR_RGB2BGR)
     note_text = google_vision(client, note_screenshot)
     corrected_note_text = generic_autocorrect(note_text)
-    edited_page = edit_text_in_editor(corrected_note_text)
+    edited_page = edit_text_in_editor(corrected_note_text, editor_path)
     pages.append(edited_page)
     print()
 
-def capture_note(client: vision.ImageAnnotatorClient, current_room: Room) -> Note:
+def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor_path: str = None) -> Note:
     print("Starting note capture with mouse input.")
     pages = []
 
     # Capture the first page immediately
-    capture_and_process_helper(client, pages)
+    capture_and_process_helper(client, pages, editor_path)
     print("Left click to capture next page. Right click to finish note capture.")
 
     stop_capture = Event()       # Used to signal when to stop capturing
@@ -57,7 +57,7 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room) -> Not
 
         if event.button == 'left':
             print("Left click detected — capturing next page.")
-            capture_and_process_helper(client, pages)
+            capture_and_process_helper(client, pages, editor_path)
             print("Left click to capture next page. Right click to finish note capture.")
             # Delay re-hooking the listener in a background thread (avoids GUI click bleed-over)
             def delayed_rehook():

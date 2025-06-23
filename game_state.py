@@ -12,9 +12,9 @@ class GameState:
     def __init__(self, current_day=1):
         self.resources = {
             "footprints": 0,
-            "gems": 0,
             "dice": 0,
             "keys": 0,
+            "gems": 0,
             "coins": 0
         }
         self.items = {}
@@ -146,7 +146,7 @@ class GameState:
 
         if self.current_room.name in ("CLASSROOM", "DRAWING ROOM"):
             while True:
-                val = input("How many redraws are allotted by the current room? ")
+                val = input("\nHow many redraws are allotted by the current room? ")
                 if val.isdigit():
                     room_redraw_count = int(val)
                     break
@@ -154,7 +154,7 @@ class GameState:
                 time.sleep(1)
         if self.house.get_room_by_name("STUDY"):
             while True:
-                val = input("How many redraws are allotted by the study? ")
+                val = input("\nHow many redraws are allotted by the STUDY? ")
                 if val.isdigit():
                     study_redraw_count = int(val)
                     break

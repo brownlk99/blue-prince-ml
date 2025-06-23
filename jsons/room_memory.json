@@ -1,66 +1,4 @@
 {
-  "SPARE ROOM": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT"
-    ],
-    "description": "An unfurnished, unfinished and otherwise unremarkable empty room. If there had at some point been plans for this spare room, it would seem those designs are now long forgotten.",
-    "additional_info": "",
-    "shape": "STRAIGHT",
-    "rarity": "COMMONPLACE"
-  },
-  "NOOK": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT"
-    ],
-    "description": "A snug corner reading room which serves as a quiet, private place for guests to spend a few hours of their afternoon away from the hustle and bustle of the staff.",
-    "additional_info": "+1 KEY",
-    "shape": "L",
-    "rarity": "COMMONPLACE"
-  },
-  "HALLWAY": {
-    "cost": 0,
-    "type": [
-      "HALLWAY"
-    ],
-    "description": "One of the many nondescript hallways snaking through the ESTATE and providing elegant causeways between the more noteworthy destinations that the house has to offer.",
-    "additional_info": "",
-    "shape": "T",
-    "rarity": "COMMONPLACE"
-  },
-  "STOREROOM": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT",
-      "DEAD END"
-    ],
-    "description": "A dedicated storage space filled from end to end with a surplus of chairs, carpets, paintings and a handful of other things that had at one time been in vogue and on display elsewhere in the house.",
-    "additional_info": "+1 KEY, +1 GEM, +1 COIN",
-    "shape": "DEAD END",
-    "rarity": "COMMONPLACE"
-  },
-  "DEN": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT"
-    ],
-    "description": "A more traditional family room, warm and inviting. So comfortable, one might assume that the countless clocks surrounding the sofas are placed in a futile attempt to avoid inevitably wasting the entire day here.",
-    "additional_info": "+1 GEM",
-    "shape": "T",
-    "rarity": "COMMONPLACE"
-  },
-  "CLOSET": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT",
-      "DEAD END"
-    ],
-    "description": "A very modest recessed space used for storage. This particular closet is favored by the junior members of the staff, who utilize it to stash away assorted articles and knicknacks whose proper place in the ESTATE is yet unknown to them.",
-    "additional_info": "2 items",
-    "shape": "DEAD END",
-    "rarity": "COMMONPLACE"
-  },
   "BILLIARD ROOM": {
     "cost": 0,
     "type": [
@@ -72,46 +10,25 @@
     "shape": "L",
     "rarity": "COMMONPLACE"
   },
-  "CHAPEL": {
-    "cost": 0,
-    "type": [
-      "RED ROOM",
-      "ENTRY"
-    ],
-    "description": "A private sacristy, as ornate as the most lavish rooms of the ESTATE, is watched over by eight Ajeran Angels depicited in stained glass. This room was more a tribute to your uncle's vanity than it was to his faith.",
-    "additional_info": "Whenever you enter CHAPEL, lose 1 COIN.",
-    "shape": "T",
-    "rarity": "COMMONPLACE"
-  },
-  "CORRIDOR": {
+  "WEST WING HALL": {
     "cost": 0,
     "type": [
       "HALLWAY"
     ],
-    "description": "A long hall with two doors at either end that had been one of your uncle's most frequently traveled rooms. Consequently, he had left strict instructions with the household staff that the doors of this corridor should never under any circumstance be locked.",
-    "additional_info": "CORRIDOR is always left unlocked.",
-    "shape": "STRAIGHT",
-    "rarity": "COMMONPLACE"
-  },
-  "PARLOR": {
-    "cost": 0,
-    "type": [
-      "BLUEPRINT",
-      "PUZZLE"
-    ],
-    "description": "This cozy lounge furnished with couches and armchairs serves as the perfect social setting for receptions and after parties. Consequently this was one of the most popular rooms for entertaining and the late H. S. Sinclair was known to supply a myriad of parlor games to encourage his guests to think and conversate.",
-    "additional_info": "contains a puzzle that can be solved for a reward",
-    "shape": "L",
-    "rarity": "COMMONPLACE"
-  },
-  "DARKROOM": {
-    "cost": 0,
-    "type": [
-      "RED ROOM"
-    ],
-    "description": "A room dedicated to photo processing, development and print-making. This room is outfitted with safelights which provide red illumination to which the photographic material is insensitive. However, due to a faulty installation the safelights often overload their circuit capacity and blow a fuse.",
-    "additional_info": "You cannot see the Floor Plans while drafting in this room.",
+    "description": "The west wing of the ESTATE has been closed since the death of Lady Epsen. It is unsurprising therefore, that this hallway in its neglected state features boarded windows and dust smothered furniture.",
+    "additional_info": "",
     "shape": "T",
     "rarity": "STANDARD"
+  },
+  "GUEST BEDROOM": {
+    "cost": 0,
+    "type": [
+      "BEDROOM",
+      "DEAD END"
+    ],
+    "description": "A small bedroom maintained and kept available for accommodating weekend guests and impromptu visitors who find themselves compelled to stay the night.",
+    "additional_info": "+10 STEPS",
+    "shape": "DEAD END",
+    "rarity": "COMMONPLACE"
   }
 }
