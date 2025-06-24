@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 import cv2
 import easyocr
 import numpy as np
@@ -14,11 +14,11 @@ from loguru import logger
 from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LIST, DIRECTORY, ROOM_LOOKUP
 from door import Door
 from house_map import HouseMap
-from room import Room
+from room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
 from terminal import SecurityTerminal, LabTerminal, ShelterTerminal, OfficeTerminal
 
 
-def capture_drafting_options(reader: easyocr.Reader, google_client: vision.ImageAnnotatorClient, current_room: Room, chosen_door: Door) -> List[Room]:
+def capture_drafting_options(reader: easyocr.Reader, google_client: vision.ImageAnnotatorClient, current_room: Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage], chosen_door: Door) -> List[Room]:
     drafting_options = []
     draft_regions = REGIONS["drafting"]                                         #regions for the left, center, and right drafts
     for draft, draft_region in draft_regions.items():
@@ -38,7 +38,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
                 shape = "UNKNOWN"
                 doors = None
                 rarity = "UNKNOWN"
-                terminal = "UNKNOWN"    #TODO: This might have to change
+                terminal = None
             else:
                 draft_room_name = get_draft_room_name(reader, draft_screenshot, google_client)
         else:
@@ -52,7 +52,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             shape = "UNKNOWN"
             doors = None
             rarity = "UNKNOWN"
-            terminal = "UNKNOWN"
+            terminal = None
         elif draft_room_name != "UNKNOWN":      # if we have a valid/possible room name
             print(f"Draft room name: {draft_room_name}")
             detected_doors = get_doors(draft_screenshot)                #get the detected doors from the draft screenshot
@@ -85,7 +85,7 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             additional_info=additional_info,
             shape=shape,
             position=get_new_room_position(current_room.position, chosen_door.orientation),
-            doors=doors,
+            doors=doors if doors else [],
             rarity=rarity,
             terminal=terminal
         )
@@ -114,8 +114,8 @@ def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: 
 
     if "ARCHIVED" in results.strip().upper():
         return "ARCHIVED FLOOR PLAN"
-    print("No room name found in draft.")
-    return None
+    print("No room name found in draft.")   #TODO: could potentially be an issue if it gets to this point (maybe manual entry?)
+    return ""
 
 
 def door_check(room_name: str, actual_number: int) -> bool:
@@ -313,43 +313,3 @@ def isolate_pink(image: np.ndarray) -> np.ndarray:
     upper_pink = np.array([170, 255, 255])
     mask = cv2.inRange(hsv, lower_pink, upper_pink)
     return cv2.bitwise_and(image, image, mask=mask)
-
-
-def testing_make_random_room_choice(drafting_options: List[Room]) -> Room:
-    """
-    Selects a random Room from a list of drafting options.
-
-    Args:
-        drafting_options: A list of Room objects to choose from.
-
-    Returns:
-        A randomly chosen Room.
-    """
-    return random.choice(drafting_options)
-
-def testing_make_random_door_choice():
-    return random.choice(["W", "N", "E"])
-
-
-if __name__ == "__main__":
-    # Example usage
-    reader = easyocr.Reader(['en'])
-    google_client = vision.ImageAnnotatorClient()
-    entrance_hall = Room(
-            name="ENTRANCE HALL",
-            shape="T",
-            doors=[Door(locked=False, orientation="W"), Door(locked=False, orientation="N"), Door(locked=False, orientation="E")],
-            description="",
-            additional_info="",
-            position=(2, 8)
-        )
-    darkroom = Room(
-            name="DARKROOM",
-            shape="CROSS",
-            doors=[Door(locked=False, orientation="W"), Door(locked=False, orientation="N"), Door(locked=False, orientation="S"), Door(locked=False, orientation="E")],
-            description="",
-            additional_info="",
-            position=(2, 7)
-        )
-    chosen_door = darkroom.doors[0]  # Example chosen door
-    drafting_options = capture_drafting_options(reader, google_client, darkroom, chosen_door)

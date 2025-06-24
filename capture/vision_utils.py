@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 import time
+from typing import Optional
 import cv2
 from loguru import logger
 import numpy as np
@@ -30,7 +31,7 @@ def generic_autocorrect(text):
     corrected = blob.correct()
     return str(corrected)
 
-def edit_text_in_editor(text: str, editor_path: str = None) -> str:
+def edit_text_in_editor(text: str, editor_path: Optional[str] = None) -> str:
     print("Editing text in external editor, save and close to continue.")
     
     # Priority: 1. Function argument, 2. Environment variable, 3. Default

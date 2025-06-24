@@ -30,7 +30,7 @@ class HouseMap:
             raise ValueError("No room exists at the specified position to update.")
         self.grid[y][x] = room
 
-    def get_room_by_position(self, x, y) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]:
+    def get_room_by_position(self, x, y) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage, None]:
         if not (0 <= x < self.width and 0 <= y < self.height):
             return None
         return self.grid[y][x]
@@ -57,13 +57,6 @@ class HouseMap:
             if room:
                 return room
             name = input(f"Detected room '{name}' - but not found. Please enter a valid room name: ").strip().upper()
-
-    def get_position_by_room(self, room: Room) -> tuple:
-        for y in range(self.height):
-            for x in range(self.width):
-                if self.grid[y][x] == room:
-                    return (x, y)
-        return None
     
     def count_occupied_rooms(self) -> int:
         return sum(1 for row in self.grid for room in row if room)
@@ -125,7 +118,7 @@ class HouseMap:
         return flag_dict
 
     @staticmethod
-    def specialize_room(room: Room) -> Union[ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]:
+    def specialize_room(room: Room) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]:
         if room.name in ["KITCHEN", "COMMISSARY", "LOCKSMITH", "SHOWROOM"]:
             return ShopRoom.from_dict(room.to_dict())
         elif room.name == "PARLOR":
@@ -160,7 +153,7 @@ class HouseMap:
             room.terminal = LabTerminal()
         elif room_name == "SHELTER":
             room.terminal = ShelterTerminal()
-        for floor_type, rooms in DIRECTORY["FLOORPLANS"].items():
+        for _, rooms in DIRECTORY["FLOORPLANS"].items():
             if room_name in rooms:
                 info = rooms[room_name]
                 room.name = room_name
@@ -249,7 +242,7 @@ class HouseMap:
                 print("Launching door editor...")
                 room.edit_doors()
                 continue
-            elif field == "items_for_sale" and hasattr(room, "edit_items_for_sale"):
+            elif field == "items_for_sale" and hasattr(room, "edit_items_for_sale") and isinstance(room, ShopRoom):
                 print("Launching items for sale editor...")
                 room.edit_items_for_sale()
                 continue
@@ -295,10 +288,10 @@ class HouseMap:
                         break
                 if matching_neighbor_door:
                     door.leads_to = neighbor.name
-                    door.locked = False
+                    door.locked = str(False)
                     door.is_security = matching_neighbor_door.is_security
                     matching_neighbor_door.leads_to = new_room.name
-                    matching_neighbor_door.locked = False
+                    matching_neighbor_door.locked = str(False)
                 else:
                     door.leads_to = "DEAD END"
 
@@ -332,13 +325,31 @@ class HouseMap:
             ]
         }
 
-    @staticmethod
-    def from_dict(data):
+    @classmethod
+    def from_dict(cls, data):
         hm = HouseMap(width=data.get("width", 5), height=data.get("height", 9))
-        hm.grid = [
-            [Room.from_dict(room) if room else None for room in row]
-            for row in data["rooms"]
-        ]
+        hm.grid = []
+        for row in data["rooms"]:
+            grid_row = []
+            for room_data in row:
+                if room_data is None:
+                    grid_row.append(None)
+                else:
+                    # Determine the correct room type and call appropriate from_dict
+                    room_name = room_data.get("name", "")
+                    if room_name in ["KITCHEN", "COMMISSARY", "LOCKSMITH", "SHOWROOM"]:
+                        grid_row.append(ShopRoom.from_dict(room_data))
+                    elif room_name == "PARLOR":
+                        grid_row.append(PuzzleRoom.from_dict(room_data))
+                    elif room_name == "UTILITY CLOSET":
+                        grid_row.append(UtilityCloset.from_dict(room_data))
+                    elif room_name == "COAT CHECK":
+                        grid_row.append(CoatCheck.from_dict(room_data))
+                    elif room_name == "SECRET PASSAGE":
+                        grid_row.append(SecretPassage.from_dict(room_data))
+                    else:
+                        grid_row.append(Room.from_dict(room_data))
+            hm.grid.append(grid_row)
         return hm
 
     #TODO: look at this a bit more

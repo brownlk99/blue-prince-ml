@@ -27,18 +27,20 @@ class ScreenCapture:
         )
 
     def on_mouse_drag(self, event):
-        cur_x, cur_y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
-        self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
+        if self.rect and self.start_x and self.start_y:
+            cur_x, cur_y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+            self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
 
     def on_mouse_up(self, event):
-        end_x = self.canvas.canvasx(event.x)
-        end_y = self.canvas.canvasy(event.y)
+        if self.start_x and self.start_y:
+            end_x = self.canvas.canvasx(event.x)
+            end_y = self.canvas.canvasy(event.y)
 
-        x1, y1 = int(min(self.start_x, end_x)), int(min(self.start_y, end_y))
-        x2, y2 = int(max(self.start_x, end_x)), int(max(self.start_y, end_y))
+            x1, y1 = int(min(self.start_x, end_x)), int(min(self.start_y, end_y))
+            x2, y2 = int(max(self.start_x, end_x)), int(max(self.start_y, end_y))
 
-        self.root.destroy()
-        self.grab_region((x1, y1, x2, y2))
+            self.root.destroy()
+            self.grab_region((x1, y1, x2, y2))
 
     def on_escape(self, event):
         """Cancel capture on Escape key."""

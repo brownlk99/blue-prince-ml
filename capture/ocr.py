@@ -15,7 +15,7 @@ def google_vision(client: vision.ImageAnnotatorClient, img: np.ndarray) -> str:
     content = encoded_image.tobytes()
     image = vision.Image(content=content)
 
-    response = client.text_detection(image=image)
+    response = client.text_detection(image=image)   # type: ignore
     texts = response.text_annotations
 
     if texts:

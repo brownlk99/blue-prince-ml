@@ -1568,7 +1568,16 @@
     "LUCKY PURSE": "Doubles all COINS you find.",
     "PICK SOUND AMPLIFIER": "Greater chance of picking high-sensitivity locks.",
     "POWER HAMMER": "A stronger SLEDGEHAMMER that can also knock down weaker brick walls",
-    "POWERED ELECTROMAGNET": "You are more likely to draft MECHANICAL ROOMS. Automatically collect COINS and KEYS when entering a room."
+    "POWERED ELECTROMAGNET": "You are more likely to draft MECHANICAL ROOMS. Automatically collect COINS and KEYS when entering a room.",
+    "CAR KEYS": "Possibly used to unlock a car?",
+    "KEYCARD": "Used to unlock KEYCARD DOORS (security doors)",
+    "PRISM KEY": "If you unlock a door with the PRISM KEY in a GREEN ROOM, HALLWAY, BEDROOM, RED ROOM, or SHOP, you will draw floorplans of that same color.",
+    "SILVER KEY": "Unlocking a DOOR with the SILVER KEY will lead to a ROOM with many DOORS.",
+    "SECRET GARDEN KEY": "DRAFTS the SECRET GARDEN when used on a LOCKED DOOR in the wings of the HOUSE.",
+    "VAULT KEY 149": "A Safe Deposit Box Key to be used in the VAULT.",
+    "VAULT KEY 233": "A Safe Deposit Box Key to be used in the VAULT.",
+    "VAULT KEY 304": "A Safe Deposit Box Key to be used in the VAULT.",
+    "VAULT KEY 370": "A Safe Deposit Box Key to be used in the VAULT."
   },
   "SERVICES":{
     "SPIN CYCLE": "exchange ALL of your GEMS with ALL of your GOLD, at a 1:1 rate",

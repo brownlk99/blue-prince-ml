@@ -4,6 +4,8 @@ import numpy as np
 from google.cloud import vision
 from capture.ocr import google_vision
 from capture.screen_capture import ScreenCapture
+from datetime import datetime
+import os
 
 from capture.constants import NUMERIC_ALLOWLIST, REGIONS
 
@@ -14,6 +16,7 @@ def image_hash(img):
 
 def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_resources: dict) -> dict:
     available_resources = {}
+    template_folder = "./capture/number_templates"
     for resource, bbox in REGIONS["resources"].items():
         resource_screenshot = ScreenCapture(bbox).run()
         resource_screenshot = np.array(resource_screenshot)
@@ -31,15 +34,31 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
 
         result = google_vision(client, resource_screenshot)
         last_resource_hashes[resource] = img_hash
+
         if result == "":
             # Keep the resource value the same as before if result is empty
             value = current_game_state_resources.get(resource, 0)
+
+            #TODO: temp capture
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"unknown_{resource}_{timestamp}.png"
+            filepath = os.path.join(template_folder, filename)
+            cv2.imwrite(filepath, resource_screenshot)
+            print(f"Resource {resource}: OCR failed, saved template: {filename}")
         else:
             try:
                 value = int(result)
             except ValueError:
                 # If conversion fails, keep the last known value
                 print(f"Failed to convert resource {resource} value to int, using cached value.")
+
+                #TODO: temp capture
                 value = current_game_state_resources.get(resource, 0)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"failed_convert_{resource}_{timestamp}.png"
+                filepath = os.path.join(template_folder, filename)
+                cv2.imwrite(filepath, resource_screenshot)
+                print(f"Resource {resource}: OCR conversion failed, saved template: {filename}")
+
         available_resources[resource] = value
     return available_resources

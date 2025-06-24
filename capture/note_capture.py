@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import Optional
 import cv2
 import numpy as np
 import mouse
@@ -17,7 +18,7 @@ from capture.vision_utils import edit_text_in_editor, generic_autocorrect
 from loguru import logger
 
 
-def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str], editor_path: str = None) -> None:
+def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str], editor_path: Optional[str] = None) -> None:
     time.sleep(1)  # Allow time so there's no overlap with clicking to activate and triggering the capture
     note_screenshot = ScreenCapture().run()
     if note_screenshot is None:
@@ -32,7 +33,7 @@ def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[
     pages.append(edited_page)
     print()
 
-def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor_path: str = None) -> Note:
+def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor_path: Optional[str] = None) -> Note:
     print("Starting note capture with mouse input.")
     pages = []
 
@@ -41,7 +42,7 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor
     print("Left click to capture next page. Right click to finish note capture.")
 
     stop_capture = Event()       # Used to signal when to stop capturing
-    hook_ref = [None]            # Holds the current mouse hook reference (list allows mutation in nested scope)
+    hook_ref: list = [None]            # Holds the current mouse hook reference (list allows mutation in nested scope)
 
     def on_mouse(event):
         # Only respond to actual mouse button down events (ignore movement or button-up)

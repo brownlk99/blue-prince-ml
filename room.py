@@ -9,16 +9,16 @@ from capture.constants import DIRECTORY
 
 
 class Room:
-    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
         self.name = name.upper()
         self.cost = cost
-        self.type = type if isinstance(type, list) else [type]  # Ensure type is a list
+        self.type = type if isinstance(type, list) else [type]
         self.description = description
         self.additional_info = additional_info
         self.shape = shape
         self.doors = doors if doors else []
-        self.position = position  # tuple like (x, y)
-        self.rank = 9 - position[1] if position else None
+        self.position = position
+        self.rank = 9 - position[1]  # Calculated from position
         self.trunks = trunks
         self.dig_spots = dig_spots
         self.rarity = rarity
@@ -93,11 +93,11 @@ class Room:
             elif field == "locked":
                 new_val = input(f"Locked (True/False) [{door.locked}]: ").strip()
                 if new_val:
-                    door.locked = new_val.lower() in ["true", "t", "yes", "y", "1"]
+                    door.locked = str(new_val.lower() in ["true", "t", "yes", "y", "1"])
             elif field == "is_security":
                 new_val = input(f"Is Security (True/False) [{door.is_security}]: ").strip()
                 if new_val:
-                    door.is_security = new_val.lower() in ["true", "t", "yes", "y", "1"]
+                    door.is_security = str(new_val.lower() in ["true", "t", "yes", "y", "1"])
             else:
                 print("Invalid field.")
                 return
@@ -204,8 +204,7 @@ class Room:
             additional_info=data.get("additional_info", ""),
             shape=data.get("shape", ""),
             doors=[Door.from_dict(door_data) for door_data in data.get("doors", [])],
-            position=tuple(data["position"]) if "position" in data else None,
-            rank=data.get("rank", 0),
+            position=tuple(data["position"]),
             trunks=data.get("trunks", 0),
             dig_spots=data.get("dig_spots", 0),
             rarity=data.get("rarity", ""),
@@ -217,8 +216,8 @@ class Room:
         return f"Room(name={self.name}, cost={self.cost}, type={self.type}, description={self.description}, additional_info={self.additional_info}, shape={self.shape}, doors={self.doors}, position={self.position}, rank={self.rank}, trunks={self.trunks}, dig_spots={self.dig_spots}, rarity={self.rarity}, has_been_entered={self.has_been_entered}, terminal={self.terminal})"
 
 class ShopRoom(Room):
-    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, items_for_sale=None, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
-        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, items_for_sale: Optional[dict] = None):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered, terminal)
         self.items_for_sale = items_for_sale if items_for_sale else {}
 
     def edit_items_for_sale(self):
@@ -286,19 +285,23 @@ class ShopRoom(Room):
     
     @classmethod
     def from_dict(cls, data):
-        room = super().from_dict(data)
-        room.items_for_sale = data.get("items_for_sale", {})
-        return room
+        #TODO: maybe pop the doors from the data and then add them back onto the shop room.. instead of going from dict to to dict OR just do it the long way
+        base_room = super().from_dict(data)                         #get the base room attributes
+        base_data = {k: v for k, v in base_room.to_dict().items() if k != "doors"}  #remove the doors from the base room attributes
+        shop_room = cls(**base_data)                                #create the shop room with the base room attributes
+        shop_room.items_for_sale = data.get("items_for_sale", {})   #add the items for sale into the shop room
+        shop_room.doors = base_room.doors                           #add the doors back to the shop room  
+        return shop_room
     
     def __str__(self):
         return super().__str__() + f", items_for_sale={self.items_for_sale})"
 
 class PuzzleRoom(Room):
-    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, has_been_solved=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None):
-        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, has_been_solved: bool = False):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered, terminal)
         self.has_been_solved = has_been_solved  # Indicates if the puzzle in this room has been solved
 
-    def parlor_puzzle(self, reader: easyocr.Reader, editor_path: str = None):
+    def parlor_puzzle(self, reader: easyocr.Reader, editor_path: Optional[str] = None):
         """
             interactive parlor puzzle solver
 
@@ -348,9 +351,12 @@ class PuzzleRoom(Room):
     
     @classmethod
     def from_dict(cls, data):
-        room = super().from_dict(data)
-        room.has_been_solved = data.get("has_been_solved", False)
-        return room
+        base_room = super().from_dict(data)                         #get the base room attributes
+        base_data = {k: v for k, v in base_room.to_dict().items() if k != "doors"}  #remove the doors from the base room attributes
+        puzzle_room = cls(**base_data)                                #create the puzzle room with the base room attributes
+        puzzle_room.has_been_solved = data.get("has_been_solved", False)  #add the has been solved attribute to the puzzle room
+        puzzle_room.doors = base_room.doors                           #add the doors back to the puzzle room
+        return puzzle_room
     
     def __str__(self):
         return super().__str__() + f", has_been_solved={self.has_been_solved})"
@@ -361,8 +367,8 @@ class UtilityCloset(Room):
 
             Args: True means on, False means off
     """
-    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, keycard_entry_system_switch=True, gymnasium_switch=True, darkroom_switch=False, garage_switch=False):
-        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, keycard_entry_system_switch: bool = True, gymnasium_switch: bool = True, darkroom_switch: bool = False, garage_switch: bool = False):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered, terminal)
         self.keycard_entry_system_switch = keycard_entry_system_switch
         self.gymnasium_switch = gymnasium_switch
         self.darkroom_switch = darkroom_switch
@@ -399,12 +405,15 @@ class UtilityCloset(Room):
     
     @classmethod
     def from_dict(cls, data):
-        room = super().from_dict(data)
-        room.keycard_entry_system_switch = data.get("keycard_entry_system_switch", True)
-        room.gymnasium_switch = data.get("gymnasium_switch", True)
-        room.darkroom_switch = data.get("darkroom_switch", False)
-        room.garage_switch = data.get("garage_switch", False)
-        return room
+        base_room = super().from_dict(data)                         #get the base room attributes
+        base_data = {k: v for k, v in base_room.to_dict().items() if k != "doors"}  #remove the doors from the base room attributes
+        utility_closet = cls(**base_data)                            #create the utility closet with the base room attributes
+        utility_closet.keycard_entry_system_switch = data.get("keycard_entry_system_switch", True)  #add the keycard entry system switch attribute to the utility closet
+        utility_closet.gymnasium_switch = data.get("gymnasium_switch", True)  #add the gymnasium switch attribute to the utility closet
+        utility_closet.darkroom_switch = data.get("darkroom_switch", False)  #add the darkroom switch attribute to the utility closet
+        utility_closet.garage_switch = data.get("garage_switch", False)  #add the garage switch attribute to the utility closet
+        utility_closet.doors = base_room.doors                           #add the doors back to the utility closet
+        return utility_closet
     
     def __str__(self):
         return super().__str__() + f", keycard_entry_system_switch={self.keycard_entry_system_switch}, gymnasium_switch={self.gymnasium_switch}, darkroom_switch={self.darkroom_switch}, garage_switch={self.garage_switch})"
@@ -413,15 +422,15 @@ class CoatCheck(Room):
     """
         Allows the player to store and retrieve an item across runs
     """
-    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, stored_item: Optional[str] = None):
-        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, stored_item: str = ""):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered, terminal)
         self.stored_item = stored_item
 
     def store_item(self, item: str):
         self.stored_item = item
 
-    def retrieve_item(self) -> Optional[str]:
-        self.stored_item = None
+    def retrieve_item(self) -> str:
+        self.stored_item = ""
         return self.stored_item
     
     def to_dict(self):
@@ -431,9 +440,12 @@ class CoatCheck(Room):
 
     @classmethod
     def from_dict(cls, data):
-        room = super().from_dict(data)
-        room.stored_item = data.get("stored_item")
-        return room
+        base_room = super().from_dict(data)                         #get the base room attributes
+        base_data = {k: v for k, v in base_room.to_dict().items() if k != "doors"}  #remove the doors from the base room attributes
+        coat_check = cls(**base_data)                                #create the coat check with the base room attributes
+        coat_check.stored_item = data.get("stored_item")             #add the stored item attribute to the coat check
+        coat_check.doors = base_room.doors                           #add the doors back to the coat check
+        return coat_check
 
     def __str__(self):
         return super().__str__() + f", stored_item={self.stored_item})"
@@ -461,8 +473,8 @@ class SecretPassage(Room):
     """
         Represents a secret passage room with a hidden door
     """
-    def __init__(self, name="", cost=0, type=[], description="", additional_info="", shape="", doors=None, position=None, rank=0, trunks=0, dig_spots=0, rarity="", has_been_entered=False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, has_been_used=False):
-        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rank, trunks, dig_spots, rarity, has_been_entered, terminal)
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, terminal: Optional[Union[Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal]] = None, has_been_used: bool = False):
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered, terminal)
         self.has_been_used = has_been_used
 
     def to_dict(self):
@@ -470,7 +482,12 @@ class SecretPassage(Room):
     
     @classmethod
     def from_dict(cls, data):
-        return super().from_dict(data)
+        base_room = super().from_dict(data)                         #get the base room attributes
+        base_data = {k: v for k, v in base_room.to_dict().items() if k != "doors"}  #remove the doors from the base room attributes
+        secret_passage = cls(**base_data)                            #create the secret passage with the base room attributes
+        secret_passage.has_been_used = data.get("has_been_used", False)  #add the has been used attribute to the secret passage
+        secret_passage.doors = base_room.doors                           #add the doors back to the
+        return secret_passage
     
     def __str__(self):
         return super().__str__()

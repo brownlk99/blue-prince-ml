@@ -29,11 +29,12 @@ class GameState:
         entrance_hall = Room(
             name="ENTRANCE HALL",
             shape="T",
+            cost=0,
             type=[
                 "PERMANENT",
                 "BLUEPRINT"
             ],
-            doors=[Door(locked=False, orientation="W", is_security=False), Door(locked=False, orientation="N", is_security=False), Door(locked=False, orientation="E", is_security=False)],
+            doors=[Door(locked="False", orientation="W", is_security="False"), Door(locked="False", orientation="N", is_security="False"), Door(locked="False", orientation="E", is_security="False")],
             description="Past the steps and beyond the grand doors, admission to Mount Holly is granted by way of a dark and garish lobby, suitably called the Entrance Hall. From here, each guest's adventure begins; however, the three doors that proceed onward do not always lead to the same adjoining rooms...",
             additional_info="",
             position=(2, 8),
@@ -43,6 +44,7 @@ class GameState:
         antechamber = Room(
             name="ANTECHAMBER",
             shape="CROSS",
+            cost=0,
             type=[
                 "BLUEPRINT",
                 "OBJECTIVE"
@@ -68,7 +70,7 @@ class GameState:
         summary = [
             f"Resources: {', '.join(f'{k}={v}' for k, v in self.resources.items())}",
             f"Current room position: ({x}, {y})",
-            f"Current room: {current_room.name}",
+            f"Current room: {current_room.name if current_room else 'None'}",       #shouldn't be none for any valid room within the house, but here just in case
             f"House dimensions: width={self.house.width}, height={self.house.height} (upper left corner (most north-west) is (0,0))",
             "Items:"
         ]
@@ -79,18 +81,21 @@ class GameState:
         summary.append("Rooms Currently in House:")
         for row in self.house.grid:
             for room in row:
-                if room:
+                if room is not None :
                     doors = "      " + " \n      ".join(
                         f"{door.orientation} (leads_to={getattr(door, 'leads_to', None)}, locked={door.locked}, is_security={door.is_security})"
-                        for door in room.doors
+                        for door in (room.doors if isinstance(room.doors, list) else [])
                     )
                     summary.append(f"  - {room.name} at {room.position}, type: {room.type}, rarity: {room.rarity}, has_been_entered: {room.has_been_entered}")
                     # ShopRoom
-                    if isinstance(room, ShopRoom) and room.items_for_sale:
-                        summary.append(f"    Items for sale in {room.name}:")
-                        for item, price in room.items_for_sale.items():
-                            summary.append(f"      - {item}: {price}")
-                    # PuzzleRoom
+                    if isinstance(room, ShopRoom):
+                        items_for_sale = getattr(room, 'items_for_sale', {})
+                        if items_for_sale:
+                            summary.append(f"    Items for sale in {room.name}:")
+                            for item, price in items_for_sale.items():
+                                summary.append(f"      - {item}: {price}")
+                        else:
+                            summary.append(f"    Items for sale: Unknown ")
                     if isinstance(room, PuzzleRoom):
                         summary.append(f"    Puzzle has been solved: {room.has_been_solved}")
                     # UtilityCloset
@@ -144,7 +149,7 @@ class GameState:
         room_redraw_count = 0
         study_redraw_count = 0
 
-        if self.current_room.name in ("CLASSROOM", "DRAWING ROOM"):
+        if self.current_room and self.current_room.name in ("CLASSROOM", "DRAWING ROOM"):
             while True:
                 val = input("\nHow many redraws are allotted by the current room? ")
                 if val.isdigit():
@@ -178,35 +183,35 @@ class GameState:
                 Returns:
                     None
         """
-        room = self.current_room
-        while True:
-            items = list(room.items_for_sale.items())
-            if not items:
-                print("No items left for sale in this shop.")
-                break
+        if isinstance(self.current_room, ShopRoom):
+            while True:
+                items = list(self.current_room.items_for_sale.items())
+                if not items:
+                    print("No items left for sale in this shop.")
+                    break
 
-            print("\nItems for sale:")
-            for idx, (item, price) in enumerate(items, 1):
-                print(f"{idx}. {item} - {price} coins")
-            print("q. Exit item removal")
+                print("\nItems for sale:")
+                for idx, (item, price) in enumerate(items, 1):
+                    print(f"{idx}. {item} - {price} coins")
+                print("q. Exit item removal")
 
-            choice = input("Enter the number of the item to remove: ").strip()
-            if choice.lower() == 'q':
-                print("Exiting item removal.")
-                break
+                choice = input("Enter the number of the item to remove: ").strip()
+                if choice.lower() == 'q':
+                    print("Exiting item removal.")
+                    break
 
-            try:
-                idx = int(choice) - 1
-                if idx < 0 or idx >= len(items):
+                try:
+                    idx = int(choice) - 1
+                    if idx < 0 or idx >= len(items):
+                        print("Please enter a valid option.")
+                        time.sleep(1)
+                        continue
+                    item_name = items[idx][0]
+                    del self.current_room.items_for_sale[item_name]
+                    print(f"Removed {item_name} from items for sale.")
+                except Exception as e:
                     print("Please enter a valid option.")
                     time.sleep(1)
-                    continue
-                item_name = items[idx][0]
-                del room.items_for_sale[item_name]
-                print(f"Removed {item_name} from items for sale.")
-            except Exception as e:
-                print("Please enter a valid option.")
-                time.sleep(1)
 
     def to_dict(self):
         return {
@@ -233,9 +238,7 @@ class GameState:
         pos = data.get('current_position', {})
         gs.current_position = (pos.get('x', 2), pos.get('y', 8))
         gs.items = data.get('items', {})
-        # You may want to implement a from_dict for HouseMap
-        if hasattr(gs.house, 'from_dict'):
-            gs.house = gs.house.from_dict(data.get('house', {}))
-        gs.current_room = Room.from_dict(data.get("current_room", {}))
+        gs.house = HouseMap.from_dict(data.get('house', {}))
+        gs.current_room = Room.from_dict(data.get("current_room", {}))  #TODO: this might need to be specified
         gs.day = data.get("day", 1)
         return gs

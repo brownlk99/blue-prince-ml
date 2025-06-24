@@ -1,3 +1,4 @@
+from typing import Optional
 import cv2
 import easyocr
 import numpy as np
@@ -8,7 +9,7 @@ from capture.screen_capture import ScreenCapture
 from capture.vision_utils import edit_text_in_editor, generic_autocorrect
 
 
-def capture_hint(reader: easyocr.Reader, editor_path: str = None):
+def capture_hint(reader: easyocr.Reader, editor_path: Optional[str] = None):
     puzzle_hint_screenshot = ScreenCapture().run()
     puzzle_hint_screenshot = np.array(puzzle_hint_screenshot)
     puzzle_hint_screenshot = cv2.cvtColor(puzzle_hint_screenshot, cv2.COLOR_RGB2BGR)

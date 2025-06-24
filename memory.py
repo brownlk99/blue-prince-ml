@@ -231,9 +231,9 @@ class PreviousRunMemory:
         self.path = path
         if os.path.exists(self.path):
             with open(self.path, "r", encoding="utf-8") as f:
-                self.previous_runs: List[Dict[str, Any]] = json.load(f)
+                self.previous_runs = json.load(f)
         else:
-            self.previous_runs: List[Dict[str, Any]] = []
+            self.previous_runs = []
 
     def add_run(self, day: int, reason: str, stored_item: str = "") -> None:
         """
@@ -274,9 +274,9 @@ class DecisionMemory:
         self.path = path
         if os.path.exists(self.path):
             with open(self.path, "r", encoding="utf-8") as f:
-                self.decisions: List[Dict[str, Any]] = json.load(f)
+                self.decisions = json.load(f)
         else:
-            self.decisions: List[Dict[str, Any]] = []
+            self.decisions = []
 
     def add_decision(self, decision: Dict[str, Any]) -> None:
         self.decisions.append(decision)
@@ -302,9 +302,9 @@ class BookMemory():
         self.path = path
         if os.path.exists(self.path):
             with open(self.path, "r", encoding="utf-8") as f:
-                self.books: List[Dict[str, Any]] = json.load(f)
+                self.books = json.load(f)
         else:
-            self.books: List[Dict[str, Any]] = []
+            self.books = []
 
     def add_book(self, book: Dict[str, Any]) -> None:
         """
