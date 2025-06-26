@@ -178,6 +178,7 @@ class TermMemory:
             "TERMINAL": "Mt. Holly is equipped with several state of the art computer TERMINAL stations that control various systems on the ESTATE electronically. Each terminal is also connected to a central local NETWORK.",
             "TOMORROW": "Rooms that provide benefits in the future belong to a special category of floorplans: TOMORROW ROOMS. They are marked with a clock symbol.",
             "TRUNK": "A small wooden chest often found in rooms, always LOCKED, and usually containing a few items of interest.",
+            "BLOCKED": "If a DOOR is marked as BLOCKED, it isnot possible to enter it."
         }
         self.save()
 
