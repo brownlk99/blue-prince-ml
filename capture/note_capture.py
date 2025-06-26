@@ -90,8 +90,8 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor
     acceptable_colors = ["RED", "BLUE", "GREEN", "YELLOW", "WHITE", "BLACK"]
     color = input("Enter the color of the note (e.g., 'RED', 'BLUE', etc.): ").strip().upper()
     while color not in acceptable_colors:
-        logger.warning(f"Invalid color. Please choose from: {', '.join(acceptable_colors)}")
-        time.sleep(1)
+        print(f"\nInvalid color. Please choose from: {', '.join(acceptable_colors)}")
+        time.sleep(3)
         color = input("Enter the color of the note (e.g., 'RED', 'BLUE', etc.): ").strip().upper()
     note = Note(content=full_content, found_in_room=current_room.name, color=color)
     return note

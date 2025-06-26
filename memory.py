@@ -135,10 +135,12 @@ class TermMemory:
                 # Remove from available_terms so it doesn't show again
                 del available_terms[key]
                 if not available_terms:
-                    print("All terms/items have been added.")
+                    print("\nAll terms/items have been added.")
+                    time.sleep(3)
                     break
             else:
-                print("Invalid key. Please type the exact key from the list or 'q' to quit.")
+                print("\nInvalid key. Please type the exact key from the list or 'q' to quit.")
+                time.sleep(3)
 
     def reset(self):
         self.terms = {
@@ -177,6 +179,7 @@ class TermMemory:
             "TOMORROW": "Rooms that provide benefits in the future belong to a special category of floorplans: TOMORROW ROOMS. They are marked with a clock symbol.",
             "TRUNK": "A small wooden chest often found in rooms, always LOCKED, and usually containing a few items of interest.",
         }
+        self.save()
 
     def save(self):
         with open(self.path, "w", encoding="utf-8") as f:
@@ -219,6 +222,7 @@ class RoomMemory:
 
     def reset(self):
         self.rooms = {}
+        self.save()
 
 class PreviousRunMemory:
     def __init__(self, path: str = "./jsons/previous_run_memory.json"):

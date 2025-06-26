@@ -6,6 +6,8 @@ from capture.vision_utils import get_current_room
 import json
 import loguru
 
+from utils import get_color_code
+
 logger = loguru.logger
 
 class GameState:
@@ -127,22 +129,24 @@ class GameState:
         while True:
             print("\nCurrent Resources:")
             for key, value in self.resources.items():
-                print(f" - {key}: {value}")
+                print(f" - {get_color_code(key)}: {value}")
 
             res_key = input("\nEnter resource name to edit (or press Enter to finish): ").strip().lower()
             if not res_key:
                 break
 
             if res_key not in self.resources:
-                print("Invalid resource name. Try one of:", ", ".join(self.resources.keys()))
+                print("\nInvalid resource name. Try one of:", ", ".join(self.resources.keys()))
+                time.sleep(3)
                 continue
 
-            new_val = input(f"New value for {res_key}: ").strip()
+            new_val = input(f"New value for {get_color_code(res_key)}: ").strip()
             try:
                 self.resources[res_key] = int(new_val)
-                print(f"Updated {res_key} to {new_val}.")
+                print(f"Updated {get_color_code(res_key)} to {new_val}.")
             except ValueError:
-                print("Invalid number. Please enter an integer.")
+                print("\nInvalid number. Please enter an integer.")
+                time.sleep(3)
     
     def get_available_redraws(self):
         dice_redraw_count = self.resources.get("dice", 0)
@@ -155,16 +159,16 @@ class GameState:
                 if val.isdigit():
                     room_redraw_count = int(val)
                     break
-                print("Invalid input. Please enter a number.")
-                time.sleep(1)
+                print("\nInvalid input. Please enter a number.")
+                time.sleep(3)
         if self.house.get_room_by_name("STUDY"):
             while True:
                 val = input("\nHow many redraws are allotted by the STUDY? ")
                 if val.isdigit():
                     study_redraw_count = int(val)
                     break
-                print("Invalid input. Please enter a number.")
-                time.sleep(1)
+                print("\nInvalid input. Please enter a number.")
+                time.sleep(3)
 
         return {
             "dice": dice_redraw_count,
@@ -203,15 +207,15 @@ class GameState:
                 try:
                     idx = int(choice) - 1
                     if idx < 0 or idx >= len(items):
-                        print("Please enter a valid option.")
-                        time.sleep(1)
+                        print("\nPlease enter a valid option.")
+                        time.sleep(3)
                         continue
                     item_name = items[idx][0]
                     del self.current_room.items_for_sale[item_name]
                     print(f"Removed {item_name} from items for sale.")
                 except Exception as e:
-                    print("Please enter a valid option.")
-                    time.sleep(1)
+                    print("\nPlease enter a valid option.")
+                    time.sleep(3)
 
     def to_dict(self):
         return {

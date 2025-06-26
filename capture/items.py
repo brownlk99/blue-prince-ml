@@ -4,6 +4,7 @@ from capture.screen_capture import ScreenCapture
 from capture.ocr import google_vision
 from google.cloud import vision
 from capture.vision_utils import best_match
+import time
 
 from capture.constants import DIRECTORY
 
@@ -34,7 +35,8 @@ def capture_items(client: vision.ImageAnnotatorClient):
         # Manual entry path
         return manually_obtain_item()
     else:
-        print("Invalid choice. Please enter 1 or 2.")
+        print("\nInvalid choice. Please enter 1 or 2.")
+        time.sleep(3)
         return None
 
 def manually_obtain_item():
@@ -50,7 +52,8 @@ def manually_obtain_item():
             print("Item capture cancelled.")
             return None
         elif item_details is None:
-            print(f"Item '{item_name}' not recognized or not in directory.")
+            print(f"\nItem '{item_name}' not recognized or not in directory.")
+            time.sleep(3)
             item_name = input("\nPlease re-enter a valid item name: ").strip().upper()
         else:
             return {item_name: item_details}

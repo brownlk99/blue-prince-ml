@@ -85,5 +85,5 @@ def get_current_room_name(reader) -> str:
         room_name = input("\nPlease enter the room name: ").strip().upper()
         if room_name in ROOM_LOOKUP:
             return room_name
-        print("Invalid room name. Please try again.")
-        time.sleep(1)
+        print("\nInvalid room name. Please try again.")
+        time.sleep(3)
