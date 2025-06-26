@@ -52,7 +52,6 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             doors = None
             rarity = "UNKNOWN"
         elif draft_room_name != "UNKNOWN":      # if we have a valid/possible room name
-            print(f"Draft room name: {draft_room_name}")
             detected_doors = get_doors(draft_screenshot)                #get the detected doors from the draft screenshot
             valid = door_check(draft_room_name, len(detected_doors))          #make sure the number of doors matches the expected number for the room
             orientation = get_orientation(chosen_door, list(detected_doors))  #get the orientation of the doors based on the chosen door from the previous room and detected doors
@@ -127,8 +126,6 @@ def door_check(room_name: str, actual_number: int) -> bool:
     elif expected != actual_number:
         logger.warning(f"{room_name}: Expected {expected}, Got {actual_number}")
         return False
-    else:       #TODO: maybe add a verbose flag for this?
-        print(f"{room_name}: Door count matches ({expected})")
     return True
 
 
