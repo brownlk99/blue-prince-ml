@@ -1,83 +1,73 @@
-# import json
-# import os
+import contextlib
+import itertools
+import sys
+import threading
+import time
+from typing import Union
+from capture.constants import DIRECTORY
 
+def animate(stop, text="Thinking"):
+    for i in itertools.cycle(['   ', '.  ', '.. ', '...']):
+        if stop():  # Check if we should stop
+            break
+        sys.stdout.write(f'\r{text}' + i)
+        sys.stdout.flush()
+        time.sleep(0.5)
 
-# def update_json(filepath: str, incoming_data: dict):
-#     try:
-#         if os.path.exists(filepath):
-#             with open(filepath, 'r') as file:
-#                 current_data = json.load(file)
-#         else:
-#             current_data = {}
-#     except (json.JSONDecodeError, OSError) as e:
-#         print(f"Warning: Failed to load existing JSON from {filepath}. Reason: {e}")
-#         current_data = {}
+def start_animation(text="Thinking"):
+    stop_thread = threading.Event()
+    t = threading.Thread(target=animate, args=(stop_thread.is_set, text))
+    t.daemon = True
+    t.start()
+    return t, stop_thread.set
 
-#     for group_key, subdict in incoming_data.items():
-#         if not isinstance(subdict, dict):
-#             print(f"Warning: Expected dict for group '{group_key}', got {type(subdict)}")
-#             continue
+@contextlib.contextmanager
+def thinking_animation(text="Thinking"):
+    """Context manager for thinking animation"""
+    thread, stop = start_animation(text)
+    try:
+        yield
+    finally:
+        stop()
+        thread.join(timeout=1)
+        sys.stdout.write('\r' + ' ' * (len(text) + 4) + '\r')
 
-#         if group_key not in current_data:
-#             current_data[group_key] = {}
-
-#         # Update the sub-dictionary
-#         current_data[group_key].update(subdict)
-
-#     with open(filepath, 'w') as file:
-#         serializable_data = make_json_serializable(current_data)
-#         json.dump(serializable_data, file, indent=4)
-
-# def append_to_list_json(filepath: str, new_entries: list[dict]):
-#     try:
-#         if os.path.exists(filepath):
-#             with open(filepath, 'r') as file:
-#                 current_data = json.load(file)
-#                 if not isinstance(current_data, list):
-#                     print(f"Warning: Expected a list in {filepath}, got {type(current_data)}. Overwriting.")
-#                     current_data = []
-#         else:
-#             current_data = []
-#     except (json.JSONDecodeError, OSError) as e:
-#         print(f"Warning: Failed to load JSON from {filepath}. Reason: {e}")
-#         current_data = []
-
-#     # Append new entries
-#     current_data.extend(new_entries)
-
-#     with open(filepath, 'w') as file:
-#         json.dump(current_data, file, indent=4)
-
-# def make_json_serializable(obj):
-#     if isinstance(obj, list):
-#         return [make_json_serializable(x) for x in obj]
-#     elif isinstance(obj, dict):
-#         return {k: make_json_serializable(v) for k, v in obj.items()}
-#     elif hasattr(obj, 'to_dict'):
-#         return make_json_serializable(obj.to_dict())
-#     else:
-#         return obj
+def get_color_code(input: str) -> str:
+    """
+    Get the ANSI color code for a room based on its type from the DIRECTORY.
     
-# #not used
-# def summarize_game_state() -> str:
-#     with open("current_run.json", "r") as f:
-#         state = json.load(f)
-#     summary = []
-
-#     # Resources
-#     res = state["resources"]
-#     summary.append(f"Resources: footprints={res['footprints']}, gems={res['gems']}, dice={res['dice']}, keys={res['keys']}, coins={res['coins']}")
-
-#     # Current position
-#     pos = state["current_position"]
-#     summary.append(f"Current room position: ({pos['x']}, {pos['y']})")
-
-#     # Discovered rooms
-#     summary.append("Discovered rooms:")
-#     for y, row in enumerate(state["house"]["rooms"]):
-#         for x, room in enumerate(row):
-#             if room:
-#                 doors = ", ".join([f"{k} (discovered={v['discovered']}, locked={v['locked']})" for k, v in room["doors"].items()])
-#                 summary.append(f" - {room['name']} at ({x}, {y}), doors: {doors}")
-
-#     return "\n".join(summary)
+    Args:
+        room_name: Name of the room
+        room_type: List of room types (optional, for more precise coloring)
+    
+    Returns:
+        ANSI color code string
+    """
+    # ANSI color codes
+    ORANGE = '\033[33m'         # Yellow/Orange
+    YELLOW = '\033[93m'         # Bright Yellow
+    GREEN = '\033[32m'          # Green
+    RED = '\033[31m'            # Red
+    BLUE = '\033[34m'           # Blue
+    LIGHT_BLUE = '\033[94m'     # Light Blue
+    PINK = '\033[95m'           # Pink
+    RESET = '\033[0m'           # Reset color
+    
+    # Check which category the room belongs to in DIRECTORY
+    if input.upper() == "GEMS":
+        return f"{PINK}{input}{RESET}"
+    elif input.upper() == "KEYS":
+        return f"{LIGHT_BLUE}{input}{RESET}"
+    elif input.upper() in DIRECTORY["FLOORPLANS"]["ROOMS"] and input.upper() not in ["ENTRANCE HALL", "THE FOUNDATION", "ANTECHAMBER"]:
+        return f"{BLUE}{input}{RESET}"
+    elif input.upper() in DIRECTORY["FLOORPLANS"]["HALLWAYS"]:
+        return f"{ORANGE}{input}{RESET}"
+    elif input.upper() in DIRECTORY["FLOORPLANS"]["SHOPS"] or input.upper() == "COINS":
+        return f"{YELLOW}{input}{RESET}"
+    elif input.upper() == "YES" or input.upper() in DIRECTORY["FLOORPLANS"]["GREEN ROOMS"]:
+        return f"{GREEN}{input}{RESET}"    
+    elif input.upper() == "NO" or input.upper() in DIRECTORY["FLOORPLANS"]["RED ROOMS"]:
+        return f"{RED}{input}{RESET}"
+    else:
+        return input
+    

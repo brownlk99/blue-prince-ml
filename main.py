@@ -15,8 +15,24 @@ from capture.lab import capture_lab_experiment_options
 
 from google.cloud import vision
 
-from room import CoatCheck, PuzzleRoom, SecretPassage, ShopRoom, UtilityCloset
+from room import CoatCheck, PuzzleRoom, SecretPassage, ShopRoom, UtilityCloset, Security, Office, Laboratory, Shelter
 from terminal import SecurityTerminal, ShelterTerminal, Terminal
+
+from llm_parsers import (
+    parse_action_response,
+    parse_door_exploration_response,
+    parse_purchase_response,
+    parse_drafting_response,
+    parse_parlor_response,
+    parse_terminal_response,
+    parse_security_level_response,
+    parse_mode_response,
+    parse_lab_experiment_response,
+    parse_coat_check_response,
+    parse_secret_passage_response,
+    parse_note_title_response
+)
+from utils import get_color_code, thinking_animation
 
 def print_menu():
     print("""
@@ -40,32 +56,33 @@ q. Quit                     - Exit the script.
 """)
 
 def main(day, load, verbose, editor_path):
-    game_state = None
-    if load:
-        game_state = GameState.load_from_file(load)
-    else:
-        game_state = GameState(current_day=day)
-    google_client = vision.ImageAnnotatorClient()
-    reader = easyocr.Reader(['en'], gpu=True)
-    agent = BluePrinceAgent(game_state, verbose)
+    with thinking_animation("Initializing Blue Prince ML"):
+        game_state = None
+        if load:
+            game_state = GameState.load_from_file(load)
+        else:
+            game_state = GameState(current_day=day)
+        google_client = vision.ImageAnnotatorClient()
+        reader = easyocr.Reader(['en'], gpu=True)
+        agent = BluePrinceAgent(game_state, verbose)
 
-    #clearing memory if a completely fresh run
-    if agent.game_state.day == 1 and not load:
-        agent.room_memory.reset()
-        agent.term_memory.reset()
-        agent.decision_memory.reset()
-    elif load:
-         # Search through decisions in reverse order (most recent first)
-        for decision in reversed(agent.decision_memory.decisions):
-            # Check if this decision contains exploration data
-            if isinstance(decision, dict) and "target_room" in decision and "final_door" in decision:
-                agent.previously_chosen_room = decision["target_room"]
-                agent.previously_chosen_door = decision["final_door"]
-                break
-        
-        # If no exploration decision found, keep current values or set defaults
-        if not agent.previously_chosen_room:
-            print("No previous exploration decision found in memory.")
+        #clearing memory if a completely fresh run
+        if agent.game_state.day == 1 and not load:
+            agent.room_memory.reset()
+            agent.term_memory.reset()
+            agent.decision_memory.reset()
+        elif load:
+            # Search through decisions in reverse order (most recent first)
+            for decision in reversed(agent.decision_memory.decisions):
+                # Check if this decision contains exploration data
+                if isinstance(decision, dict) and "target_room" in decision and "final_door" in decision:
+                    agent.previously_chosen_room = decision["target_room"]
+                    agent.previously_chosen_door = decision["final_door"]
+                    break
+            
+            # If no exploration decision found, keep current values or set defaults
+            if not agent.previously_chosen_room:
+                print("No previous exploration decision found in memory.")
 
     print("Script is running. Type a number (1-14) and press Enter to interact. Type 'q' to quit.")
 
@@ -89,7 +106,7 @@ def main(day, load, verbose, editor_path):
                 continue
             note = capture_note(google_client, agent.game_state.current_room, editor_path)
             response = agent.generate_note_title(note.content)
-            parsed_response = agent.parse_note_title_response(response)
+            parsed_response = parse_note_title_response(response)
             note.title = parsed_response
             agent.note_memory.add_to_vector_db(note)
             agent.note_memory.add_to_json(note)
@@ -132,17 +149,17 @@ def main(day, load, verbose, editor_path):
             
             context = agent.game_state.summarize_for_llm()
             response = agent.take_action(context)
-            parsed_response = agent.parse_action_response(response)
+            parsed_response = parse_action_response(response)
             parsed_response["context"] = context
             agent.decision_memory.add_decision(parsed_response)
             print(f"Action Response:\nAction: {parsed_response['action']}\nExplanation: {parsed_response['explanation']}")
             time.sleep(2)
             if parsed_response["action"] == "explore":
                 response = agent.decide_door_to_explore(context)
-                parsed_response = agent.parse_door_exploration_response(response)
+                parsed_response = parse_door_exploration_response(response, agent)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
-                print(f"Explore Response:\nRoom: {parsed_response['room']}\nDoor: {parsed_response['door']}\nPath: {parsed_response['path']}\nSpecial Item: {parsed_response['special_item']}\nExplanation: {parsed_response['explanation']}")
+                print(f"Explore Response:\nRoom: {get_color_code(parsed_response['target_room'])}\nDoor: {parsed_response['final_door']}\nPath: {parsed_response['path']}\nSpecial Item: {parsed_response['special_item']}\nExplanation: {parsed_response['explanation']}")
                 if parsed_response["special_item"] != "NONE":
                     if parsed_response["special_item"] in agent.game_state.items.keys():
                         agent.game_state.items.pop(parsed_response["special_item"])
@@ -151,20 +168,21 @@ def main(day, load, verbose, editor_path):
                 time.sleep(2)
             elif parsed_response["action"] == "peruse_shop":
                 if isinstance(agent.game_state.current_room, ShopRoom):
+                    input(f"Please access the {agent.game_state.current_room.name} shop inventory and press 'Enter'to stock shelves: ")
                     stock_shelves(reader, agent.game_state.current_room)
                 else:
                     print("Current room is not a shop room, cannot stock shelves.")
                 print("Stocked shelves")
             elif parsed_response["action"] == "purchase_item":
                 response = agent.decide_purchase_item(context)
-                parsed_response = agent.parse_purchase_response(response)
+                parsed_response = parse_purchase_response(response)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
                 print(f"Purchase Response:\nItem: {parsed_response['item']}\nQuantity: {parsed_response['quantity']}\nExplanation: {parsed_response['explanation']}")
                 agent.game_state.purchase_item()       #up to the user to alter the quantity of inventory if an item sells out
             elif parsed_response["action"] == "solve_puzzle":
                 response = agent.solve_parlor_puzzle(reader, context, editor_path)
-                parsed_response = agent.parse_parlor_response(response)
+                parsed_response = parse_parlor_response(response)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
                 print(f"Parlor Response:\nBox: {parsed_response['box']}\nExplanation: {parsed_response['explanation']}")
@@ -174,7 +192,7 @@ def main(day, load, verbose, editor_path):
                     print("Current room is not a PUZZLE ROOM, cannot mark as solved.")
             elif parsed_response["action"] == "open_secret_passage":
                 response = agent.open_secret_passage(context)
-                parsed_response = agent.parse_secret_passage_response(response)
+                parsed_response = parse_secret_passage_response(response)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
                 print(f"Secret Passage Response:\nRoom Type: {parsed_response['room_type']}\nExplanation: {parsed_response['explanation']}")
@@ -187,9 +205,9 @@ def main(day, load, verbose, editor_path):
             elif parsed_response["action"] == "open_trunk":
                 agent.game_state.current_room.set_trunks()
             elif parsed_response["action"] == "use_terminal":
-                if agent.game_state.current_room.terminal:
+                if isinstance(agent.game_state.current_room, (Security, Shelter, Office, Laboratory)):
                     response = agent.use_terminal(context)
-                    parsed_response = agent.parse_terminal_response(response)
+                    parsed_response = parse_terminal_response(response)
                     parsed_response["context"] = context
                     agent.decision_memory.add_decision(parsed_response)
                     print(f"Terminal Response:\nCommand: {parsed_response['command']}\nExplanation: {parsed_response['explanation']}")
@@ -197,38 +215,38 @@ def main(day, load, verbose, editor_path):
                     if command == "RUN EXPERIMENT SETUP":
                         options = capture_lab_experiment_options(google_client, editor_path)
                         response = agent.decide_lab_experiment(options, context)
-                        parsed_response = agent.parse_lab_experiment_response(response)
+                        parsed_response = parse_lab_experiment_response(response)
                         parsed_response["context"] = context
                         agent.decision_memory.add_decision(parsed_response)
                         print(f"Lab Experiment Response:\nCause: {parsed_response.get('cause', 'N/A')}\nEffect: {parsed_response.get('effect', 'N/A')}\nExplanation: {parsed_response.get('explanation', 'N/A')}")
                     elif command == "VIEW ESTATE INVENTORY":
-                        if isinstance(agent.game_state.current_room.terminal, SecurityTerminal):
+                        if isinstance(agent.game_state.current_room, Security):
                             agent.game_state.current_room.terminal.set_estate_inventory()
                         else:
-                            print("Current room does not have a SECURITY TERMINAL, cannot view estate inventory.")  #TODO: maybe this should be validated by room idk.. i.e. SECURITY ROOM
+                            print("Current room does not have a SECURITY TERMINAL, cannot view estate inventory.")
                         #TODO: implement this.. not sure where to save it......
                     elif command == "ALTER SECURITY LEVEL":
                         response = agent.decide_security_level(context)
-                        parsed_response = agent.parse_security_level_response(response)
+                        parsed_response = parse_security_level_response(response)
                         parsed_response["context"] = context
                         agent.decision_memory.add_decision(parsed_response)
                         print(f"Security Level Response:\nLevel: {parsed_response['security_level']}\nExplanation: {parsed_response['explanation']}")
-                        if isinstance(agent.game_state.current_room.terminal, SecurityTerminal):
+                        if isinstance(agent.game_state.current_room, Security):
                             agent.game_state.current_room.terminal.set_security_level(parsed_response.get("level", "MEDIUM"))
                         else:
                             print("Current room does not have a SECURITY TERMINAL, cannot alter security level.")
                     elif command == "ALTER MODE":
                         response = agent.decide_mode(context)
-                        parsed_response = agent.parse_mode_response(response)
+                        parsed_response = parse_mode_response(response)
                         parsed_response["context"] = context
                         agent.decision_memory.add_decision(parsed_response)
                         print(f"Mode Response:\nMode: {parsed_response['mode']}\nExplanation: {parsed_response['explanation']}")
-                        if isinstance(agent.game_state.current_room.terminal, SecurityTerminal):
+                        if isinstance(agent.game_state.current_room, Security):
                             agent.game_state.current_room.terminal.set_mode(parsed_response.get("mode", "LOCKED"))
                         else:
                             print("Current room does not have a SECURITY TERMINAL, cannot alter mode.")
                     elif command == "TIME LOCK SAFE":       #TODO: SHELTER terminal still needs to be implemented
-                        if isinstance(agent.game_state.current_room.terminal, ShelterTerminal):
+                        if isinstance(agent.game_state.current_room, Shelter):
                             # response = agent.shelter_decide_time_lock_safe()
                             pass
                         else:
@@ -238,7 +256,7 @@ def main(day, load, verbose, editor_path):
                     time.sleep(1)
             elif parsed_response["action"] == "store_item_in_coat_check":
                 response = agent.coat_check_prompt("STORE", context)
-                parsed_response = agent.parse_coat_check_response(response)
+                parsed_response = parse_coat_check_response(response)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
                 coat_check = agent.game_state.house.get_room_by_name("COAT CHECK")
@@ -252,10 +270,11 @@ def main(day, load, verbose, editor_path):
                     print(f"Item {parsed_response['item']} not found in inventory.")
             elif parsed_response["action"] == "retrieve_item_from_coat_check":     # TODO: maybe I should use current room instead of if it's just in the house
                 response = agent.coat_check_prompt("RETRIEVE", context)
-                parsed_response = agent.parse_coat_check_response(response)
+                parsed_response = parse_coat_check_response(response)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
                 coat_check = agent.game_state.house.get_room_by_name("COAT CHECK")
+                print(f"Coat Check Response:\nItem: {parsed_response['item']}\nExplanation: {parsed_response['explanation']}")
                 if isinstance(coat_check, CoatCheck) and coat_check.stored_item == parsed_response["item"]: # if the Coat Check room exists in the house and the stored item matches the requested item
                     agent.game_state.items[parsed_response["item"]] = DIRECTORY["ITEMS"][parsed_response["item"]]
                     coat_check.stored_item = ""
@@ -264,12 +283,11 @@ def main(day, load, verbose, editor_path):
                     print("No COAT CHECK room found in the house, cannot retrieve item.")
                 else:
                     print(f"Item {parsed_response['item']} not found in Coat Check.")
-                print(f"Coat Check Response:\nItem: {parsed_response['item']}\nExplanation: {parsed_response['explanation']}")
             elif parsed_response["action"] in ["toggle_keycard_entry_switch", "toggle_gymnasium_switch", "toggle_darkroom_switch", "toggle_garage_switch"]:
                 utility_closet = agent.game_state.house.get_room_by_name("UTILITY CLOSET")
                 if isinstance(utility_closet, UtilityCloset):
-                   switch_name = parsed_response["action"].replace("toggle_", "")
-                   utility_closet.toggle_switch(switch_name)
+                    switch_name = parsed_response["action"].replace("toggle_", "")
+                    utility_closet.toggle_switch(switch_name)
                 else:
                     print("No UTILITY CLOSET found in the house, cannot toggle switches.")
             elif parsed_response["action"] == "call_it_a_day":
@@ -313,13 +331,13 @@ def main(day, load, verbose, editor_path):
             if room is not None:
                 chosen_door = room.get_door_by_orientation(agent.previously_chosen_door)
             else:
-                print("Previously chosen room not found, cannot DRAFT.")
+                print("Previously chosen room not found, cannot DRAFT.") #TODOL add a manual enter option
                 continue
 
             drafting_options = capture_drafting_options(reader, google_client, room, chosen_door)
             context = agent.game_state.summarize_for_llm()
             response = agent.decide_drafting_option(drafting_options, context)
-            parsed_response = agent.parse_drafting_response(response)
+            parsed_response = parse_drafting_response(response)
             parsed_response["context"] = context
             agent.decision_memory.add_decision(parsed_response)
             if "action" in parsed_response:
@@ -329,7 +347,7 @@ def main(day, load, verbose, editor_path):
                 # TODO: decrement redraw counter? (manual for now)
                 continue  # return to menu
             elif "room" in parsed_response:
-                print(f"Drafting Response:\nRoom: {parsed_response['room']}\nEnter: {parsed_response['enter']}\nExplanation: {parsed_response['explanation']}")
+                print(f"Drafting Response:\nRoom: {get_color_code(parsed_response['room'])}\nEnter: {get_color_code(parsed_response['enter'])}\nExplanation: {parsed_response['explanation']}")
                 
                 # Check if we're dealing with unknown rooms
                 all_unknown = all(option.name == "UNKNOWN" for option in drafting_options)
@@ -358,7 +376,7 @@ def main(day, load, verbose, editor_path):
 
                 if selected_room.name == "UNKNOWN" or selected_room.name == "ARCHIVED FLOOR PLAN":
                     room_name = input("Please enter the name of the newly drafted room: ").strip().upper()
-                    agent.game_state.house.autofill_room_attributes(selected_room, room_name)
+                    agent.game_state.house.generic_autofill_room_attributes(selected_room, room_name)
                     selected_room = agent.game_state.house.specialize_room(selected_room)      
 
                 # Add room to house and handle additional operations
@@ -372,6 +390,7 @@ def main(day, load, verbose, editor_path):
                     selected_room.has_been_entered = True
                     if len(selected_room.doors) > 1:  # If multiple doors, prompt for editing
                         print("\nPlease enter the room and edit the doors within the newly drafted room to ensure accuracy.")
+                        time.sleep(3)
                         selected_room.edit_doors()
 
                 agent.game_state.save_to_file('./jsons/current_run.json')
@@ -442,7 +461,7 @@ def main(day, load, verbose, editor_path):
                 room_name = input("Please enter the name of the room: ").strip().upper()
                 
                 # update room attributes and specialized type
-                agent.game_state.house.autofill_room_attributes(room_to_edit, room_name)
+                agent.game_state.house.generic_autofill_room_attributes(room_to_edit, room_name)
                 room_to_edit = agent.game_state.house.specialize_room(room_to_edit)
                 agent.game_state.house.update_room_in_house(room_to_edit)
                 print(f"Room updated to {room_name}.")
@@ -453,7 +472,7 @@ def main(day, load, verbose, editor_path):
             agent.game_state.save_to_file('./jsons/current_run.json')
         elif user_input == '14':
             response = agent.manual_llm_follow_up()
-            print(f"Manual LLM Follow Up Response:\n{response}")
+            print(f"\nManual LLM Follow Up Response:\n{response}")
         else:
             print("Invalid input. Please enter a number between 1 and 14, or 'q' to quit.")
             time.sleep(1)
