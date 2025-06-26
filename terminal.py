@@ -186,8 +186,7 @@ class SecurityTerminal(Terminal):
 
     @classmethod
     def from_dict(cls, data):
-        terminal = cls()  # No parameters needed
-        terminal.knows_password = data.get("knows_password", False)
+        terminal = super().from_dict(data)
         terminal.estate_inventory = data.get("estate_inventory", {})
         terminal.security_level = data.get("security_level", "MEDIUM")
         terminal.offline_mode = data.get("offline_mode", "LOCKED")
@@ -207,6 +206,22 @@ class OfficeTerminal(Terminal):
 
     def get_commands(self):
         return super().get_commands() + ["Check Inventory", "Purchase Item", "View Office Logs"]
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "office_equipment": self.office_equipment
+        })
+        return data
+    
+    @classmethod
+    def from_dict(cls, data):
+        terminal = super().from_dict(data)
+        terminal.office_equipment = data.get("office_equipment", {})
+        return terminal
+    
+    def __str__(self):
+        return super().__str__() + f", office_equipment={self.office_equipment}"
 
 class LabTerminal(Terminal):
     def __init__(self):
@@ -238,8 +253,7 @@ class LabTerminal(Terminal):
     
     @classmethod
     def from_dict(cls, data):
-        terminal = cls()  # No parameters needed
-        terminal.knows_password = data.get("knows_password", False)
+        terminal = super().from_dict(data)
         terminal.experimental_house_feature = data.get("experimental_house_feature", {})
         return terminal
     
@@ -300,8 +314,7 @@ class ShelterTerminal(Terminal):
     
     @classmethod
     def from_dict(cls, data):
-        terminal = cls()  # No parameters needed
-        terminal.knows_password = data.get("knows_password", False)
+        terminal = super().from_dict(data)
         terminal.time_lock_engaged = data.get("time_lock_engaged", True)
         terminal.radiation_level = data.get("radiation_level", "NORMAL")
         return terminal

@@ -30,21 +30,21 @@ class Room:
 
     def edit_doors(self):
         print(f"\n\n ----- DOOR EDITOR ----- \n")
-        print(f"Editing doors for room: {get_color_code(self.name)}")
+        print(f"Editing DOORS for room: {get_color_code(self.name)}")
         while True:
             print("\nCurrent DOORS:")
             if self.doors:
                 for door in self.doors:
                     print(door)
             else:
-                print(f"No doors currently within {self.name}")
+                print(f"No DOORS currently within {self.name}")
 
             print("\nOptions:")
-            print("1. Edit a door")
-            print("2. Add a new door")
-            print("3. Remove a door")
-            print("4. Mark all doors as not security")
-            print("\nq. Quit door editing")
+            print("1. Edit a DOOR")
+            print("2. Add a new DOOR")
+            print("3. Remove a DOOR")
+            print("4. Mark all DOORS as NOT SECURITY")
+            print("\nq. Quit DOOR editing")
 
             choice = input("\n\nSelect an option: ").strip().lower()
             if choice == "1":
@@ -56,81 +56,81 @@ class Room:
             elif choice == "4":
                 for door in self.doors:
                     door.is_security = "False"
-                print("\nAll doors marked as not security.")
+                print("\nAll DOORS marked as NOT SECURITY")
             elif choice == "q":
-                print("\nExiting door editor.")
+                print("\nExiting DOOR editor")
                 break
             else:
-                print("\nInvalid option.")
+                print("\nInvalid option")
                 time.sleep(3)
 
     def edit_single_door_interactive(self):
         try:
             if not self.doors:
-                print("\nNo doors to edit in this room.")
+                print("\nNo DOORS to edit in this room.")
                 time.sleep(3)
                 return
-            print("\nAvailable doors:")
+            print("\nAvailable DOORS:")
             for door in (self.doors):
                 print(door)
-            door_orientation = input("Enter door orientation to edit (N/S/E/W): ").strip().upper()
+            door_orientation = input("Enter DOOR orientation to EDIT (N/S/E/W): ").strip().upper()
             matching_doors = [d for d in self.doors if d.orientation == door_orientation]
             if not matching_doors:
-                print(f"\nNo door with orientation {door_orientation} found.")
+                print(f"\nNo DOOR with ORIENTATION {door_orientation} found.")
                 time.sleep(3)
                 return
             door = matching_doors[0]
             print(f"\nEditing DOOR: {door}")
-            print("Fields you can edit: orientation, locked, is_security")
-            field = input("Enter field to edit: ").strip().lower()
+            print("Fields you can edit: ORIENTATION, LOCKED, IS_SECURITY")
+            field = input("Enter FIELD to EDIT: ").strip().lower()
             if field == "orientation":
-                new_val = input(f"Orientation [{door.orientation}]: ").strip().upper()
+                new_val = input(f"ORIENTATION [{door.orientation}]: ").strip().upper()
                 if new_val:
                     door.orientation = new_val
             elif field == "locked":
-                new_val = input(f"Locked (True/False) [{door.locked}]: ").strip()
+                new_val = input(f"LOCKED (True/False) [{door.locked}]: ").strip()
                 if new_val:
                     door.locked = str(new_val.lower() in ["true", "t", "yes", "y", "1"])
             elif field == "is_security":
-                new_val = input(f"Is Security (True/False) [{door.is_security}]: ").strip()
+                new_val = input(f"IS SECURITY (True/False) [{door.is_security}]: ").strip()
                 if new_val:
                     door.is_security = str(new_val.lower() in ["true", "t", "yes", "y", "1"])
             else:
                 print("\nInvalid field.")
                 time.sleep(3)
                 return
-            print("Door updated.")
+            print("DOOR updated.")
         except ValueError:
             print("\nInvalid input.")
             time.sleep(3)
             
     def add_door_interactive(self, count: int = 1) -> None:
-        print(f"Adding {count} door(s) to room: {self.name}")
+        print(f"Adding {count} DOOR(s) to room: {self.name}")
         #TODO: add input validation for orientation, locked, is_security.. is in ["true", "t", "yes", "y", "1"]
         for i in range(count):
-            orientation = input("Orientation (N/S/E/W): ").strip().upper()
-            locked = input("Locked (True/False) [False]: ").strip().lower()
-            is_security = input("Is Security (True/False) [False]: ").strip().lower()
+            orientation = input("ORIENTATION (N/S/E/W): ").strip().upper()
+            locked = input("LOCKED (True/False) [False]: ").strip().lower()
+            is_security = input("IS SECURITY (True/False) [False]: ").strip().lower()
             self.doors.append(Door(orientation=orientation, locked=locked, is_security=is_security))
-            print(f"Door {i+1} added.")
+            print(f"DOOR {i+1} added")
 
     def remove_door_interactive(self):
         try:
-            door_idx = int(input("Enter door number to remove: ")) - 1
+            door_idx = int(input("Enter DOOR number to REMOVE: ")) - 1
             if 0 <= door_idx < len(self.doors):
                 removed = self.doors.pop(door_idx)
-                print(f"Removed door: {removed}")
+                print(f"REMOVED DOOR: {removed}")
             else:
-                print("\nInvalid door number.")
+                print("\nInvalid DOOR number")
                 time.sleep(3)
         except ValueError:
-            print("\nInvalid input.")
+            print("\nInvalid INPUT")
             time.sleep(3)
 
     def get_door_by_orientation(self, door_dir):
         door = next((d for d in self.doors if getattr(d, "orientation", None) == door_dir), None)
         if not door:
-            raise ValueError(f"Door '{door_dir}' not found in room '{self.name}'.")
+            raise ValueError(f"DOOR '{door_dir}' not found in room '{self.name}'.")
         return door
     
     def get_door_count_from_shape(self):
@@ -198,7 +198,7 @@ class Room:
         }
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data, **kwargs):
         return cls(
             name=data.get("name", ""),
             cost=data.get("cost", 0),
@@ -211,7 +211,8 @@ class Room:
             trunks=data.get("trunks", 0),
             dig_spots=data.get("dig_spots", 0),
             rarity=data.get("rarity", ""),
-            has_been_entered=data.get("has_been_entered", "False")
+            has_been_entered=data.get("has_been_entered", False),
+            **kwargs
         )
     
     def __str__(self):
@@ -307,12 +308,8 @@ class ShopRoom(Room):
     
     @classmethod
     def from_dict(cls, data):
-        #TODO: maybe pop the doors from the data and then add them back onto the shop room.. instead of going from dict to to dict OR just do it the long way
-        base_room = super().from_dict(data)                         #get the base room attributes
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}  #remove the doors from the base room attributes
-        shop_room = cls(**base_data, doors=base_room.doors)         #create the shop room with the base room attributes
-        shop_room.items_for_sale = data.get("items_for_sale", {})   #add the items for sale into the shop room
-        return shop_room
+        items_for_sale = data.get("items_for_sale", {})
+        return super().from_dict(data, items_for_sale=items_for_sale)
     
     def __str__(self):
         return super().__str__() + f", items_for_sale={self.items_for_sale})"
@@ -373,11 +370,8 @@ class PuzzleRoom(Room):
     
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)                         #get the base room attributes
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}  #remove the doors from the base room attributes
-        puzzle_room = cls(**base_data, doors=base_room.doors)         #create the puzzle room with the base room attributes
-        puzzle_room.has_been_solved = data.get("has_been_solved", False)  #add the has been solved attribute to the puzzle room
-        return puzzle_room
+        has_been_solved = data.get("has_been_solved", False)
+        return super().from_dict(data, has_been_solved=has_been_solved)
     
     def __str__(self):
         return super().__str__() + f", has_been_solved={self.has_been_solved})"
@@ -460,11 +454,8 @@ class CoatCheck(Room):
 
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)                         #get the base room attributes
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}  #remove the doors from the base room attributes
-        coat_check = cls(**base_data, doors=base_room.doors)         #create the coat check with the base room attributes
-        coat_check.stored_item = data.get("stored_item")             #add the stored item attribute to the coat check
-        return coat_check
+        stored_item = data.get("stored_item", "")
+        return super().from_dict(data, stored_item=stored_item)
 
     def __str__(self):
         return super().__str__() + f", stored_item={self.stored_item})"
@@ -503,11 +494,8 @@ class SecretPassage(Room):
     
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}
-        secret_passage = cls(**base_data, doors=base_room.doors)
-        secret_passage.has_been_used = data.get("has_been_used", False)
-        return secret_passage
+        has_been_used = data.get("has_been_used", False)
+        return super().from_dict(data, has_been_used=has_been_used)
     
     def __str__(self):
         return super().__str__()
@@ -528,9 +516,6 @@ class Security(Room):
     
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}
-        
         # Handle missing or invalid terminal data
         terminal_data = data.get("terminal")
         if terminal_data:
@@ -538,8 +523,7 @@ class Security(Room):
         else:
             terminal = SecurityTerminal()  # Create default terminal
         
-        security = cls(**base_data, doors=base_room.doors, terminal=terminal)
-        return security
+        return super().from_dict(data, terminal=terminal)
     
     def __str__(self):
         return super().__str__() + f", terminal={self.terminal})"
@@ -559,18 +543,15 @@ class Office(Room):
     
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}
-        
-        # Handle missing or invalid terminal data
+        # Handle terminal creation
         terminal_data = data.get("terminal")
-        if terminal_data:
+        if terminal_data and isinstance(terminal_data, dict):
             terminal = OfficeTerminal.from_dict(terminal_data)
         else:
             terminal = OfficeTerminal()  # Create default terminal
         
-        office = cls(**base_data, doors=base_room.doors, terminal=terminal)
-        return office
+        # Create base room, passing the terminal as an extra argument
+        return super().from_dict(data, terminal=terminal)
     
     def __str__(self):
         return super().__str__() + f", terminal={self.terminal})"
@@ -590,9 +571,6 @@ class Laboratory(Room):
     
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}
-        
         # Handle missing or invalid terminal data
         terminal_data = data.get("terminal")
         if terminal_data:
@@ -600,8 +578,7 @@ class Laboratory(Room):
         else:
             terminal = LabTerminal()  # Create default terminal
         
-        laboratory = cls(**base_data, doors=base_room.doors, terminal=terminal)
-        return laboratory
+        return super().from_dict(data, terminal=terminal)
     
     def __str__(self):
         return super().__str__() + f", terminal={self.terminal})"
@@ -621,9 +598,6 @@ class Shelter(Room):
     
     @classmethod
     def from_dict(cls, data):
-        base_room = super().from_dict(data)
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}
-        
         # Handle missing or invalid terminal data
         terminal_data = data.get("terminal")
         if terminal_data:
@@ -631,8 +605,7 @@ class Shelter(Room):
         else:
             terminal = ShelterTerminal()  # Create default terminal
         
-        shelter = cls(**base_data, doors=base_room.doors, terminal=terminal)
-        return shelter
+        return super().from_dict(data, terminal=terminal)
     
     def __str__(self):
         return super().__str__() + f", terminal={self.terminal})"
