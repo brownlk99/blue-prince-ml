@@ -5,10 +5,10 @@ import numpy as np
 from google.cloud import vision
 from capture.ocr import google_vision
 from capture.screen_capture import ScreenCapture
-from datetime import datetime
 import os
 
-from capture.constants import NUMERIC_ALLOWLIST, REGIONS
+from capture.constants import  REGIONS
+from utils import get_color_code
 
 last_resource_hashes = {}
 
@@ -34,7 +34,7 @@ def trim_template(template_img: np.ndarray) -> np.ndarray:
     # Crop to just the number
     return template_img[y:y+h, x:x+w]
 
-def recognize_number(resource_img: np.ndarray, number_template_paths: list[str], threshold: float = 0.8) -> int:
+def recognize_number(resource_img: np.ndarray, number_template_paths: list[str], threshold: float = 0.75) -> int:
     """Recognize the actual number in resource image using template matching."""
     # Check if image is already grayscale (single channel)
     if len(resource_img.shape) == 3:
@@ -43,9 +43,11 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
         resource_gray = resource_img
     
     # Sort templates by length (longest first) to prioritize multi-digit numbers
-    template_paths_sorted = sorted(number_template_paths, 
-                                  key=lambda x: len(os.path.basename(x).split('.')[0]), 
-                                  reverse=True)
+    template_paths_sorted = sorted(
+        number_template_paths,
+        key=lambda x: len(os.path.basename(x).split('_')[0]),
+        reverse=True
+    )
     
     best_match = None
     best_score = 0
@@ -55,8 +57,8 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
         if number_template is None:
             continue
             
-        # Get the number from filename (e.g., "44.png" -> "44")
-        template_name = os.path.basename(template_path).split('.')[0]
+        # Get the number from filename (e.g., "44_1.png" -> "44")
+        template_name = os.path.basename(template_path).split('_')[0]
         try:
             template_number = int(template_name)
         except ValueError:
@@ -81,18 +83,22 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
     return best_match if best_match is not None else 0
 
 def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, template_folder: str, prefix: str = "unknown") -> int:
-    """Save a template image and prompt user to rename it with the correct number. Returns the user-entered value."""
-    
-    # Ask user to rename the file with the correct number
     while True:
-        user_number = input(f"\nWhat is the current value of {resource} (or press Enter to skip): ").strip()
-
+        user_number = input(f"\nWhat is the current value of {get_color_code(resource)} (or press Enter to skip): ").strip()
         if user_number and user_number.isdigit():
-            # Check if target file already exists
-            filepath = os.path.join(template_folder, f"{user_number}.png")
-            if not os.path.exists(filepath):
-                cv2.imwrite(filepath, resource_screenshot)
-                print(f"\nSaved template to {filepath}")
+            base = user_number
+            # Find all files that start with the digit and underscore
+            existing = [f for f in os.listdir(template_folder) if f.startswith(f"{base}_") and f.endswith('.png')]
+            indices = []
+            for f in existing:
+                parts = f.replace('.png', '').split('_')
+                if len(parts) == 2 and parts[1].isdigit():
+                    indices.append(int(parts[1]))
+            next_index = max(indices) + 1 if indices else 1
+            filename = f"{base}_{next_index}.png"
+            filepath = os.path.join(template_folder, filename)
+            cv2.imwrite(filepath, resource_screenshot)
+            print(f"\nSaved template to {filepath}")
             return int(user_number)
         elif user_number == "":
             return 0  # Return 0 if user skips
@@ -120,7 +126,6 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
 
         # Check if image is completely white (no content detected)
         if np.mean(resource_screenshot) > 253:  # Threshold for "mostly white"
-            print(f"Resource {resource}: No content detected, setting to 0")
             available_resources[resource] = 0
             continue
 
@@ -137,7 +142,7 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
         if result == "":
             # Try template matching as fallback
             value = recognize_number(resource_screenshot, number_template_paths)
-            print(f"Resource {resource}: OCR failed, template matching found: {value}")
+            print(f"Resource {resource}: OCR failed, template matched for: {value}")
             
             # Save template and ask user what number it is
             if value == 0:
@@ -148,7 +153,7 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
             except ValueError:
                 # Try template matching as fallback
                 value = recognize_number(resource_screenshot, number_template_paths)
-                print(f"Resource {resource}: OCR conversion failed, template matching found: {value}")
+                print(f"Resource {resource}: OCR conversion failed, template matched for: {value}")
                 
                 # Save template and ask user what number it is
                 if value == 0:
