@@ -38,7 +38,6 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
                 shape = "UNKNOWN"
                 doors = None
                 rarity = "UNKNOWN"
-                terminal = None
             else:
                 draft_room_name = get_draft_room_name(reader, draft_screenshot, google_client)
         else:
@@ -52,7 +51,6 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             shape = "UNKNOWN"
             doors = None
             rarity = "UNKNOWN"
-            terminal = None
         elif draft_room_name != "UNKNOWN":      # if we have a valid/possible room name
             print(f"Draft room name: {draft_room_name}")
             detected_doors = get_doors(draft_screenshot)                #get the detected doors from the draft screenshot
@@ -66,16 +64,6 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             shape = room["SHAPE"]
             doors = [Door(orientation=direction) for direction in orientation]
             rarity = room["RARITY"]
-            if draft_room_name == "SECURITY":
-                terminal = SecurityTerminal()
-            elif draft_room_name == "LABORATORY":
-                terminal = LabTerminal()
-            elif draft_room_name == "SHELTER":
-                terminal = ShelterTerminal()
-            elif draft_room_name == "OFFICE":
-                terminal = OfficeTerminal()
-            else:
-                terminal = None
 
         new_room = Room(
             name=draft_room_name,
@@ -87,7 +75,6 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             position=get_new_room_position(current_room.position, chosen_door.orientation),
             doors=doors if doors else [],
             rarity=rarity,
-            terminal=terminal
         )
         
         if draft_room_name not in ["ARCHIVED FLOOR PLAN", "UNKNOWN"] and not valid:
@@ -140,7 +127,7 @@ def door_check(room_name: str, actual_number: int) -> bool:
     elif expected != actual_number:
         logger.warning(f"{room_name}: Expected {expected}, Got {actual_number}")
         return False
-    else:
+    else:       #TODO: maybe add a verbose flag for this?
         print(f"{room_name}: Door count matches ({expected})")
     return True
 

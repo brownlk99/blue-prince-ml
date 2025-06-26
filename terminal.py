@@ -5,8 +5,8 @@ class Terminal:
     """
         Base class for all in-game terminals.
     """
-    def __init__(self, room_name: str):
-        self.room_name = room_name.upper()
+    def __init__(self):
+        self.room_name = None  # Will be set by subclasses
         self.commands = self.get_commands()
         self.network_password = "SWANSONG"
         self.knows_password = False
@@ -73,10 +73,24 @@ class Terminal:
             "SLEEPING MASK",
             "SLEDGE HAMMER"
         ]
-        
+    
+    def to_dict(self):
+        return {
+            "commands": self.commands,
+            "network_password": self.network_password,
+            "knows_password": self.knows_password
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        terminal = cls()  # No parameters needed
+        terminal.knows_password = data.get("knows_password", False)
+        return terminal
+
 class SecurityTerminal(Terminal):
     def __init__(self):
-        super().__init__("SECURITY")
+        super().__init__()
+        self.room_name = "SECURITY"
         self.estate_inventory = {"FRUIT": 0, "GEMS": 0, "KEYS": 0, "COINS": 0}
         self.security_level = "MEDIUM"
         self.offline_mode = "LOCKED"
@@ -159,12 +173,36 @@ class SecurityTerminal(Terminal):
             print(f"Offline mode set to {self.offline_mode}.")
         else:
             print("Invalid offline mode.")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "estate_inventory": self.estate_inventory,
+            "security_level": self.security_level,
+            "offline_mode": self.offline_mode,
+            "keycard_system": self.keycard_system
+        })
+        return data
+
+    @classmethod
+    def from_dict(cls, data):
+        terminal = cls()  # No parameters needed
+        terminal.knows_password = data.get("knows_password", False)
+        terminal.estate_inventory = data.get("estate_inventory", {})
+        terminal.security_level = data.get("security_level", "MEDIUM")
+        terminal.offline_mode = data.get("offline_mode", "LOCKED")
+        terminal.keycard_system = data.get("keycard_system", "OPERATIONAL")
+        return terminal
+    
+    def __str__(self):
+        return super().__str__() + f", estate_inventory={self.estate_inventory}, security_level={self.security_level}, offline_mode={self.offline_mode}, keycard_system={self.keycard_system}"
     
 
 class OfficeTerminal(Terminal):
     #TODO: this needs to be implemented
     def __init__(self):
-        super().__init__("OFFICE")
+        super().__init__()
+        self.room_name = "OFFICE"
         self.office_equipment = {}
 
     def get_commands(self):
@@ -172,7 +210,8 @@ class OfficeTerminal(Terminal):
 
 class LabTerminal(Terminal):
     def __init__(self):
-        super().__init__("LABORATORY")
+        super().__init__()
+        self.room_name = "LABORATORY"
         self.experimental_house_feature = {}
 
     def get_commands(self):
@@ -190,9 +229,27 @@ class LabTerminal(Terminal):
             }
         ]
 
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "experimental_house_feature": self.experimental_house_feature
+        })
+        return data
+    
+    @classmethod
+    def from_dict(cls, data):
+        terminal = cls()  # No parameters needed
+        terminal.knows_password = data.get("knows_password", False)
+        terminal.experimental_house_feature = data.get("experimental_house_feature", {})
+        return terminal
+    
+    def __str__(self):
+        return super().__str__() + f", experimental_house_feature={self.experimental_house_feature}"
+
 class ShelterTerminal(Terminal):
     def __init__(self):
-        super().__init__("SHELTER")
+        super().__init__()
+        self.room_name = "SHELTER"
         self.time_lock_engaged = True
         self.radiation_level = "NORMAL"
 
@@ -232,3 +289,22 @@ class ShelterTerminal(Terminal):
         # This is a placeholder for actual radiation reading logic
         #TODO: Implement actual radiation reading logic
         print("Taking radiation reading...")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "time_lock_engaged": self.time_lock_engaged,
+            "radiation_level": self.radiation_level
+        })
+        return data
+    
+    @classmethod
+    def from_dict(cls, data):
+        terminal = cls()  # No parameters needed
+        terminal.knows_password = data.get("knows_password", False)
+        terminal.time_lock_engaged = data.get("time_lock_engaged", True)
+        terminal.radiation_level = data.get("radiation_level", "NORMAL")
+        return terminal
+    
+    def __str__(self):
+        return super().__str__() + f", time_lock_engaged={self.time_lock_engaged}, radiation_level={self.radiation_level}"

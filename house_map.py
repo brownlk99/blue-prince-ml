@@ -1,7 +1,7 @@
 import time
 from typing import Union
 from capture.constants import DIRECTORY
-from room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
+from room import CoatCheck, Laboratory, Office, PuzzleRoom, Room, SecretPassage, Security, Shelter, ShopRoom, UtilityCloset
 from terminal import LabTerminal, OfficeTerminal, SecurityTerminal, ShelterTerminal
 
 
@@ -56,7 +56,7 @@ class HouseMap:
             room = self.get_room_by_name(name)
             if room:
                 return room
-            name = input(f"Detected room '{name}' - but not found. Please enter a valid room name: ").strip().upper()
+            name = input(f"Detected room '{name}' - but not found within the house. Please enter a valid room name: ").strip().upper()
     
     def count_occupied_rooms(self) -> int:
         return sum(1 for row in self.grid for room in row if room)
@@ -118,7 +118,16 @@ class HouseMap:
         return flag_dict
 
     @staticmethod
-    def specialize_room(room: Room) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]:
+    def specialize_room(room: Room) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage, Security, Office, Laboratory, Shelter]:
+        """
+            Specializes a room type based on its name
+
+                Args:
+                    room (Room): the room object to specialize
+
+                Returns:
+                    Room: the specialized room type
+        """
         if room.name in ["KITCHEN", "COMMISSARY", "LOCKSMITH", "SHOWROOM"]:
             return ShopRoom.from_dict(room.to_dict())
         elif room.name == "PARLOR":
@@ -129,12 +138,20 @@ class HouseMap:
             return CoatCheck.from_dict(room.to_dict())
         elif room.name == "SECRET PASSAGE":
             return SecretPassage.from_dict(room.to_dict())
+        elif room.name == "SECURITY":       # the following rooms rely on the terminal being present (which it never will be as Room doesnt have that attribute so it must be created)
+            return Security.from_dict(room.to_dict())
+        elif room.name == "OFFICE":
+            return Office.from_dict(room.to_dict())
+        elif room.name == "LABORATORY":
+            return Laboratory.from_dict(room.to_dict())
+        elif room.name == "SHELTER":
+            return Shelter.from_dict(room.to_dict())
         else:
             # If the room is not a special type, return it as is
             return room
 
     @staticmethod
-    def autofill_room_attributes(room: Room, room_name: str) -> None:
+    def generic_autofill_room_attributes(room: Room, room_name: str) -> None:
         """
             Autofills room attributes from DIRECTORY using the provided room name
 
@@ -145,14 +162,6 @@ class HouseMap:
                 Returns:
                     None
         """
-        if room_name == "SECURITY":
-            room.terminal = SecurityTerminal()
-        elif room_name == "OFFICE":
-            room.terminal = OfficeTerminal()
-        elif room_name == "LABORATORY":
-            room.terminal = LabTerminal()
-        elif room_name == "SHELTER":
-            room.terminal = ShelterTerminal()
         for _, rooms in DIRECTORY["FLOORPLANS"].items():
             if room_name in rooms:
                 info = rooms[room_name]
@@ -347,6 +356,14 @@ class HouseMap:
                         grid_row.append(CoatCheck.from_dict(room_data))
                     elif room_name == "SECRET PASSAGE":
                         grid_row.append(SecretPassage.from_dict(room_data))
+                    elif room_name == "SECURITY":
+                        grid_row.append(Security.from_dict(room_data))
+                    elif room_name == "OFFICE":
+                        grid_row.append(Office.from_dict(room_data))
+                    elif room_name == "LABORATORY":
+                        grid_row.append(Laboratory.from_dict(room_data))
+                    elif room_name == "SHELTER":
+                        grid_row.append(Shelter.from_dict(room_data))
                     else:
                         grid_row.append(Room.from_dict(room_data))
             hm.grid.append(grid_row)
