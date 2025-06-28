@@ -1,17 +1,21 @@
 import json
 import re
 import time
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 import easyocr
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import HumanMessage, SystemMessage
-from nltk.corpus.reader import str2tuple
+from langchain.chat_models import init_chat_model
+from langchain_core.callbacks import get_usage_metadata_callback
 from game_state import GameState
 from memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory, DecisionMemory
 from terminal import Terminal, SecurityTerminal, ShelterTerminal, OfficeTerminal, LabTerminal
 from room import PuzzleRoom, Room, ShopRoom
-from loguru import logger
+from langchain_openai import ChatOpenAI          # OpenAI family
+from langchain_google_genai import ChatGoogleGenerativeAI  # Gemini family
+from langchain_anthropic import ChatAnthropic    # Claude family
+from langchain_google_vertexai import ChatVertexAI
 
 from utils import thinking_animation
 from llm_formatters import (
@@ -25,10 +29,49 @@ from llm_formatters import (
     format_available_actions
 )
 
+def _get_context_window(model_name: str) -> int:
+    """
+    Ask the vendor SDK for the model’s max-context window.
+    Handles OpenAI, Anthropic, and both Google SDKs.
+    Falls back to 0 if the field is absent or the call fails.
+    """
+    # Strip "provider:" prefix that init_chat_model sometimes adds,
+    # e.g. "openai:o4-mini" → "o4-mini".
+    if ":" in model_name:
+        _, model_name = model_name.split(":", 1)
+
+    try:
+        # ---- OpenAI --------------------------------------------------
+        if model_name.startswith(("gpt", "o")):                        # :contentReference[oaicite:0]{index=0}
+            from openai import OpenAI
+            info = OpenAI().models.retrieve(model_name)                # :contentReference[oaicite:1]{index=1}
+            return cast(int, getattr(info, "context_window", 0))       # field exists at runtime
+
+        # ---- Anthropic ----------------------------------------------
+        if model_name.startswith(("claude", "anthropic")):             # :contentReference[oaicite:2]{index=2}
+            import anthropic
+            info = anthropic.Anthropic().models.retrieve(model_name)
+            return cast(int, getattr(info, "context_length", 0))       # SDK returns ModelInfo
+
+        # ---- Gemini / Google ----------------------------------------
+        if model_name.lower().startswith(("gemini", "gai", "google")):
+            try:
+                # New SDK (recommended after Aug-2025)                 # :contentReference[oaicite:3]{index=3}
+                from google.genai import GenerativeModel               # type: ignore
+            except ModuleNotFoundError:
+                # Legacy SDK (sunsets Aug-2025)                        # :contentReference[oaicite:4]{index=4}
+                from google.generativeai.generative_models import GenerativeModel
+            info = GenerativeModel(model_name)
+            return cast(int, getattr(info, "input_token_limit", 0))    # public property
+    except Exception:
+        pass
+
+    return 0          # offline, wrong ID, or unsupported provider
+
 class BluePrinceAgent:
-    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False):
-        self.llm_o4_mini = ChatOpenAI(model="o4-mini")
-        self.llm_gpt_4_1_nano = ChatOpenAI(model="gpt-4.1-nano")
+    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:o4-mini"):
+        # self.model = init_chat_model(model_name)
+        self.model = ChatVertexAI(model="gemini-2.5-pro")
         self.note_memory = NoteMemory()
         self.term_memory = TermMemory()
         self.room_memory = RoomMemory()
@@ -38,6 +81,24 @@ class BluePrinceAgent:
         self.previously_chosen_room = ""
         self.previously_chosen_door = ""
         self.verbose = verbose
+        print(f"Using model: {self.model}")
+        print(f"Model type: {type(self.model)}")
+    def _invoke(self, messages):
+        with get_usage_metadata_callback() as tracker:                     # universal handler
+            response = self.model.invoke(messages, config={"callbacks": [tracker]})
+
+        usage = next(iter(tracker.usage_metadata.values()), {})
+        prompt = usage.get("input_tokens", 0)
+        comp  = usage.get("output_tokens", 0)
+        total = usage.get("total_tokens", prompt + comp)
+
+        name = getattr(self.model, "model_name", getattr(self.model, "model", "?"))
+        ctx = _get_context_window(name) or "?"
+        pct = f"{prompt/ctx:.1%}" if isinstance(ctx, int) and ctx else "?"
+
+        print(f"[TOKENS] prompt={prompt}  completion={comp}  "
+            f"total={total}/{ctx}  ({pct} of window)")
+        return response
 
     def take_action(self, context: str) -> str:
         """
@@ -75,7 +136,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding next action"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def decide_door_to_explore(self, context: str) -> str:
@@ -113,7 +174,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding door to explore"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def decide_purchase_item(self, context: str) -> str:
@@ -158,7 +219,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding purchase item"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def decide_drafting_option(self, draft_options: List[Room], context: str) -> str:
@@ -200,7 +261,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding drafting option"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def solve_parlor_puzzle(self, reader: easyocr.Reader, context: str, editor_path: Optional[str] = None) -> str:
@@ -240,7 +301,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Solving parlor puzzle"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def use_terminal(self, context: str) -> str:
@@ -265,7 +326,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Using terminal"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def decide_security_level(self, context: str) -> str:
@@ -302,7 +363,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding security level"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def decide_mode(self, context: str) -> str:
@@ -338,7 +399,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding mode"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def decide_lab_experiment(self, options: dict[str, list[str]], context: str) -> str:
@@ -378,7 +439,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding lab experiment"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def coat_check_prompt(self, action: str, context: str) -> str:
@@ -415,7 +476,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation(f"LLM Taking Action: Coat check {action.lower()}"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def open_secret_passage(self, context: str) -> str:
@@ -451,7 +512,7 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding secret passage"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
 
     def get_relevant_notes(self, query: str, k: int = 3) -> str:
@@ -476,7 +537,7 @@ class BluePrinceAgent:
             SystemMessage(content="You are a helpful assistant."),
             HumanMessage(content=prompt)
         ]
-        response = self.llm_o4_mini.invoke(messages)
+        response = self._invoke(messages)
         return str(response.content)
 
     def manual_llm_follow_up(self) -> str:
@@ -506,5 +567,5 @@ class BluePrinceAgent:
             print("\nPrompt for LLM:\n" + prompt)
         print("\n")
         with thinking_animation("LLM Taking Action: Analyzing previous decision"):
-            response = self.llm_o4_mini.invoke(messages)
+            response = self._invoke(messages)
         return str(response.content)
