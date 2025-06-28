@@ -1,6 +1,7 @@
 import time
-from typing import Union
+from typing import Union, cast
 from capture.constants import DIRECTORY
+from door import Door
 from room import (CoatCheck,
     Laboratory,
     Office,
@@ -333,6 +334,47 @@ class HouseMap:
                         # If new_room does NOT have a door facing neighbor, mark as DEAD END
                         if not any(d.orientation == dir for d in new_room.doors):
                             neighbor_door.leads_to = "BLOCKED"   
+
+
+    def update_security_doors(self):
+            """
+            Updates all security doors based on current Security room terminal settings
+            and the Utility Closet keycard_entry_system_switch status.
+            
+            If the Security terminal offline_mode is set to "UNLOCKED" AND the 
+            keycard_entry_system_switch in the Utility Closet is toggled to False (off),
+            then all security doors will be unlocked.
+            Otherwise, all security doors remain locked if they are not yet opened.
+            """
+            # Find the Security room and Utility Closet
+            security_room = self.get_room_by_name("SECURITY")
+            utility_closet = self.get_room_by_name("UTILITY CLOSET")
+            
+            # Default to security doors being locked unless specific conditions are met.
+            unlock_all_security = False
+            
+            # Check if conditions are met to globally unlock security doors.
+            # This requires both rooms to be present and of the correct type.
+            if isinstance(security_room, Security) and isinstance(utility_closet, UtilityCloset):
+                if (security_room.terminal.offline_mode == "UNLOCKED" and not utility_closet.keycard_entry_system_switch):
+                    unlock_all_security = True
+
+            # Update all security doors in the house
+            for row in self.grid:
+                for room in row:
+                    if room:
+                        for door in cast(list[Door], room.doors):
+                            # We only care about doors that are marked as security doors
+                            if str(getattr(door, 'is_security', 'false')).lower() != "true":
+                                continue
+
+                            if unlock_all_security:
+                                # If the master unlock is active, unlock all security doors.
+                                door.locked = str(False)
+                            elif door.leads_to == "?":
+                                # If the master unlock is NOT active, only lock security doors
+                                # that haven't been opened yet.
+                                door.locked = str(True)
 
     def to_dict(self):
         return {
