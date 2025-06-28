@@ -52,13 +52,16 @@ def get_color_code(input: str) -> str:
     LIGHT_BLUE = '\033[94m'     # Light Blue
     PINK = '\033[95m'           # Pink
     RESET = '\033[0m'           # Reset color
+    BLACK = '\033[90m'          # Gray (using it for black)
     
     # Check which category the room belongs to in DIRECTORY
     if input.upper() == "GEMS":
         return f"{PINK}{input}{RESET}"
     elif input.upper() == "KEYS":
         return f"{LIGHT_BLUE}{input}{RESET}"
-    elif input.upper() in DIRECTORY["FLOORPLANS"]["ROOMS"] and input.upper() not in ["ENTRANCE HALL", "THE FOUNDATION", "ANTECHAMBER"]:
+    elif input.upper() == "BLACK":
+        return f"{BLACK}{input}{RESET}"
+    elif input.upper() == "BLUE" or input.upper() in DIRECTORY["FLOORPLANS"]["ROOMS"] and input.upper() not in ["ENTRANCE HALL", "THE FOUNDATION", "ANTECHAMBER"]:
         return f"{BLUE}{input}{RESET}"
     elif input.upper() in DIRECTORY["FLOORPLANS"]["HALLWAYS"]:
         return f"{ORANGE}{input}{RESET}"
