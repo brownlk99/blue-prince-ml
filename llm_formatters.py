@@ -1,5 +1,5 @@
 from typing import List
-from room import Room
+from room import Laboratory, Office, Room, Security, Shelter
 
 
 def format_term_memory_section(term_memory):
@@ -88,13 +88,13 @@ def format_terminal_menu(game_state):
     Returns:
         str: Formatted string of the current terminal's menu structure.
     """
-    if game_state.current_room and game_state.current_room.terminal:
+    if isinstance(game_state.current_room, (Security, Shelter, Office, Laboratory)):
         menu_dict = game_state.current_room.terminal.get_menu_structure()
         section = f"You are at the {game_state.current_room.name} terminal. Do you wish to run any of the following commands?\n\n"
-        for command, description in menu_dict:
-            section += f" - {command}: {description}\n"
+        for command in menu_dict:
+            section += f" - {command['command']}: {command['description']}\n"
         return section
-    return ""
+    return "Terminal not found, please make sure you are in a room with a terminal"
 
 
 def format_lab_experiment_section(options: dict[str, list[str]]):
