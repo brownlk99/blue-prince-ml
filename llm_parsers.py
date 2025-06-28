@@ -5,6 +5,7 @@ from llm_agent import BluePrinceAgent
 
 def _parse_json_response(response: str):
     """Helper function to parse JSON response with consistent error handling"""
+    response = response.replace("```json", "").replace("```", "")
     try:
         return json.loads(response)
     except json.JSONDecodeError as e:
