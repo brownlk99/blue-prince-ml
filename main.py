@@ -1,7 +1,9 @@
+import os
+os.environ["ANONYMIZED_TELEMETRY"] = "FALSE"
+
 import time
 import easyocr
 import argparse
-import os
 from game_state import GameState
 from llm_agent import BluePrinceAgent
 from capture.resources import capture_resources
@@ -55,7 +57,7 @@ def print_menu():
 q. Quit                     - Exit the script.
 """)
 
-def main(day, load, verbose, editor_path):
+def main(day, load, verbose, editor_path, model_name):
     with thinking_animation("Initializing Blue Prince ML"):
         game_state = None
         if load:
@@ -63,8 +65,8 @@ def main(day, load, verbose, editor_path):
         else:
             game_state = GameState(current_day=day)
         google_client = vision.ImageAnnotatorClient()
-        reader = easyocr.Reader(['en'], gpu=True)
-        agent = BluePrinceAgent(game_state, verbose)
+        reader = easyocr.Reader(['en'], gpu=False)
+        agent = BluePrinceAgent(game_state, verbose, model_name)
 
         #clearing memory if a completely fresh run
         if agent.game_state.day == 1 and not load:
@@ -168,11 +170,11 @@ def main(day, load, verbose, editor_path):
                 time.sleep(2)
             elif parsed_response["action"] == "peruse_shop":
                 if isinstance(agent.game_state.current_room, ShopRoom):
-                    input(f"Please access the {agent.game_state.current_room.name} shop inventory and press 'Enter'to stock shelves: ")
+                    input(f"\nPlease access the {agent.game_state.current_room.name} shop inventory and press 'Enter' to stock shelves: ")
                     stock_shelves(reader, agent.game_state.current_room)
                 else:
                     print("Current room is not a shop room, cannot stock shelves.")
-                print("Stocked shelves")
+                print("\nStocked shelves")
             elif parsed_response["action"] == "purchase_item":
                 response = agent.decide_purchase_item(context)
                 parsed_response = parse_purchase_response(response)
@@ -185,7 +187,7 @@ def main(day, load, verbose, editor_path):
                 parsed_response = parse_parlor_response(response)
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
-                print(f"Parlor Response:\nBox: {parsed_response['box']}\nExplanation: {parsed_response['explanation']}")
+                print(f"Parlor Response:\nBox: {get_color_code(parsed_response['box'])}\nExplanation: {parsed_response['explanation']}")
                 if isinstance(agent.game_state.current_room, PuzzleRoom):
                     agent.game_state.current_room.has_been_solved = True
                 else:
@@ -243,8 +245,19 @@ def main(day, load, verbose, editor_path):
                         print(f"Mode Response:\nMode: {parsed_response['mode']}\nExplanation: {parsed_response['explanation']}")
                         if isinstance(agent.game_state.current_room, Security):
                             agent.game_state.current_room.terminal.set_mode(parsed_response.get("mode", "LOCKED"))
+                            agent.game_state.house.update_security_doors()
                         else:
                             print("Current room does not have a SECURITY TERMINAL, cannot alter mode.")
+                    elif command == "RUN PAYROLL":
+                        if isinstance(agent.game_state.current_room, Office):
+                            agent.game_state.current_room.terminal.payroll_ran = True
+                        else:
+                            print("Current room does not have an OFFICE TERMINAL, cannot run payroll.")
+                    elif command == "SPREAD GOLD IN ESTATE":
+                        if isinstance(agent.game_state.current_room, Office):
+                            agent.game_state.current_room.terminal.gold_spread = True
+                        else:
+                            print("Current room does not have an OFFICE TERMINAL, cannot spread gold.")
                     elif command == "TIME LOCK SAFE":       #TODO: SHELTER terminal still needs to be implemented
                         if isinstance(agent.game_state.current_room, Shelter):
                             # response = agent.shelter_decide_time_lock_safe()
@@ -288,6 +301,8 @@ def main(day, load, verbose, editor_path):
                 if isinstance(utility_closet, UtilityCloset):
                     switch_name = parsed_response["action"].replace("toggle_", "")
                     utility_closet.toggle_switch(switch_name)
+                    if switch_name == "keycard_entry_system_switch":
+                        agent.game_state.house.update_security_doors()
                 else:
                     print("No UTILITY CLOSET found in the house, cannot toggle switches.")
             elif parsed_response["action"] == "call_it_a_day":
@@ -390,8 +405,10 @@ def main(day, load, verbose, editor_path):
                     selected_room.has_been_entered = True
                     if len(selected_room.doors) > 1:  # If multiple doors, prompt for editing
                         print("\nPlease enter the room and edit the doors within the newly drafted room to ensure accuracy.")
-                        time.sleep(3)
+                        time.sleep(2)
                         selected_room.edit_doors()
+
+                agent.game_state.house.update_security_doors()
 
                 agent.game_state.save_to_file('./jsons/current_run.json')
                 print(agent.game_state.house.print_map())
@@ -416,6 +433,7 @@ def main(day, load, verbose, editor_path):
             if agent.game_state.current_room is not None:
                 agent.game_state.current_room.edit_doors()
                 agent.game_state.house.connect_adjacent_doors(agent.game_state.current_room)  # ensure doors are connected after editing
+                agent.game_state.house.update_security_doors()
             else:
                 print("Current ROOM is not set, cannot edit doors.")
                 continue
@@ -482,8 +500,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--load', '-l', type=str, help='Path to saved game state JSON')
     parser.add_argument('--day', '-d', type=int, required=True, help='Day/run number for this session')
+    parser.add_argument('--model', '-m', type=str, default="openai:o4-mini", help='Model to use for LLM (default: o4-mini)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Show full LLM prompts')
     parser.add_argument('--editor', '-e', type=str, default=os.environ.get('EDITOR_PATH'), help='Path to text editor (default: from EDITOR_PATH env var)')
     args = parser.parse_args()
 
-    main(args.day, args.load, args.verbose, args.editor)
+    main(args.day, args.load, args.verbose, args.editor, args.model)
