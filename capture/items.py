@@ -36,7 +36,7 @@ def capture_items(client: vision.ImageAnnotatorClient):
         return manually_obtain_item()
     else:
         print("\nInvalid choice. Please enter 1 or 2.")
-        time.sleep(3)
+        time.sleep(2)
         return None
 
 def manually_obtain_item():
@@ -53,7 +53,7 @@ def manually_obtain_item():
             return None
         elif item_details is None:
             print(f"\nItem '{item_name}' not recognized or not in directory.")
-            time.sleep(3)
+            time.sleep(2)
             item_name = input("\nPlease re-enter a valid item name: ").strip().upper()
         else:
             return {item_name: item_details}

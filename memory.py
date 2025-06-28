@@ -2,6 +2,7 @@ import json
 import os
 import time
 from typing import Any, Dict, List
+from chromadb.config import Settings
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain.schema import Document
@@ -15,11 +16,15 @@ class NoteMemory:
         self.persist_path = persist_path
         self.json_path = "./jsons/notes.json"
         self.embedder = OpenAIEmbeddings(model="text-embedding-3-small")
-
+        
         # Load existing DB or create new
         self.store = Chroma(
             embedding_function=self.embedder,
-            persist_directory=self.persist_path
+            persist_directory=self.persist_path,
+            client_settings=Settings(
+                anonymized_telemetry=False,
+                is_persistent=True
+            )
         )
 
         self.existing_hashes = {m.get("hash") for m in self.store.get()["metadatas"] if m}
@@ -136,11 +141,11 @@ class TermMemory:
                 del available_terms[key]
                 if not available_terms:
                     print("\nAll terms/items have been added.")
-                    time.sleep(3)
+                    time.sleep(2)
                     break
             else:
                 print("\nInvalid key. Please type the exact key from the list or 'q' to quit.")
-                time.sleep(3)
+                time.sleep(2)
 
     def reset(self):
         self.terms = {
@@ -178,7 +183,7 @@ class TermMemory:
             "TERMINAL": "Mt. Holly is equipped with several state of the art computer TERMINAL stations that control various systems on the ESTATE electronically. Each terminal is also connected to a central local NETWORK.",
             "TOMORROW": "Rooms that provide benefits in the future belong to a special category of floorplans: TOMORROW ROOMS. They are marked with a clock symbol.",
             "TRUNK": "A small wooden chest often found in rooms, always LOCKED, and usually containing a few items of interest.",
-            "BLOCKED": "If a DOOR is marked as BLOCKED, it isnot possible to enter it."
+            "BLOCKED": "If a DOOR is marked as BLOCKED, it is not possible to enter it."
         }
         self.save()
 

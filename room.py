@@ -62,13 +62,13 @@ class Room:
                 break
             else:
                 print("\nInvalid option")
-                time.sleep(3)
+                time.sleep(2)
 
     def edit_single_door_interactive(self):
         try:
             if not self.doors:
                 print("\nNo DOORS to edit in this room.")
-                time.sleep(3)
+                time.sleep(2)
                 return
             print("\nAvailable DOORS:")
             for door in (self.doors):
@@ -77,7 +77,7 @@ class Room:
             matching_doors = [d for d in self.doors if d.orientation == door_orientation]
             if not matching_doors:
                 print(f"\nNo DOOR with ORIENTATION {door_orientation} found.")
-                time.sleep(3)
+                time.sleep(2)
                 return
             door = matching_doors[0]
             print(f"\nEditing DOOR: {door}")
@@ -97,20 +97,20 @@ class Room:
                     door.is_security = str(new_val.lower() in ["true", "t", "yes", "y", "1"])
             else:
                 print("\nInvalid field.")
-                time.sleep(3)
+                time.sleep(2)
                 return
             print("DOOR updated.")
         except ValueError:
             print("\nInvalid input.")
-            time.sleep(3)
+            time.sleep(2)
             
     def add_door_interactive(self, count: int = 1) -> None:
         print(f"Adding {count} DOOR(s) to room: {self.name}")
         #TODO: add input validation for orientation, locked, is_security.. is in ["true", "t", "yes", "y", "1"]
         for i in range(count):
             orientation = input("ORIENTATION (N/S/E/W): ").strip().upper()
-            locked = input("LOCKED (True/False) [False]: ").strip().lower()
-            is_security = input("IS SECURITY (True/False) [False]: ").strip().lower()
+            locked = input("LOCKED (True/False/?) [?]: ").strip().lower()
+            is_security = input("IS SECURITY (True/False/?) [?]: ").strip().lower()
             self.doors.append(Door(orientation=orientation, locked=locked, is_security=is_security))
             print(f"DOOR {i+1} added")
 
@@ -122,10 +122,10 @@ class Room:
                 print(f"REMOVED DOOR: {removed}")
             else:
                 print("\nInvalid DOOR number")
-                time.sleep(3)
+                time.sleep(2)
         except ValueError:
             print("\nInvalid INPUT")
-            time.sleep(3)
+            time.sleep(2)
 
     def get_door_by_orientation(self, door_dir):
         door = next((d for d in self.doors if getattr(d, "orientation", None) == door_dir), None)
@@ -158,26 +158,26 @@ class Room:
             count = int(input("Enter the number of trunks in this room: ").strip())
             if count < 0:
                 print("\nNumber cannot be negative.")
-                time.sleep(3)
+                time.sleep(2)
                 return
             self.trunks = count
             print(f"Set {count} trunks in this room.")
         except ValueError:
             print("\nInvalid input. Please enter a number.")
-            time.sleep(3)
+            time.sleep(2)
 
     def set_dig_spots(self):
         try:
             count = int(input("Enter the number of dig spots in this room: ").strip())
             if count < 0:
                 print("\nNumber cannot be negative.")
-                time.sleep(3)
+                time.sleep(2)
                 return
             self.dig_spots = count
             print(f"Set {count} dig spots in this room.")
         except ValueError:
             print("\nInvalid input. Please enter a number.")
-            time.sleep(3)
+            time.sleep(2)
 
 
     def to_dict(self):
@@ -334,8 +334,9 @@ class PuzzleRoom(Room):
         results = {}
         
         for color in colors:
+            printable_box_color = get_color_code(color)
             while True:
-                print(f"\nFor the {color} box:")
+                print(f"\nFor the {printable_box_color} box:")
                 print("1. Capture with screenshot")
                 print("2. Enter manually")
                 
@@ -343,23 +344,23 @@ class PuzzleRoom(Room):
                 
                 if capture_choice == "1":
                     # Screenshot capture path
-                    input(f"Please get into position to screenshot the {color} box, press Enter to continue...")
+                    input(f"Please get into position to screenshot the {printable_box_color} box, press Enter to continue...")
                     box_result = parlor.capture_hint(reader, editor_path)
-                    print(f"OCR result for {color} box: {box_result}")
+                    print(f"OCR result for {printable_box_color} box: {box_result}")
                 elif capture_choice == "2":
                     # Manual entry path
-                    box_result = input(f"\nEnter the text for the {color} box: ").strip()
+                    box_result = input(f"\nEnter the text for the {printable_box_color} box: ").strip()
                 else:
                     print("\nInvalid choice. Please enter 1 or 2.")
-                    time.sleep(3)
+                    time.sleep(2)
                     continue
                 
-                confirm = input(f"Is the {color} box result '{box_result}' correct? (Y/n): ").strip().lower()
+                confirm = input(f"Is the {printable_box_color} box result '{box_result}' correct? (Y/n): ").strip().lower()
                 if confirm in ["y", "yes"]:
                     results[color] = box_result
                     break
                 else:
-                    print(f"Let's try again for the {color} box.")
+                    print(f"Let's try again for the {printable_box_color} box.")
         
         return results
     

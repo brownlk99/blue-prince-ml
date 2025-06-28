@@ -5,7 +5,6 @@ import tempfile
 import time
 from typing import Optional
 import cv2
-from loguru import logger
 import numpy as np
 from textblob import TextBlob
 
@@ -86,4 +85,4 @@ def get_current_room_name(reader) -> str:
         if room_name in ROOM_LOOKUP:
             return room_name
         print("\nInvalid room name. Please try again.")
-        time.sleep(3)
+        time.sleep(2)

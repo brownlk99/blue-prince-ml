@@ -104,7 +104,7 @@ def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, tem
             return 0  # Return 0 if user skips
         else:
             print("\nInvalid input. Please enter a valid number.")
-            time.sleep(3)
+            time.sleep(2)
 
 def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_resources: dict) -> dict:
     available_resources = {}

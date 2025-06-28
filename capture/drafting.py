@@ -9,13 +9,13 @@ from capture.resources import capture_resources
 from capture.screen_capture import ScreenCapture
 from capture.vision_utils import best_match, get_current_room
 from google.cloud import vision
-from loguru import logger
 
 from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LIST, DIRECTORY, ROOM_LOOKUP
 from door import Door
 from house_map import HouseMap
 from room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
 from terminal import SecurityTerminal, LabTerminal, ShelterTerminal, OfficeTerminal
+from utils import get_color_code
 
 
 def capture_drafting_options(reader: easyocr.Reader, google_client: vision.ImageAnnotatorClient, current_room: Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage], chosen_door: Door) -> List[Room]:
@@ -63,6 +63,13 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             shape = room["SHAPE"]
             doors = [Door(orientation=direction) for direction in orientation]
             rarity = room["RARITY"]
+        else:
+            cost = 0
+            type = []
+            description = "UNKNOWN"
+            additional_info = "UNKNOWN"
+            shape = "UNKNOWN"
+            doors = None
 
         new_room = Room(
             name=draft_room_name,
@@ -116,15 +123,15 @@ def door_check(room_name: str, actual_number: int) -> bool:
     """
     characteristics = ROOM_LOOKUP.get(room_name)
     if not characteristics:
-        logger.error(f"{room_name} not found in directory.")
+        print(f"{room_name} not found in directory.")
         return False
 
     expected = characteristics.get("NUM_DOORS")
     if expected is None:
-        logger.warning(f"{room_name}: No NUM_DOORS recorded in directory.")
+        print(f"{room_name}: No NUM_DOORS recorded in directory.")
         return False
     elif expected != actual_number:
-        logger.warning(f"{room_name}: Expected {expected}, Got {actual_number}")
+        print(f"\n{get_color_code(room_name)} DOOR CORRECTION: expected {expected}, got {actual_number}")
         return False
     return True
 

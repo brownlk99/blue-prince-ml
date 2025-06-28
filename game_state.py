@@ -4,11 +4,10 @@ from house_map import HouseMap
 from room import CoatCheck, PuzzleRoom, Room, ShopRoom, UtilityCloset
 from capture.vision_utils import get_current_room
 import json
-import loguru
+
 
 from utils import get_color_code
 
-logger = loguru.logger
 
 class GameState:
     def __init__(self, current_day=1):
@@ -137,7 +136,7 @@ class GameState:
 
             if res_key not in self.resources:
                 print("\nInvalid resource name. Try one of:", ", ".join(self.resources.keys()))
-                time.sleep(3)
+                time.sleep(2)
                 continue
 
             new_val = input(f"New value for {get_color_code(res_key)}: ").strip()
@@ -146,7 +145,7 @@ class GameState:
                 print(f"Updated {get_color_code(res_key)} to {new_val}.")
             except ValueError:
                 print("\nInvalid number. Please enter an integer.")
-                time.sleep(3)
+                time.sleep(2)
     
     def get_available_redraws(self):
         dice_redraw_count = self.resources.get("dice", 0)
@@ -160,7 +159,7 @@ class GameState:
                     room_redraw_count = int(val)
                     break
                 print("\nInvalid input. Please enter a number.")
-                time.sleep(3)
+                time.sleep(2)
         if self.house.get_room_by_name("STUDY"):
             while True:
                 val = input("\nHow many redraws are allotted by the STUDY? ")
@@ -168,7 +167,7 @@ class GameState:
                     study_redraw_count = int(val)
                     break
                 print("\nInvalid input. Please enter a number.")
-                time.sleep(3)
+                time.sleep(2)
 
         return {
             "dice": dice_redraw_count,
@@ -208,14 +207,14 @@ class GameState:
                     idx = int(choice) - 1
                     if idx < 0 or idx >= len(items):
                         print("\nPlease enter a valid option.")
-                        time.sleep(3)
+                        time.sleep(2)
                         continue
                     item_name = items[idx][0]
                     del self.current_room.items_for_sale[item_name]
                     print(f"Removed {item_name} from items for sale.")
                 except Exception as e:
                     print("\nPlease enter a valid option.")
-                    time.sleep(3)
+                    time.sleep(2)
 
     def to_dict(self):
         return {
