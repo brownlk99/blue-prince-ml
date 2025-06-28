@@ -198,30 +198,44 @@ class SecurityTerminal(Terminal):
     
 
 class OfficeTerminal(Terminal):
-    #TODO: this needs to be implemented
     def __init__(self):
         super().__init__()
         self.room_name = "OFFICE"
-        self.office_equipment = {}
+        self.payroll_ran = False
+        self.gold_spread = False
 
     def get_commands(self):
-        return super().get_commands() + ["Check Inventory", "Purchase Item", "View Office Logs"]
+        return super().get_commands() + ["Run Payroll", "Spread Gold in Estate"]
+
+    def get_menu_structure(self):
+        return super().get_menu_structure() + [
+            {
+                "command": "Run Payroll",
+                "description": "After running this process, checks will be placed in each staff member's room. This includes each Servant's Quarter and Maid's Chamber currently on the estate.",
+            },
+            {
+                "command": "Spread Gold in Estate",
+                "description": "The Office can facilitate a modest distribution of coins withdrawn from the Staff Incentives program.\nThese coins are \"spread\" (distributed in a number of rooms currently active) throughout the estate.",
+            }
+        ]
 
     def to_dict(self):
         data = super().to_dict()
         data.update({
-            "office_equipment": self.office_equipment
+            "payroll_ran": self.payroll_ran,
+            "gold_spread": self.gold_spread
         })
         return data
     
     @classmethod
     def from_dict(cls, data):
         terminal = super().from_dict(data)
-        terminal.office_equipment = data.get("office_equipment", {})
+        terminal.payroll_ran = data.get("payroll_ran", False)
+        terminal.gold_spread = data.get("gold_spread", False)
         return terminal
     
     def __str__(self):
-        return super().__str__() + f", office_equipment={self.office_equipment}"
+        return super().__str__() + f", payroll_ran={self.payroll_ran}, gold_spread={self.gold_spread}"
 
 class LabTerminal(Terminal):
     def __init__(self):
