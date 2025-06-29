@@ -1,5 +1,4 @@
 import os
-os.environ["ANONYMIZED_TELEMETRY"] = "FALSE"
 
 import time
 import easyocr
@@ -35,6 +34,9 @@ from llm_parsers import (
     parse_note_title_response,
 )
 from utils import get_color_code, thinking_animation
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="torch.utils.data.dataloader")
 
 def end_run(agent: BluePrinceAgent):
     """Saves the current run, gets a reason from the user, and updates run memory."""
