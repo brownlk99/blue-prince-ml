@@ -32,9 +32,39 @@ from llm_parsers import (
     parse_lab_experiment_response,
     parse_coat_check_response,
     parse_secret_passage_response,
-    parse_note_title_response
+    parse_note_title_response,
 )
 from utils import get_color_code, thinking_animation
+
+def end_run(agent: BluePrinceAgent):
+    """Saves the current run, gets a reason from the user, and updates run memory."""
+    # Save the final state for this day
+    agent.game_state.save_to_file(f'./jsons/runs/day_{agent.game_state.day}.json')
+
+    reason_for_ending = input("Reason for ending the run: ")
+
+    # Determine what item is in the coat check for the next run
+    coat_check = agent.game_state.house.get_room_by_name("COAT CHECK")
+    previous_run = agent.previous_run_memory.get_most_recent_run()
+    previous_stored_item = previous_run.get("stored_item", "")
+    stored_item = ""
+
+    if isinstance(coat_check, CoatCheck):
+        # Player interacted with coat check this run
+        current_stored_item = coat_check.stored_item
+
+        if current_stored_item != previous_stored_item:
+            # Player swapped out or added a new item
+            stored_item = current_stored_item
+        else:
+            # Player did not exchange any item, keep previous
+            stored_item = previous_stored_item
+    else:
+        # Coat check not present, keep previous stored item
+        stored_item = previous_stored_item
+
+    agent.previous_run_memory.add_run(agent.game_state.day, reason_for_ending, stored_item)
+    print(f"\nDay {agent.game_state.day} has ended. Run data saved.")
 
 def print_menu():
     print("""
@@ -53,6 +83,7 @@ def print_menu():
 12. Fill Room Attributes    - Autofill attributes for a room based on its position.
 13. Save Game State         - Save the current game state to a JSON file.
 14. Manual LLM Follow Up    - Analyze previous LLM decision.
+15. Call It a Day           - End the current run and save progress.
 
 q. Quit                     - Exit the script.
 """)
@@ -86,11 +117,11 @@ def main(day, load, verbose, editor_path, model_name):
             if not agent.previously_chosen_room:
                 print("No previous exploration decision found in memory.")
 
-    print("Script is running. Type a number (1-14) and press Enter to interact. Type 'q' to quit.")
+    print("Script is running. Type a number (1-15) and press Enter to interact. Type 'q' to quit.")
 
     while True:
         print_menu()
-        user_input = input("\nEnter command (1-14, q to quit): ").strip().lower()
+        user_input = input("\nEnter command (1-15, q to quit): ").strip().lower()
         if user_input == 'q':
             print("Exiting script.")
             break
@@ -110,7 +141,6 @@ def main(day, load, verbose, editor_path, model_name):
             response = agent.generate_note_title(note.content)
             parsed_response = parse_note_title_response(response)
             note.title = parsed_response
-            agent.note_memory.add_to_vector_db(note)
             agent.note_memory.add_to_json(note)
             print("Note captured and saved.")
         elif user_input == '3':
@@ -306,27 +336,8 @@ def main(day, load, verbose, editor_path, model_name):
                 else:
                     print("No UTILITY CLOSET found in the house, cannot toggle switches.")
             elif parsed_response["action"] == "call_it_a_day":
-                agent.game_state.save_to_file(f'./jsons/runs/day_{agent.game_state.day}.json')    #call it a day
-                reason_for_ending = input("Reason for ending the run: ")
-                coat_check = agent.game_state.house.get_room_by_name("COAT CHECK")
-                previous_run = agent.previous_run_memory.get_most_recent_run()
-                previous_stored_item = previous_run.get("stored_item", "")
-                stored_item = ""
-                if isinstance(coat_check, CoatCheck):
-                    # player interacted with coat check this run
-                    current_stored_item = coat_check.stored_item
-
-                    if current_stored_item != previous_stored_item:
-                        # player swapped out or added a new item
-                        stored_item = current_stored_item
-                    else:
-                        # player did not exchange any item, keep previous
-                        stored_item = previous_stored_item
-                else:
-                    # coat check not present, keep previous stored item
-                    stored_item = previous_stored_item
-                agent.previous_run_memory.add_run(agent.game_state.day, reason_for_ending, stored_item)
-
+                end_run(agent)
+                break
         elif user_input == '6':
             #always update the current room and position before making a decision
             agent.game_state.current_room = get_current_room(reader, agent.game_state.house)
@@ -491,8 +502,11 @@ def main(day, load, verbose, editor_path, model_name):
         elif user_input == '14':
             response = agent.manual_llm_follow_up()
             print(f"\nManual LLM Follow Up Response:\n{response}")
+        elif user_input == '15':
+            end_run(agent)
+            break
         else:
-            print("Invalid input. Please enter a number between 1 and 14, or 'q' to quit.")
+            print("Invalid input. Please enter a number between 1 and 15, or 'q' to quit.")
             time.sleep(1)
         agent.game_state.save_to_file('./jsons/current_run.json')   #always save to file after
 
