@@ -297,6 +297,8 @@ class HouseMap:
             #if the neighbor would be out of bounds, the door leads to a dead end
             if not (0 <= neighbor_x < self.width and 0 <= neighbor_y < self.height):
                 door.leads_to = "BLOCKED"
+                door.locked = "N/A"
+                door.is_security = "N/A"
                 continue
 
             neighbor = self.get_room_by_position(neighbor_x, neighbor_y)
@@ -314,6 +316,8 @@ class HouseMap:
                     matching_neighbor_door.locked = str(False)
                 else:
                     door.leads_to = "BLOCKED"
+                    door.locked = "N/A"
+                    door.is_security = "N/A"
 
         # now, for all neighbors, check if any of their doors are blocked by the new room
         for dir, opp_dir in direction_opposite.items():
@@ -333,7 +337,9 @@ class HouseMap:
                     if neighbor_door.orientation == opp_dir:
                         # If new_room does NOT have a door facing neighbor, mark as DEAD END
                         if not any(d.orientation == dir for d in new_room.doors):
-                            neighbor_door.leads_to = "BLOCKED"   
+                            neighbor_door.leads_to = "BLOCKED"
+                            neighbor_door.locked = "N/A"
+                            neighbor_door.is_security = "N/A"
 
 
     def update_security_doors(self):
