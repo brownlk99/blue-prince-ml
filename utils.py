@@ -63,16 +63,22 @@ def get_color_code(input: str) -> str:
     
     # Check which category the room belongs to in DIRECTORY
     if input.upper() == "GEMS":
-        return f"{PINK}{input}{RESET}"
+        return f"{PINK}{input.upper()}{RESET}"
     elif input.upper() == "KEYS":
-        return f"{LIGHT_BLUE}{input}{RESET}"
+        return f"{LIGHT_BLUE}{input.upper()}{RESET}"
+    elif input.upper() == "COINS":
+        return f"{YELLOW}{input.upper()}{RESET}"
+    elif input.upper() == "DICE":
+        return f"{BLUE}{input.upper()}{RESET}"
+    elif input.upper() == "FOOTPRINTS":
+        return f"{GREEN}{input.upper()}{RESET}"
     elif input.upper() == "BLACK":
         return f"{BLACK}{input}{RESET}"
     elif input.upper() == "BLUE" or input.upper() in DIRECTORY["FLOORPLANS"]["ROOMS"] and input.upper() not in ["ENTRANCE HALL", "THE FOUNDATION", "ANTECHAMBER"]:
         return f"{BLUE}{input}{RESET}"
     elif input.upper() in DIRECTORY["FLOORPLANS"]["HALLWAYS"]:
         return f"{ORANGE}{input}{RESET}"
-    elif input.upper() in DIRECTORY["FLOORPLANS"]["SHOPS"] or input.upper() == "COINS":
+    elif input.upper() in DIRECTORY["FLOORPLANS"]["SHOPS"]:
         return f"{YELLOW}{input}{RESET}"
     elif input.upper() == "YES" or input.upper() in DIRECTORY["FLOORPLANS"]["GREEN ROOMS"]:
         return f"{GREEN}{input}{RESET}"    
