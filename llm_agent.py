@@ -514,12 +514,6 @@ class BluePrinceAgent:
         with thinking_animation("LLM Taking Action: Deciding secret passage"):
             response = self._invoke(messages)
         return str(response.content)
-
-    def get_relevant_notes(self, query: str, k: int = 3) -> str:
-        relevant = self.note_memory.search(query, k=k)
-        if not relevant:
-            return "No RELEVANT NOTES found."
-        return "\n".join(f"- {doc.page_content}" for doc in relevant)
     
     def generate_note_title(self, note_content: str) -> str:
         """

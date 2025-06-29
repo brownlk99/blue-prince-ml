@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from chromadb.config import Settings
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
@@ -15,19 +15,6 @@ class NoteMemory:
     def __init__(self, persist_path="./note_db"):
         self.persist_path = persist_path
         self.json_path = "./jsons/notes.json"
-        self.embedder = OpenAIEmbeddings(model="text-embedding-3-small")
-        
-        # Load existing DB or create new
-        self.store = Chroma(
-            embedding_function=self.embedder,
-            persist_directory=self.persist_path,
-            client_settings=Settings(
-                anonymized_telemetry=False,
-                is_persistent=True
-            )
-        )
-
-        self.existing_hashes = {m.get("hash") for m in self.store.get()["metadatas"] if m}
 
         intro_note = Note(
             title="Intro Monologue",
@@ -51,38 +38,9 @@ class NoteMemory:
             found_in_room="N/A",
             color="N/A"
         )
-        if intro_note.hash_note() not in self.existing_hashes:
-            self.add_to_vector_db(intro_note)
-            self.add_to_json(intro_note)
+
+        self.add_to_json(intro_note)
         
-    def add_to_vector_db(self, note: Note):
-        h = note.hash_note()
-        if h in self.existing_hashes:
-            print("Duplicate note, skipping.")
-            return
-
-        doc = Document(
-            page_content=note.content,
-            metadata={
-                "title": note.title,
-                "room": note.found_in_room,
-                "color": note.color,
-                "hash": h
-            }
-        )
-        self.store.add_documents([doc])
-        self.existing_hashes.add(h)
-
-    def clear_vector_db(self):
-        # Remove all documents from the Chroma store
-        self.store.delete_collection()
-        # Re-initialize the store to ensure it's empty and ready for new notes
-        self.store = Chroma(
-            embedding_function=self.embedder,
-            persist_directory=self.persist_path
-        )
-        self.existing_hashes = set()
-
     def add_to_json(self, note: Note):
         if os.path.exists(self.json_path):
             with open(self.json_path, "r", encoding="utf-8") as f:
@@ -90,12 +48,16 @@ class NoteMemory:
         else:
             notes = []
 
+        # Check for duplicate by hash
+        existing_hashes = {n.get("hash") for n in notes}
+        if note.hash in existing_hashes:
+            # Note already exists, do not add
+            return
+
         notes.append(note.to_dict())
         with open(self.json_path, "w", encoding="utf-8") as f:
             json.dump(notes, f, indent=2, ensure_ascii=False)
 
-    def search(self, query: str, k=3):
-        return self.store.similarity_search(query, k=k)
 
 class TermMemory:
     def __init__(self, path="./jsons/term_memory.json"):
