@@ -2,6 +2,7 @@ import hashlib
 import time
 import cv2
 import numpy as np
+from typing import Optional
 from google.cloud import vision
 from capture.ocr import google_vision
 from capture.screen_capture import ScreenCapture
@@ -34,7 +35,7 @@ def trim_template(template_img: np.ndarray) -> np.ndarray:
     # Crop to just the number
     return template_img[y:y+h, x:x+w]
 
-def recognize_number(resource_img: np.ndarray, number_template_paths: list[str], threshold: float = 0.75) -> int:
+def recognize_number(resource_img: np.ndarray, number_template_paths: list[str], threshold: float = 0.75) -> Optional[int]:
     """Recognize the actual number in resource image using template matching."""
     # Check if image is already grayscale (single channel)
     if len(resource_img.shape) == 3:
@@ -80,7 +81,7 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
             best_score = max_score
             best_match = template_number
     
-    return best_match if best_match is not None else 0
+    return best_match  # Returns None if no match found
 
 def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, template_folder: str, prefix: str = "unknown") -> int:
     while True:
@@ -145,7 +146,7 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
             print(f"Resource {resource}: OCR failed, template matched for: {value}")
             
             # Save template and ask user what number it is
-            if value == 0:
+            if value is None:
                 value = save_and_rename_template(resource_screenshot, resource, template_folder, "unknown")
         else:       #gets words back from OCR
             try:
@@ -156,7 +157,7 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
                 print(f"Resource {resource}: OCR conversion failed, template matched for: {value}")
                 
                 # Save template and ask user what number it is
-                if value == 0:
+                if value is None:
                     value = save_and_rename_template(resource_screenshot, resource, template_folder, "failed_convert")
 
         available_resources[resource] = value
