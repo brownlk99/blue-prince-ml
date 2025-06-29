@@ -23,14 +23,21 @@ def start_animation(text="Thinking"):
 
 @contextlib.contextmanager
 def thinking_animation(text="Thinking"):
-    """Context manager for thinking animation"""
+    """Context manager for thinking animation that hides the cursor."""
+    # Hide cursor
+    sys.stdout.write('\033[?25l')
+    sys.stdout.flush()
+
     thread, stop = start_animation(text)
     try:
         yield
     finally:
         stop()
         thread.join(timeout=1)
+        # Clear the animation line and show cursor again
         sys.stdout.write('\r' + ' ' * (len(text) + 4) + '\r')
+        sys.stdout.write('\033[?25h')
+        sys.stdout.flush()
 
 def get_color_code(input: str) -> str:
     """
@@ -73,4 +80,3 @@ def get_color_code(input: str) -> str:
         return f"{RED}{input}{RESET}"
     else:
         return input
-    
