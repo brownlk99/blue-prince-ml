@@ -68,14 +68,10 @@ def get_color_code(input: str) -> str:
         return f"{LIGHT_BLUE}{input.upper()}{RESET}"
     elif input.upper() == "COINS":
         return f"{YELLOW}{input.upper()}{RESET}"
-    elif input.upper() == "DICE":
-        return f"{BLUE}{input.upper()}{RESET}"
-    elif input.upper() == "FOOTPRINTS":
-        return f"{GREEN}{input.upper()}{RESET}"
     elif input.upper() == "BLACK":
-        return f"{BLACK}{input}{RESET}"
+        return f"{BLACK}{input.upper()}{RESET}"
     elif input.upper() == "BLUE" or input.upper() in DIRECTORY["FLOORPLANS"]["ROOMS"] and input.upper() not in ["ENTRANCE HALL", "THE FOUNDATION", "ANTECHAMBER"]:
-        return f"{BLUE}{input}{RESET}"
+        return f"{BLUE}{input.upper()}{RESET}"
     elif input.upper() in DIRECTORY["FLOORPLANS"]["HALLWAYS"]:
         return f"{ORANGE}{input}{RESET}"
     elif input.upper() in DIRECTORY["FLOORPLANS"]["SHOPS"]:
@@ -85,4 +81,4 @@ def get_color_code(input: str) -> str:
     elif input.upper() == "NO" or input.upper() in DIRECTORY["FLOORPLANS"]["RED ROOMS"]:
         return f"{RED}{input}{RESET}"
     else:
-        return input
+        return input.upper()
