@@ -2,10 +2,6 @@ import json
 import os
 import time
 from typing import Any, Dict, List, Optional
-from chromadb.config import Settings
-from langchain_openai import OpenAIEmbeddings
-from langchain_chroma import Chroma
-from langchain.schema import Document
 from note import Note
 
 from capture.constants import DIRECTORY
@@ -262,7 +258,18 @@ class DecisionMemory:
         with open(self.path, "w", encoding="utf-8") as f:
             json.dump(self.decisions, f, indent=2, ensure_ascii=False)
 
-    
+    def get_move_context(self) -> Optional[Dict[str, Any]]:
+        """Get the most recent move decision context if it exists"""
+        # Search through decisions in reverse order (most recent first)
+        for decision in reversed(self.decisions):
+            if isinstance(decision, dict) and decision.get("action") == "move":
+                return {
+                    "target_room": decision.get("target_room", ""),
+                    "planned_action": decision.get("planned_action", ""),
+                    "explanation": decision.get("explanation", "")
+                }
+        return None
+
 class BookMemory():
     def __init__(self, path: str = "./jsons/book_memory.json"):
         """

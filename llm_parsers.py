@@ -20,20 +20,34 @@ def parse_action_response(response: str):
     return {"action": action, "explanation": explanation}
 
 
-def parse_door_exploration_response(response: str, agent: BluePrinceAgent):
-    """Parse the door exploration response from the LLM"""
+def parse_move_response(response: str):
+    """Parse the move response from the LLM"""
     data = _parse_json_response(response)
-    room_name = data.get("target_room", "").strip().upper()
-    door_dir = data.get("final_door", "").strip().upper()[0]
+    target_room = data.get("target_room", "").strip().upper()
     path = data.get("path", [])
-    special_item = data.get("special_item", "NONE").strip().upper()
-    explanation = data.get("explanation", "").strip()   
-    agent.previously_chosen_room = room_name
-    agent.previously_chosen_door = door_dir
+    planned_action = data.get("planned_action", "").strip()
+    explanation = data.get("explanation", "").strip()
     return {
-        "target_room": room_name,
-        "final_door": door_dir,
+        "target_room": target_room,
         "path": path,
+        "planned_action": planned_action,  
+        "explanation": explanation
+    }
+
+
+def parse_door_opening_response(response: str, agent: BluePrinceAgent):
+    """Parse the door opening response from the LLM"""
+    data = _parse_json_response(response)
+    door_direction = data.get("door_direction", "").strip().upper()[0]
+    special_item = data.get("special_item", "NONE").strip().upper()
+    explanation = data.get("explanation", "").strip()
+    
+    # Set the previously chosen room and door for drafting
+    agent.previously_chosen_room = agent.game_state.current_room.name if agent.game_state.current_room else ""
+    agent.previously_chosen_door = door_direction
+    
+    return {
+        "door_direction": door_direction,
         "special_item": special_item,
         "explanation": explanation
     }

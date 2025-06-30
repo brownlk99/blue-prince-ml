@@ -3,19 +3,11 @@ import re
 import time
 from typing import List, Optional, Union, cast
 import easyocr
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import HumanMessage, SystemMessage
-from langchain.chat_models import init_chat_model
-from langchain_core.callbacks import get_usage_metadata_callback
 from game_state import GameState
+from llm_client import LLMClient, _context_window
 from memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory, DecisionMemory
 from terminal import Terminal, SecurityTerminal, ShelterTerminal, OfficeTerminal, LabTerminal
 from room import PuzzleRoom, Room, ShopRoom
-from langchain_openai import ChatOpenAI          # OpenAI family
-from langchain_google_genai import ChatGoogleGenerativeAI  # Gemini family
-from langchain_anthropic import ChatAnthropic    # Claude family
-from langchain_google_vertexai import ChatVertexAI
 
 from utils import thinking_animation
 from llm_formatters import (
@@ -26,52 +18,13 @@ from llm_formatters import (
     format_redraw_count,
     format_terminal_menu,
     format_lab_experiment_section,
-    format_available_actions
+    format_available_actions,
+    format_move_context
 )
 
-def _get_context_window(model_name: str) -> int:
-    """
-    Ask the vendor SDK for the model’s max-context window.
-    Handles OpenAI, Anthropic, and both Google SDKs.
-    Falls back to 0 if the field is absent or the call fails.
-    """
-    # Strip "provider:" prefix that init_chat_model sometimes adds,
-    # e.g. "openai:o4-mini" → "o4-mini".
-    if ":" in model_name:
-        _, model_name = model_name.split(":", 1)
-
-    try:
-        # ---- OpenAI --------------------------------------------------
-        if model_name.startswith(("gpt", "o")):                        # :contentReference[oaicite:0]{index=0}
-            from openai import OpenAI
-            info = OpenAI().models.retrieve(model_name)                # :contentReference[oaicite:1]{index=1}
-            return cast(int, getattr(info, "context_window", 0))       # field exists at runtime
-
-        # ---- Anthropic ----------------------------------------------
-        if model_name.startswith(("claude", "anthropic")):             # :contentReference[oaicite:2]{index=2}
-            import anthropic
-            info = anthropic.Anthropic().models.retrieve(model_name)
-            return cast(int, getattr(info, "context_length", 0))       # SDK returns ModelInfo
-
-        # ---- Gemini / Google ----------------------------------------
-        if model_name.lower().startswith(("gemini", "gai", "google")):
-            try:
-                # New SDK (recommended after Aug-2025)                 # :contentReference[oaicite:3]{index=3}
-                from google.genai import GenerativeModel               # type: ignore
-            except ModuleNotFoundError:
-                # Legacy SDK (sunsets Aug-2025)                        # :contentReference[oaicite:4]{index=4}
-                from google.generativeai.generative_models import GenerativeModel
-            info = GenerativeModel(model_name)
-            return cast(int, getattr(info, "input_token_limit", 0))    # public property
-    except Exception:
-        pass
-
-    return 0          # offline, wrong ID, or unsupported provider
-
 class BluePrinceAgent:
-    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:o4-mini"):
-        # self.model = init_chat_model(model_name)
-        self.model = ChatVertexAI(model="gemini-2.5-pro")
+    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:gpt-4o-mini"):
+        self.llm_client = LLMClient(model_name)
         self.note_memory = NoteMemory()
         self.term_memory = TermMemory()
         self.room_memory = RoomMemory()
@@ -81,23 +34,20 @@ class BluePrinceAgent:
         self.previously_chosen_room = ""
         self.previously_chosen_door = ""
         self.verbose = verbose
-        print(f"Using model: {self.model}")
-        print(f"Model type: {type(self.model)}")
-    def _invoke(self, messages):
-        with get_usage_metadata_callback() as tracker:                     # universal handler
-            response = self.model.invoke(messages, config={"callbacks": [tracker]})
+        print(f"Using model: {self.llm_client.model_name}")
+        print(f"Provider: {self.llm_client.provider}")
 
-        usage = next(iter(tracker.usage_metadata.values()), {})
-        prompt = usage.get("input_tokens", 0)
-        comp  = usage.get("output_tokens", 0)
-        total = usage.get("total_tokens", prompt + comp)
-
-        name = getattr(self.model, "model_name", getattr(self.model, "model", "?"))
-        ctx = _get_context_window(name) or "?"
-        pct = f"{prompt/ctx:.1%}" if isinstance(ctx, int) and ctx else "?"
-
-        print(f"[TOKENS] prompt={prompt}  completion={comp}  "
-            f"total={total}/{ctx}  ({pct} of window)")
+    def _invoke(self, system_message: str, user_message: str) -> str:
+        """Invoke the LLM and handle usage tracking"""
+        response, usage = self.llm_client.chat(system_message, user_message)
+        
+        # Print usage statistics
+        ctx_limit = _context_window(self.llm_client.model_name)
+        pct = f"{usage.input_tokens/ctx_limit:.1%}" if ctx_limit else "?"
+        
+        print(f"[TOKENS] prompt={usage.input_tokens}  completion={usage.output_tokens}  "
+              f"total={usage.total_tokens}/{ctx_limit}  ({pct} of window)")
+        
         return response
 
     def take_action(self, context: str) -> str:
@@ -114,10 +64,14 @@ class BluePrinceAgent:
         terms_section = format_term_memory_section(self.term_memory)
         rooms_section = format_room_memory_section(self.room_memory)
         actions_section = format_available_actions(self.game_state)
-        prompt = (f"GAME STATE:\n{context}\n"
+        move_context = format_move_context(self.decision_memory.get_move_context())
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{rooms_section}\n"
             f"RELEVANT NOTES:\n{notes}\n"
+            f"{move_context}"
             "Based on the above context and notes, what action should the agent take?\n\n"
             f"{actions_section}"
             "If more information is needed to complete the action, return the high-level action and the parameters you know.\n"
@@ -128,54 +82,96 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding next action"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
-    def decide_door_to_explore(self, context: str) -> str:
-        # notes = self.get_relevant_notes(query="Intro")
+    def decide_move(self, context: str) -> str:
+        """
+            Decide where to move and what action to take there.
+
+                Args:
+                    context: Current game state context
+                    
+                Returns:
+                    str: JSON string with the move decision.
+        """
         notes = ""
         terms_section = format_term_memory_section(self.term_memory)
         rooms_section = format_room_memory_section(self.room_memory)
-        special_items_section = format_special_items(self.game_state)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{rooms_section}\n"
             f"RELEVANT NOTES:\n{notes}\n\n"
-            "Based on the above context and notes, what door should the player open?\n\n"
-            "Choose a route that begins in the **current room** and ultimately leads to the **door you want to access within the TARGET ROOM of your choice** (TARGET ROOM **MUST** be a room that has currently been discovered and is currently accessible).\n"
+            "Based on the above context and notes, where should you move and what action do you plan to take there?\n\n"
+            "Choose a route that begins in the **current room** and leads to your **target room** (TARGET ROOM **MUST** be a room that has currently been discovered and is currently accessible).\n"
             "If there is NOT a currently available path to the TARGET ROOM based upon the ROOMS currently in the HOUSE, you must choose a different option.\n"
-            "Keep in mind that if a DOOR leads to a \"?\" then it is a valid option to choose to explore.\n"
-            f"{special_items_section}"
             "Return **only** valid JSON in this exact shape:\n"
             '{\n'
             '  "target_room": "ROOM NAME",\n'
-            '  "final_door":  "N|S|E|W",            # the door INSIDE target_room you intend to open\n'
-            '  "path":        ["E","E","N","W"],    # list of directions you will take, to make it to the final door\n'
-            '  "special_item": "ITEM NAME|NONE",    # the special item you will use to open the door (if any)\n'
+            '  "path": ["E","E","N","W"],    # list of directions you will take to reach the target room\n'
+            '  "planned_action": "ACTION",  # the action you plan to take once you reach the target room\n'
             '  "explanation": "why this route is best given resources / notes"\n'
             '}\n\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
             "Make your decision based on available resources, relevant notes, and unexplored paths.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
-        with thinking_animation("LLM Taking Action: Deciding door to explore"):
-            response = self._invoke(messages)
-        return str(response.content)
+        with thinking_animation("LLM Taking Action: Deciding move"):
+            response = self._invoke(system_message, user_message)
+        return response
+
+    def decide_door_to_open(self, context: str) -> str:
+        """
+            Decide which door in the current room to open.
+
+                Args:
+                    context: Current game state context
+                    
+                Returns:
+                    str: JSON string with the door opening decision.
+        """
+        notes = ""
+        terms_section = format_term_memory_section(self.term_memory)
+        rooms_section = format_room_memory_section(self.room_memory)
+        special_items_section = format_special_items(self.game_state)
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
+            f"GAME STATE:\n{context}\n"
+            f"{terms_section}\n"
+            f"{rooms_section}\n"
+            f"RELEVANT NOTES:\n{notes}\n\n"
+            "Based on the above context and notes, which door in the current room do you wish to open?\n\n"
+            "Choose a door direction (N, S, E, W) that is available in your current room.\n"
+            "Keep in mind that if a DOOR leads to a \"?\" then it is a valid option to choose to explore / open.\n"
+            f"{special_items_section}"
+            "Return **only** valid JSON in this exact shape:\n"
+            '{\n'
+            '  "door_direction": "N|S|E|W",\n'
+            '  "special_item": "ITEM NAME|NONE",    # the special item you will use to open the door (if any)\n'
+            '  "explanation": "why this door is best given resources / notes"\n'
+            '}\n\n'
+            "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
+            "Make your decision based on available resources, relevant notes, and unexplored paths.\n"
+        )
+        
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + user_message)
+        print("\n")
+        with thinking_animation("LLM Taking Action: Deciding door to open"):
+            response = self._invoke(system_message, user_message)
+        return response
 
     def decide_purchase_item(self, context: str) -> str:
         """
@@ -196,7 +192,9 @@ class BluePrinceAgent:
         else:
             items_str = "\n".join(f"- {item}: {price}" for item, price in items_for_sale.items())
         terms_section = format_term_memory_section(self.term_memory)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"You are in a shop - {self.game_state.current_room.name if self.game_state.current_room else 'None'}.\n"
@@ -211,16 +209,13 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding purchase item"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def decide_drafting_option(self, draft_options: List[Room], context: str) -> str:
         notes = ""
@@ -228,7 +223,9 @@ class BluePrinceAgent:
         terms_section = format_term_memory_section(self.term_memory)
         rooms_section = format_room_memory_section(self.room_memory)
         redraw_section = format_redraw_count(self.game_state)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{rooms_section}\n"
@@ -253,16 +250,12 @@ class BluePrinceAgent:
             "Make your decision based on available resources, relevant notes, and unexplored paths.\n"
         )
 
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding drafting option"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def solve_parlor_puzzle(self, reader: easyocr.Reader, context: str, editor_path: Optional[str] = None) -> str:
         if self.game_state.current_room and isinstance(self.game_state.current_room, PuzzleRoom):
@@ -270,7 +263,9 @@ class BluePrinceAgent:
         else:
             boxes = {}
         terms_section = format_term_memory_section(self.term_memory)
-        prompt = (
+        
+        system_message = "You are a logician helping a Blue Prince player solve the Parlor three-boxes puzzle."
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             "Rules that NEVER change:\n"
@@ -293,21 +288,20 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are a logician helping a Blue Prince player solve the Parlor three-boxes puzzle."),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Solving parlor puzzle"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def use_terminal(self, context: str) -> str:
         terms_section = format_term_memory_section(self.term_memory)
         terminal_section = format_terminal_menu(self.game_state)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{terminal_section}\n"
@@ -318,16 +312,13 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Using terminal"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def decide_security_level(self, context: str) -> str:
         """
@@ -340,7 +331,9 @@ class BluePrinceAgent:
                     str: JSON string with the chosen security level and explanation.
         """
         terms_section = format_term_memory_section(self.term_memory)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             "Based on the above context, what security level should be set for the estate?\n\n"
@@ -355,16 +348,13 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding security level"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def decide_mode(self, context: str) -> str:
         """
@@ -377,7 +367,9 @@ class BluePrinceAgent:
                     str: JSON string with the chosen mode and explanation.
         """
         terms_section = format_term_memory_section(self.term_memory)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             "Based on the above context, what offline mode should be set for security doors?\n\n"
@@ -391,16 +383,13 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding mode"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def decide_lab_experiment(self, options: dict[str, list[str]], context: str) -> str:
         """
@@ -414,7 +403,9 @@ class BluePrinceAgent:
         """
         terms_section = format_term_memory_section(self.term_memory)
         lab_section = format_lab_experiment_section(options)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{lab_section}\n"
@@ -431,16 +422,13 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding lab experiment"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def coat_check_prompt(self, action: str, context: str) -> str:
         """
@@ -455,7 +443,9 @@ class BluePrinceAgent:
         notes = ""
         terms_section = format_term_memory_section(self.term_memory)
         rooms_section = format_room_memory_section(self.room_memory)
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{rooms_section}\n"
@@ -468,16 +458,13 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation(f"LLM Taking Action: Coat check {action.lower()}"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
 
     def open_secret_passage(self, context: str) -> str:
         """
@@ -492,7 +479,9 @@ class BluePrinceAgent:
         terms_section = format_term_memory_section(self.term_memory)
         rooms_section = format_room_memory_section(self.room_memory)
         #TODO: add more context here
-        prompt = (
+        
+        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+        user_message = (
             f"GAME STATE:\n{context}\n"
             f"{terms_section}\n"
             f"{rooms_section}\n"
@@ -504,35 +493,30 @@ class BluePrinceAgent:
             '}\n'
             "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"),
-            HumanMessage(content=prompt)
-        ]
+        
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Deciding secret passage"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response
     
     def generate_note_title(self, note_content: str) -> str:
         """
         Generate a title for the note based on its content.
         This is a simple heuristic and can be improved with more complex logic.
         """
-        prompt = (f"Give the following note a short descriptive title (no more than four words at most):\n\n{note_content}"
+        system_message = "You are a helpful assistant."
+        user_message = (f"Give the following note a short descriptive title (no more than four words at most):\n\n{note_content}"
                   "\n\n Return only valid JSON in this exact shape:\n"
                   '{\n'
                   '  "title": "NOTE TITLE"\n'
                   '}\n'
                   "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
-        messages = [
-            SystemMessage(content="You are a helpful assistant."),
-            HumanMessage(content=prompt)
-        ]
-        response = self._invoke(messages)
-        return str(response.content)
+        
+        response = self._invoke(system_message, user_message)
+        return response
 
     def manual_llm_follow_up(self) -> str:
         if not self.decision_memory.decisions:
@@ -545,21 +529,19 @@ class BluePrinceAgent:
         rooms_section = format_room_memory_section(self.room_memory)
         input_section = input("Please enter any additional specific questions that may be relevant to the previous LLM decision: ")
         notes = ""
-        prompt = (f"GAME STATE:\n{most_recent_context}\n"
+        
+        system_message = "You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."
+        user_message = (f"GAME STATE:\n{most_recent_context}\n"
             f"{terms_section}\n"
             f"{rooms_section}\n"
             f"RELEVANT NOTES:\n{notes}\n"
             f"Previous Response:\n{most_recent_decision}\n\n"
             f"Based on the above context, what is the most likely reason for the previous LLM decision? {input_section}"
         )
-        messages = [
-            SystemMessage(content="You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."),
-            HumanMessage(content=prompt)
-        ]
 
         if self.verbose:
-            print("\nPrompt for LLM:\n" + prompt)
+            print("\nPrompt for LLM:\n" + user_message)
         print("\n")
         with thinking_animation("LLM Taking Action: Analyzing previous decision"):
-            response = self._invoke(messages)
-        return str(response.content)
+            response = self._invoke(system_message, user_message)
+        return response

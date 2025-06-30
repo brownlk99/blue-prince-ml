@@ -78,6 +78,14 @@ def format_redraw_count(game_state) -> str:
     return redraw_text + "\n"
 
 
+def format_move_context(move_context):
+    """Format the move context for LLM prompts when previous action was move"""
+    if not move_context:
+        return ""
+    
+    return f"\nPREVIOUS MOVE CONTEXT:\nYou previously planned to move to {move_context['target_room']} to perform the action: {move_context['planned_action']}\nExplanation: {move_context['explanation']}\nNote: You are not required to follow this plan if circumstances have changed.\n"
+
+
 def format_terminal_menu(game_state):
     """
     Format the terminal section for the agent's action decision.
@@ -131,7 +139,8 @@ def format_available_actions(game_state):
     actions = []
 
     # always available
-    actions.append('"explore": Decide that exploring is the best option; DO NOT choose a specific door or room yet, just decide if this is the action you wish to perform next.')
+    actions.append('"move": Decide to move to a specific room and to perform an action there. Specify target room, path, and planned action.')
+    actions.append('"open_door": Open a door in the current room to draft an additional room to the house.')
     # shop actions
     if flags["shop_room_present"]:
         actions.append('"peruse_shop": Use to see the list of items for sale in the current SHOP room.')

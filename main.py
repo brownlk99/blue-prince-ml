@@ -21,7 +21,8 @@ from terminal import SecurityTerminal, ShelterTerminal, Terminal
 
 from llm_parsers import (
     parse_action_response,
-    parse_door_exploration_response,
+    parse_move_response,
+    parse_door_opening_response,
     parse_purchase_response,
     parse_drafting_response,
     parse_parlor_response,
@@ -109,15 +110,16 @@ def main(day, load, verbose, editor_path, model_name):
         elif load:
             # Search through decisions in reverse order (most recent first)
             for decision in reversed(agent.decision_memory.decisions):
-                # Check if this decision contains exploration data
-                if isinstance(decision, dict) and "target_room" in decision and "final_door" in decision:
-                    agent.previously_chosen_room = decision["target_room"]
-                    agent.previously_chosen_door = decision["final_door"]
+                # Check if this decision contains door opening data
+                if isinstance(decision, dict) and "door_direction" in decision:
+                    # This is a door opening decision - use current room from game state
+                    agent.previously_chosen_room = agent.game_state.current_room.name if agent.game_state.current_room else ""
+                    agent.previously_chosen_door = decision["door_direction"]
                     break
             
-            # If no exploration decision found, keep current values or set defaults
+            # If no door opening decision found, keep current values or set defaults
             if not agent.previously_chosen_room:
-                print("No previous exploration decision found in memory.")
+                print("No previous door opening decision found in memory.")
 
     print("Script is running. Type a number (1-15) and press Enter to interact. Type 'q' to quit.")
 
@@ -188,12 +190,20 @@ def main(day, load, verbose, editor_path, model_name):
             agent.decision_memory.add_decision(parsed_response)
             print(f"Action Response:\nAction: {parsed_response['action']}\nExplanation: {parsed_response['explanation']}")
             time.sleep(2)
-            if parsed_response["action"] == "explore":
-                response = agent.decide_door_to_explore(context)
-                parsed_response = parse_door_exploration_response(response, agent)
+            if parsed_response["action"] == "move":
+                response = agent.decide_move(context)
+                parsed_response = parse_move_response(response)
+                parsed_response["action"] = "move"  # Add action type for decision memory
                 parsed_response["context"] = context
                 agent.decision_memory.add_decision(parsed_response)
-                print(f"Explore Response:\nRoom: {get_color_code(parsed_response['target_room'])}\nDoor: {parsed_response['final_door']}\nPath: {parsed_response['path']}\nSpecial Item: {parsed_response['special_item']}\nExplanation: {parsed_response['explanation']}")
+                print(f"\nMove Response:\nTarget Room: {get_color_code(parsed_response['target_room'])}\nPath: {parsed_response['path']}\nPlanned Action: {parsed_response['planned_action']}\nExplanation: {parsed_response['explanation']}")
+                time.sleep(2)
+            elif parsed_response["action"] == "open_door":
+                response = agent.decide_door_to_open(context)
+                parsed_response = parse_door_opening_response(response, agent)
+                parsed_response["context"] = context
+                agent.decision_memory.add_decision(parsed_response)
+                print(f"\nDoor Opening Response:\nDirection: {parsed_response['door_direction']}\nSpecial Item: {parsed_response['special_item']}\nExplanation: {parsed_response['explanation']}")
                 if parsed_response["special_item"] != "NONE":
                     if parsed_response["special_item"] in agent.game_state.items.keys():
                         agent.game_state.items.pop(parsed_response["special_item"])
