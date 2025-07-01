@@ -3,7 +3,7 @@ import itertools
 import sys
 import threading
 import time
-from typing import Union
+
 from capture.constants import DIRECTORY
 
 def animate(stop, text="Thinking"):

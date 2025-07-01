@@ -1,25 +1,23 @@
-import os
-
-import time
-import easyocr
 import argparse
-from game_state import GameState
-from llm_agent import BluePrinceAgent
-from capture.resources import capture_resources
-from capture.note_capture import capture_note
-from capture.vision_utils import get_current_room
-from capture.drafting import capture_drafting_options
-from capture.items import capture_items
-from capture.shops import stock_shelves
-from capture.constants import DIRECTORY
-from capture.lab import capture_lab_experiment_options
+import os
+import time
+import warnings
 
+import easyocr
 from google.cloud import vision
 
-from room import CoatCheck, PuzzleRoom, SecretPassage, ShopRoom, UtilityCloset, Security, Office, Laboratory, Shelter
-from terminal import SecurityTerminal, ShelterTerminal, Terminal
-
-from llm_parsers import (
+from capture.constants import DIRECTORY
+from capture.drafting import capture_drafting_options
+from capture.items import capture_items
+from capture.lab import capture_lab_experiment_options
+from capture.note_capture import capture_note
+from capture.resources import capture_resources
+from capture.shops import stock_shelves
+from capture.vision_utils import get_current_room
+from game.game_state import GameState
+from game.room import CoatCheck, PuzzleRoom, SecretPassage, ShopRoom, UtilityCloset, Security, Office, Laboratory, Shelter
+from llm.llm_agent import BluePrinceAgent
+from llm.llm_parsers import (
     parse_action_response,
     parse_move_response,
     parse_door_opening_response,
@@ -36,7 +34,7 @@ from llm_parsers import (
 )
 from utils import get_color_code, thinking_animation
 
-import warnings
+
 warnings.filterwarnings("ignore", category=UserWarning, module="torch.utils.data.dataloader")
 
 def end_run(agent: BluePrinceAgent):
