@@ -1,8 +1,8 @@
-import time
 from typing import Union, cast
+
 from capture.constants import DIRECTORY
-from door import Door
-from room import (CoatCheck,
+from .door import Door
+from .room import (CoatCheck,
     Laboratory,
     Office,
     PuzzleRoom,
@@ -13,7 +13,6 @@ from room import (CoatCheck,
     ShopRoom,
     UtilityCloset,
 )
-from terminal import LabTerminal, OfficeTerminal, SecurityTerminal, ShelterTerminal
 
 
 class HouseMap:

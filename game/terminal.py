@@ -1,6 +1,7 @@
 import time
 from typing import List, Dict
 
+
 class Terminal:
     """
         Base class for all in-game terminals.

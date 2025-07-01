@@ -1,11 +1,12 @@
 import time
-from typing import Optional, Union
-import easyocr
-from capture import parlor
-from door import Door
-from terminal import Terminal, SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal
+from typing import Optional
 
+import easyocr
+
+from capture import parlor
 from capture.constants import DIRECTORY
+from .door import Door
+from .terminal import SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal
 from utils import get_color_code
 
 
