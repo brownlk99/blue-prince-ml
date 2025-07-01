@@ -11,8 +11,8 @@ llm_agent.py.
 from __future__ import annotations
 
 import os
-from typing import Tuple, Optional, Dict, Any, TYPE_CHECKING
 from dataclasses import dataclass
+from typing import Tuple, Optional, Dict, Any, TYPE_CHECKING
 
 
 class LLMError(Exception):
@@ -39,7 +39,7 @@ class LLMClient:
         
         # Initialize the client based on provider
         self.client = self._init_client()
-        self._cached_gemini_model = None  # Cache for Gemini model
+        self._cached_gemini_models = {}  # Cache for Gemini models by system instruction
         self._cached_anthropic_client = None  # Cache for Anthropic client
 
     def _clean_model_name(self, model_name: str) -> str:
@@ -69,16 +69,15 @@ class LLMClient:
         else:  # openai
             return 2048
 
-    @property
-    def _gemini_model(self):
-        """Lazy-loaded Gemini model to avoid re-auth costs"""
-        if self._cached_gemini_model is None:
+    def _get_gemini_model(self, system_instruction: str):
+        """Get or create a Gemini model with the specified system instruction"""
+        if system_instruction not in self._cached_gemini_models:
             import google.generativeai as genai  # type: ignore[import-untyped]
-            self._cached_gemini_model = genai.GenerativeModel(  # type: ignore[attr-defined]
+            self._cached_gemini_models[system_instruction] = genai.GenerativeModel(  # type: ignore[attr-defined]
                 self.model_name,
-                system_instruction={"role": "user", "parts": [{"text": "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"}]}
+                system_instruction={"role": "user", "parts": [{"text": system_instruction}]}
             )
-        return self._cached_gemini_model
+        return self._cached_gemini_models[system_instruction]
 
     @property
     def _anthropic_client(self):
@@ -147,12 +146,12 @@ class LLMClient:
         Send a prompt and return the assistant message content and usage stats.
         
         Args:
-            system: System prompt
+            system: System prompt (required)
             user: User message
             generation_config: Provider-specific generation configuration (mainly for Gemini)
         """
         # Check context window
-        total_prompt_tokens = _count_tokens(f"{system}\n{user}", self.model_name, self)
+        total_prompt_tokens = _count_tokens(user, self.model_name, system, self)
         ctx_limit = _context_window(self.model_name)
         if total_prompt_tokens + self.max_tokens > ctx_limit:
             raise LLMError(
@@ -243,7 +242,7 @@ class LLMClient:
         if generation_config:
             default_config.update(generation_config)
         
-        resp = self._gemini_model.generate_content(
+        resp = self._get_gemini_model(system).generate_content(
             contents,
             generation_config=default_config  # type: ignore[arg-type]
         )
@@ -315,8 +314,15 @@ def _context_window(model_name: str) -> int:
     return _STATIC_CTX.get(name, 32000)  # Conservative default
 
 
-def _count_tokens(text: str, model_name: str, llm_client: Optional[LLMClient] = None) -> int:
-    """Best-effort token estimate"""
+def _count_tokens(text: str, model_name: str, system: str, llm_client: Optional[LLMClient] = None) -> int:
+    """Best-effort token estimate
+    
+    Args:
+        text: User message text
+        model_name: Name of the model
+        system: System message (required for accurate counting)
+        llm_client: LLM client instance (for provider-specific token counting)
+    """
     name = model_name.lower()
     
     # Use tiktoken for OpenAI models
@@ -327,7 +333,9 @@ def _count_tokens(text: str, model_name: str, llm_client: Optional[LLMClient] = 
             # New models may not be registered – fall back to base encoding
             enc = tiktoken.get_encoding("cl100k_base")
         try:
-            return len(enc.encode(text))
+            # Include system message in token count
+            full_text = f"{system}\n{text}"
+            return len(enc.encode(full_text))
         except Exception as e:
             print(f"Warning: tiktoken failed for {model_name} ({e}), using heuristic token count")
     
@@ -336,7 +344,8 @@ def _count_tokens(text: str, model_name: str, llm_client: Optional[LLMClient] = 
         try:
             result = llm_client._anthropic_client.messages.count_tokens(
                 model=model_name,
-                messages=[{"role": "user", "content": text}]
+                system=system,
+                messages=[{"role": "user", "content": text}]  # type: ignore[arg-type]
             )
             return result.input_tokens
         except Exception as e:
@@ -345,13 +354,15 @@ def _count_tokens(text: str, model_name: str, llm_client: Optional[LLMClient] = 
     # Use Google's official token counter for Gemini models
     if name.startswith(("gemini",)) and llm_client:
         try:
-            return llm_client._gemini_model.count_tokens([{"role": "user", "parts": [{"text": text}]}]).total_tokens
+            # Use the actual system instruction that will be used
+            return llm_client._get_gemini_model(system).count_tokens([{"role": "user", "parts": [{"text": text}]}]).total_tokens
         except Exception as e:
             print(f"Warning: Google AI token counter failed for {model_name} ({e}), using heuristic token count")
     
     # Naive estimate: roughly 4 characters per token
     print(f"Using heuristic token count for {model_name} (4 chars per token)")
-    return len(text) // 4
+    full_text = f"{system}\n{text}"
+    return len(full_text) // 4
 
 
 __all__ = ["LLMClient", "UsageStats", "LLMError"]

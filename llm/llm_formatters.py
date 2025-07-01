@@ -1,5 +1,6 @@
 from typing import List
-from room import Laboratory, Office, Room, Security, Shelter
+
+from game.room import Laboratory, Office, Room, Security, Shelter, ShopRoom
 
 
 def format_term_memory_section(term_memory):
@@ -172,4 +173,27 @@ def format_available_actions(game_state):
     # always available
     actions.append('"call_it_a_day": If you\'re out of possible moves but still have steps remaining you can call it a day to proceed to tomorrow.')
     # format as a string for the prompt
-    return "AVAILABLE ACTIONS:\n" + "\n".join(f" - {a}" for a in actions) + "\n\n" 
+    return "AVAILABLE ACTIONS:\n" + "\n".join(f" - {a}" for a in actions) + "\n\n"
+
+
+def format_shop_items(game_state):
+    """
+    Format the items for sale in a shop room for LLM prompts
+    
+    Args:
+        game_state: The current game state
+        
+    Returns:
+        str: Formatted string of shop items for sale or message if no items
+    """
+    if game_state.current_room and isinstance(game_state.current_room, ShopRoom):
+        items_for_sale = game_state.current_room.items_for_sale
+    else:
+        items_for_sale = {}
+        
+    if not items_for_sale:
+        return "No items are currently for sale in this shop, if the shop has not been perused yet, you must do so first."
+    else:
+        items_str = "\n".join(f"- {item}: {price}" for item, price in items_for_sale.items())
+        room_name = game_state.current_room.name if game_state.current_room else 'None'
+        return f"You are in a shop - {room_name}.\nItems currently for sale:\n{items_str}" 

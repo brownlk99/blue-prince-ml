@@ -1,16 +1,12 @@
-import json
-import re
-import time
-from typing import List, Optional, Union, cast
-import easyocr
-from game_state import GameState
-from llm_client import LLMClient, _context_window
-from memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory, DecisionMemory
-from terminal import Terminal, SecurityTerminal, ShelterTerminal, OfficeTerminal, LabTerminal
-from room import PuzzleRoom, Room, ShopRoom
+from typing import List, Optional, Union
 
-from utils import thinking_animation
-from llm_formatters import (
+import easyocr
+
+from game.game_state import GameState
+from game.memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory, DecisionMemory
+from game.room import PuzzleRoom, Room
+from .llm_client import LLMClient, _context_window
+from .llm_formatters import (
     format_term_memory_section,
     format_room_memory_section,
     format_draft_summary,
@@ -19,8 +15,17 @@ from llm_formatters import (
     format_terminal_menu,
     format_lab_experiment_section,
     format_available_actions,
-    format_move_context
+    format_move_context,
+    format_shop_items
 )
+from utils import thinking_animation
+
+
+# System prompt constants - all game-specific prompts defined here
+SYSTEM_EXPLORER = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
+SYSTEM_LOGICIAN = "You are a logician helping a Blue Prince player solve the Parlor three-boxes puzzle."
+SYSTEM_ASSISTANT = "You are a helpful assistant."
+SYSTEM_DEDUCTION = "You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."
 
 class BluePrinceAgent:
     def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:gpt-4o-mini"):
@@ -34,8 +39,6 @@ class BluePrinceAgent:
         self.previously_chosen_room = ""
         self.previously_chosen_door = ""
         self.verbose = verbose
-        print(f"Using model: {self.llm_client.model_name}")
-        print(f"Provider: {self.llm_client.provider}")
 
     def _invoke(self, system_message: str, user_message: str) -> str:
         """Invoke the LLM and handle usage tracking"""
@@ -50,6 +53,45 @@ class BluePrinceAgent:
         
         return response
 
+    def _build_prompt(self, context: str, additional_sections: Optional[dict] = None, 
+                     include_terms: bool = True, include_rooms: bool = True, 
+                     include_notes: bool = True) -> str:
+        """
+        Build a standardized user prompt with common sections
+        
+        Args:
+            context: Game state context
+            additional_sections: Dict of additional sections to include {section_name: content}
+            include_terms: Whether to include terms section
+            include_rooms: Whether to include rooms section  
+            include_notes: Whether to include notes section
+            
+        Returns:
+            str: Formatted prompt sections
+        """
+        sections = [f"GAME STATE:\n{context}"]
+        
+        if include_terms:
+            terms_section = format_term_memory_section(self.term_memory)
+            if terms_section:
+                sections.append(terms_section)
+        
+        if include_rooms:
+            rooms_section = format_room_memory_section(self.room_memory)
+            if rooms_section:
+                sections.append(rooms_section)
+        
+        if include_notes:
+            notes = ""  # TODO: change this in the future
+            sections.append(f"RELEVANT NOTES:\n{notes}")
+        
+        if additional_sections:
+            for section_name, content in additional_sections.items():
+                if content:
+                    sections.append(content)
+        
+        return "\n".join(sections) + "\n"
+
     def take_action(self, context: str) -> str:
         """
             Decide the next action for the agent based on the current GAME STATE and RELEVANT NOTES.
@@ -60,20 +102,16 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the action to take.
         """
-        notes = ""  #TODO: change this in the future
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
-        actions_section = format_available_actions(self.game_state)
-        move_context = format_move_context(self.decision_memory.get_move_context())
+        additional_sections = {
+            "move_context": format_move_context(self.decision_memory.get_move_context()),
+            "actions": format_available_actions(self.game_state)
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
-            f"RELEVANT NOTES:\n{notes}\n"
-            f"{move_context}"
+        prompt_base = self._build_prompt(context, additional_sections)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Based on the above context and notes, what action should the agent take?\n\n"
-            f"{actions_section}"
             "If more information is needed to complete the action, return the high-level action and the parameters you know.\n"
             "Return only valid JSON in this exact shape:\n"
             '{\n'
@@ -100,16 +138,10 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the move decision.
         """
-        notes = ""
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
+        prompt_base = self._build_prompt(context)
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
-            f"RELEVANT NOTES:\n{notes}\n\n"
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Based on the above context and notes, where should you move and what action do you plan to take there?\n\n"
             "Choose a route that begins in the **current room** and leads to your **target room** (TARGET ROOM **MUST** be a room that has currently been discovered and is currently accessible).\n"
             "If there is NOT a currently available path to the TARGET ROOM based upon the ROOMS currently in the HOUSE, you must choose a different option.\n"
@@ -141,21 +173,17 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the door opening decision.
         """
-        notes = ""
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
-        special_items_section = format_special_items(self.game_state)
+        additional_sections = {
+            "special_items": format_special_items(self.game_state)
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
-            f"RELEVANT NOTES:\n{notes}\n\n"
+        prompt_base = self._build_prompt(context, additional_sections)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Based on the above context and notes, which door in the current room do you wish to open?\n\n"
             "Choose a door direction (N, S, E, W) that is available in your current room.\n"
             "Keep in mind that if a DOOR leads to a \"?\" then it is a valid option to choose to explore / open.\n"
-            f"{special_items_section}"
             "Return **only** valid JSON in this exact shape:\n"
             '{\n'
             '  "door_direction": "N|S|E|W",\n'
@@ -183,22 +211,14 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the item to purchase and quantity.
         """
-        if self.game_state.current_room and isinstance(self.game_state.current_room, ShopRoom):
-            items_for_sale = self.game_state.current_room.items_for_sale
-        else:
-            items_for_sale = {}
-        if not items_for_sale:
-            items_str = "No items are currently for sale in this shop, if the shop has not been perused yet, you must do so first."
-        else:
-            items_str = "\n".join(f"- {item}: {price}" for item, price in items_for_sale.items())
-        terms_section = format_term_memory_section(self.term_memory)
+        additional_sections = {
+            "shop_items": format_shop_items(self.game_state)
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"You are in a shop - {self.game_state.current_room.name if self.game_state.current_room else 'None'}.\n"
-            f"Items currently for sale:\n{items_str}\n\n"
+        prompt_base = self._build_prompt(context, additional_sections, include_rooms=False, include_notes=False)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Which item (if any) do you wish to purchase, and how many?\n"
             "If you do not wish to purchase anything, return 'None' within the item field with a quantity of 0.\n"
             "Return only valid JSON in this exact shape:\n"
@@ -218,22 +238,16 @@ class BluePrinceAgent:
         return response
 
     def decide_drafting_option(self, draft_options: List[Room], context: str) -> str:
-        notes = ""
-        draft_summary = format_draft_summary(draft_options)
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
-        redraw_section = format_redraw_count(self.game_state)
+        additional_sections = {
+            "draft_options": f"You are choosing between 3 rooms to draft through the {self.previously_chosen_room} {self.previously_chosen_door} door.\nDrafting Options:\n{format_draft_summary(draft_options)}",
+            "redraw_section": format_redraw_count(self.game_state)
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
-            f"RELEVANT NOTES:\n{notes}\n\n"
-            f"You are choosing between 3 rooms to draft through the {self.previously_chosen_room} {self.previously_chosen_door} door.\n"
-            f"Drafting Options:\n{draft_summary}\n"
-            f"{redraw_section}"
-            f"Which should the player choose and why?\n"
+        prompt_base = self._build_prompt(context, additional_sections)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
+            "Which should the player choose and why?\n"
             "If you do not like any of the available options, have REDRAWS available, and wish to draft new rooms, return only this JSON:\n"
             '{\n'
             '  "action": "REDRAW",\n'
@@ -262,24 +276,28 @@ class BluePrinceAgent:
             boxes = self.game_state.current_room.parlor_puzzle(reader, editor_path)
         else:
             boxes = {}
-        terms_section = format_term_memory_section(self.term_memory)
         
-        system_message = "You are a logician helping a Blue Prince player solve the Parlor three-boxes puzzle."
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            "Rules that NEVER change:\n"
-            " • THERE WILL ALWAYS BE AT LEAST ONE BOX THAT DISPLAYS ONLY TRUE STATEMENTS.\n"
-            " • THERE WILL ALWAYS BE AT LEAST ONE BOX WHICH DISPLAYS ONLY FALSE STATEMENTS\n"
-            " • ONLY ONE BOX HAS A PRIZE WITHIN. THE OTHER 2 ARE ALWAYS EMPTY.\n\n"
-            "The boxes from left to right are:\n"
-            " - BLUE BOX\n"
-            " - WHITE BOX\n"
-            " - BLACK BOX\n\n"
-            "Here are today's statements:\n"
-            f"BLUE BOX:\n\"{boxes.get('BLUE', '')}\"\n\n"
-            f"WHITE BOX:\n\"{boxes.get('WHITE', '')}\"\n\n"
-            f"BLACK BOX:\n\"{boxes.get('BLACK', '')}\"\n\n"
+        additional_sections = {
+            "puzzle_info": (
+                "Rules that NEVER change:\n"
+                " • THERE WILL ALWAYS BE AT LEAST ONE BOX THAT DISPLAYS ONLY TRUE STATEMENTS.\n"
+                " • THERE WILL ALWAYS BE AT LEAST ONE BOX WHICH DISPLAYS ONLY FALSE STATEMENTS\n"
+                " • ONLY ONE BOX HAS A PRIZE WITHIN. THE OTHER 2 ARE ALWAYS EMPTY.\n\n"
+                "The boxes from left to right are:\n"
+                " - BLUE BOX\n"
+                " - WHITE BOX\n"
+                " - BLACK BOX\n\n"
+                "Here are today's statements:\n"
+                f"BLUE BOX:\n\"{boxes.get('BLUE', '')}\"\n\n"
+                f"WHITE BOX:\n\"{boxes.get('WHITE', '')}\"\n\n"
+                f"BLACK BOX:\n\"{boxes.get('BLACK', '')}\""
+            )
+        }
+        
+        prompt_base = self._build_prompt(context, additional_sections, include_rooms=False, include_notes=False)
+        
+        system_message = SYSTEM_LOGICIAN
+        user_message = (prompt_base +
             "State which box must contain the gems, and why.\n"
             "Return only valid JSON in this exact shape:\n"
             '{\n'
@@ -297,14 +315,14 @@ class BluePrinceAgent:
         return response
 
     def use_terminal(self, context: str) -> str:
-        terms_section = format_term_memory_section(self.term_memory)
-        terminal_section = format_terminal_menu(self.game_state)
+        additional_sections = {
+            "terminal_menu": format_terminal_menu(self.game_state)
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{terminal_section}\n"
+        prompt_base = self._build_prompt(context, additional_sections, include_rooms=False, include_notes=False)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Return only valid JSON in this exact shape:\n"
             '{\n'
             '  "command": "COMMAND NAME",\n'
@@ -330,12 +348,10 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen security level and explanation.
         """
-        terms_section = format_term_memory_section(self.term_memory)
+        prompt_base = self._build_prompt(context, include_rooms=False, include_notes=False)
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Based on the above context, what security level should be set for the estate?\n\n"
             "AVAILABLE SECURITY LEVELS:\n"
             " - LOW\n"
@@ -366,12 +382,10 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen mode and explanation.
         """
-        terms_section = format_term_memory_section(self.term_memory)
+        prompt_base = self._build_prompt(context, include_rooms=False, include_notes=False)
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Based on the above context, what offline mode should be set for security doors?\n\n"
             "AVAILABLE MODES:\n"
             " - LOCKED\n"
@@ -401,14 +415,14 @@ class BluePrinceAgent:
                 Returns:
                     str: JSON string with the chosen experiment and explanation.
         """
-        terms_section = format_term_memory_section(self.term_memory)
-        lab_section = format_lab_experiment_section(options)
+        additional_sections = {
+            "lab_experiments": format_lab_experiment_section(options)
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{lab_section}\n"
+        prompt_base = self._build_prompt(context, additional_sections, include_rooms=False, include_notes=False)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "If you do not like any of the available options, return only this JSON:\n"
             '{\n'
             '  "action": "LOGIN TO NETWORK|EXIT",\n'
@@ -435,22 +449,20 @@ class BluePrinceAgent:
             Decide whether to store or retrieve an item from the coat check based on the current GAME STATE.
 
                 Args:
-                    None
+                    action: The action to perform (store/retrieve)
+                    context: Current game state context
 
                 Returns:
                     str: JSON string with the chosen action and explanation.
         """
-        notes = ""
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
+        additional_sections = {
+            "action_prompt": f"Based on the above context, what item do you wish to {action}? (Choose 'None' if you no longer wish to {action} an item)"
+        }
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
-            f"RELEVANT NOTES:\n{notes}\n\n"
-            f"Based on the above context, what item do you wish to {action}? (Choose 'None' if you no longer wish to {action} an item)\n\n"
+        prompt_base = self._build_prompt(context, additional_sections)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Return only valid JSON in this exact shape:\n"
             '{\n'
             '  "item": "ITEM NAME",\n'
@@ -471,20 +483,16 @@ class BluePrinceAgent:
             Decide whether to open the secret passage based on the current GAME STATE.
 
                 Args:
-                    None
+                    context: Current game state context
 
                 Returns:
                     str: JSON string with the decision to open the secret passage and explanation.
         """
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
-        #TODO: add more context here
+        # TODO: add more context here
+        prompt_base = self._build_prompt(context, include_notes=False)
         
-        system_message = "You are an expert explorer in the game Blue Prince and your goal is to make it to the Antechamber... it may be more difficult than you think!"
-        user_message = (
-            f"GAME STATE:\n{context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
             "Based on the above context, what TYPE of ROOM would you like to open the SECRET PASSAGE to?\n\n"
             "Return only valid JSON in this exact shape:\n"
             '{\n'
@@ -506,7 +514,7 @@ class BluePrinceAgent:
         Generate a title for the note based on its content.
         This is a simple heuristic and can be improved with more complex logic.
         """
-        system_message = "You are a helpful assistant."
+        system_message = SYSTEM_ASSISTANT
         user_message = (f"Give the following note a short descriptive title (no more than four words at most):\n\n{note_content}"
                   "\n\n Return only valid JSON in this exact shape:\n"
                   '{\n'
@@ -525,19 +533,17 @@ class BluePrinceAgent:
         most_recent_decision = self.decision_memory.decisions[-1].copy()
         most_recent_context = most_recent_decision['context']
         most_recent_decision.pop("context", None)           # remove context from decision
-        terms_section = format_term_memory_section(self.term_memory)
-        rooms_section = format_room_memory_section(self.room_memory)
         input_section = input("Please enter any additional specific questions that may be relevant to the previous LLM decision: ")
-        notes = ""
         
-        system_message = "You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."
-        user_message = (f"GAME STATE:\n{most_recent_context}\n"
-            f"{terms_section}\n"
-            f"{rooms_section}\n"
-            f"RELEVANT NOTES:\n{notes}\n"
-            f"Previous Response:\n{most_recent_decision}\n\n"
-            f"Based on the above context, what is the most likely reason for the previous LLM decision? {input_section}"
-        )
+        additional_sections = {
+            "previous_response": f"Previous Response:\n{most_recent_decision}",
+            "additional_question": f"Based on the above context, what is the most likely reason for the previous LLM decision? {input_section}"
+        }
+        
+        prompt_base = self._build_prompt(most_recent_context, additional_sections)
+        
+        system_message = SYSTEM_DEDUCTION
+        user_message = prompt_base
 
         if self.verbose:
             print("\nPrompt for LLM:\n" + user_message)
