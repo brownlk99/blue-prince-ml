@@ -1,20 +1,18 @@
-import os
-import subprocess
-import tempfile
 import threading
 import time
-from typing import Optional
-import cv2
-import numpy as np
-import mouse
-from mouse import ButtonEvent
 from threading import Event
-from note import Note
-from room import Room
-from capture.screen_capture import ScreenCapture
+from typing import Optional
+
+import cv2
+import mouse
+import numpy as np
 from google.cloud import vision
-from capture.ocr import google_vision
-from capture.vision_utils import edit_text_in_editor, generic_autocorrect
+
+from .ocr import google_vision
+from .screen_capture import ScreenCapture
+from .vision_utils import edit_text_in_editor, generic_autocorrect
+from game.note import Note
+from game.room import Room
 
 
 def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str], editor_path: Optional[str] = None) -> None:

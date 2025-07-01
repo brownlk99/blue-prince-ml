@@ -1,11 +1,13 @@
 from typing import Optional
+
 import cv2
 import numpy as np
-from capture.constants import REGIONS
-from capture.screen_capture import ScreenCapture
-from capture.ocr import google_vision
 from google.cloud import vision
-from capture.vision_utils import generic_autocorrect, edit_text_in_editor
+
+from .constants import REGIONS
+from .ocr import google_vision
+from .screen_capture import ScreenCapture
+from .vision_utils import generic_autocorrect, edit_text_in_editor
 
 
 def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient, editor_path: Optional[str] = None) -> dict:

@@ -1,15 +1,17 @@
 import hashlib
+import os
 import time
+from typing import Optional
+
 import cv2
 import numpy as np
-from typing import Optional
 from google.cloud import vision
-from capture.ocr import google_vision
-from capture.screen_capture import ScreenCapture
-import os
 
-from capture.constants import  REGIONS
+from .constants import REGIONS
+from .ocr import google_vision
+from .screen_capture import ScreenCapture
 from utils import get_color_code
+
 
 last_resource_hashes = {}
 

@@ -1,20 +1,18 @@
 import os
-import random
-from typing import Dict, List, Optional, Union
+from typing import List, Union
+
 import cv2
 import easyocr
 import numpy as np
-from capture.ocr import easy_ocr, google_vision
-from capture.resources import capture_resources
-from capture.screen_capture import ScreenCapture
-from capture.vision_utils import best_match, get_current_room
 from google.cloud import vision
 
-from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LIST, DIRECTORY, ROOM_LOOKUP
-from door import Door
-from house_map import HouseMap
-from room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
-from terminal import SecurityTerminal, LabTerminal, ShelterTerminal, OfficeTerminal
+from .constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LIST, ROOM_LOOKUP
+from .ocr import easy_ocr, google_vision
+from .screen_capture import ScreenCapture
+from .vision_utils import best_match
+from game.door import Door
+from game.house_map import HouseMap
+from game.room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
 from utils import get_color_code
 
 

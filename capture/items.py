@@ -1,12 +1,13 @@
-import cv2
-import numpy as np
-from capture.screen_capture import ScreenCapture
-from capture.ocr import google_vision
-from google.cloud import vision
-from capture.vision_utils import best_match
 import time
 
-from capture.constants import DIRECTORY
+import cv2
+import numpy as np
+from google.cloud import vision
+
+from .constants import DIRECTORY
+from .ocr import google_vision
+from .screen_capture import ScreenCapture
+from .vision_utils import best_match
 
 
 def capture_items(client: vision.ImageAnnotatorClient):

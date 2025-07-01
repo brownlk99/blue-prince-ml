@@ -1,6 +1,6 @@
 import cv2
-from google.cloud import vision
 import numpy as np
+from google.cloud import vision
 
 
 def easy_ocr(reader, img, paragraph, allowlist):

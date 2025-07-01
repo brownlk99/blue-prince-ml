@@ -1,11 +1,12 @@
-import easyocr
-from room import Room, ShopRoom
-from capture.constants import REGIONS, DIRECTORY, ALPHANUMERIC_ALLOWLIST
-from capture.screen_capture import ScreenCapture
 import cv2
+import easyocr
 import numpy as np
-from capture.ocr import easy_ocr
-from capture.vision_utils import best_match
+
+from .constants import REGIONS, DIRECTORY, ALPHANUMERIC_ALLOWLIST
+from .ocr import easy_ocr
+from .screen_capture import ScreenCapture
+from .vision_utils import best_match
+from game.room import ShopRoom
 
 
 def stock_shelves(reader: easyocr.Reader, current_room: ShopRoom):

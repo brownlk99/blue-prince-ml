@@ -1,5 +1,4 @@
 import difflib
-import hashlib
 import os
 import subprocess
 import tempfile
@@ -9,10 +8,9 @@ import cv2
 import numpy as np
 from textblob import TextBlob
 
-from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LOOKUP
-from capture.ocr import easy_ocr
-from capture.screen_capture import ScreenCapture
-from note import Note
+from .constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LOOKUP
+from .ocr import easy_ocr
+from .screen_capture import ScreenCapture
 
 
 def best_match(text, options):
