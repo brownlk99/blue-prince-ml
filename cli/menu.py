@@ -8,9 +8,34 @@ import easyocr
 from google.cloud import vision
 
 from llm.llm_agent import BluePrinceAgent
-from .constants import MENU_OPTIONS, MENU_HEADER, MENU_FOOTER
 from .command_handler import CommandHandler
 
+# Menu configuration
+MENU_OPTIONS = {
+    '1': ('capture_resources', 'Capture Resources - Use OCR to capture and update resource counts.'),
+    '2': ('capture_note', 'Capture Note - Capture a note for the current room.'),
+    '3': ('capture_items', 'Capture Items - Use OCR to capture and update items.'),
+    '4': ('stock_shelves', 'Stock Shelves - Stock shelves in the current room.'),
+    '5': ('take_action', 'Take Action - Use LLM to decide on actions based on current state.'),
+    '6': ('drafting_options', 'Drafting Options - Capture drafting options for the current room.'),
+    '7': ('add_term_to_memory', 'Add Term to Memory - Add a term to memory.'),
+    '8': ('set_dig_spots', 'Set Dig Spots - Set dig spots in the current room.'),
+    '9': ('set_trunks', 'Set Trunks - Set trunks in the current room.'),
+    '10': ('edit_doors', 'Edit Doors - Edit doors in the current room.'),
+    '11': ('edit_items_for_sale', 'Edit Items for Sale - Edit items for sale in the current room.'),
+    '12': ('fill_room_attributes', 'Fill Room Attributes - Autofill attributes for a room based on its position.'),
+    '13': ('manual_llm_follow_up', 'Manual LLM Follow Up - Analyze previous LLM decision.'),
+    '14': ('call_it_a_day', 'Call It a Day - End the current run and save progress.'),
+}
+
+MENU_HEADER = """
+=========== Blue Prince ML Control Menu ==========="""
+
+MENU_FOOTER = """
+q. Quit                     - Exit the script.
+"""
+
+CURRENT_RUN_FILE = './jsons/current_run.json'
 
 class GameMenu:
     """Main game menu and command dispatcher."""
@@ -44,11 +69,11 @@ class GameMenu:
 
     def run(self) -> None:
         """Run the main menu loop."""
-        print("Script is running. Type a number (1-15) and press Enter to interact. Type 'q' to quit.")
+        print("Script is running. Type a number (1-14) and press Enter to interact. Type 'q' to quit.")
         
         while True:
             self.print_menu()
-            user_input = input("\nEnter command (1-15, q to quit): ").strip().lower()
+            user_input = input("\nEnter command (1-14, q to quit): ").strip().lower()
             
             if user_input == 'q':
                 print("Exiting script.")
@@ -66,7 +91,7 @@ class GameMenu:
                     print("Command failed to execute. Please check your current state and try again.")
             
             # Always save to file after each command (matching original behavior)
-            self.command_handler.agent.game_state.save_to_file('./jsons/current_run.json')
+            self.command_handler.agent.game_state.save('./jsons/current_run.json')
                     
             # Small pause for readability
             time.sleep(1) 
