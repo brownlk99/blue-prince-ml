@@ -166,6 +166,8 @@ class TermMemory(BaseMemory):
             else:
                 print("\nInvalid key. Please type the exact key from the list or 'q' to quit.")
                 time.sleep(2)
+        self.save()
+        
 
     def get_term(self, key):
         return self.terms.get(key.upper())
