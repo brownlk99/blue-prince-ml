@@ -15,13 +15,12 @@ from capture.resources import capture_resources
 from capture.shops import stock_shelves
 from capture.vision_utils import get_current_room
 from cli.drafting_handler import DraftingHandler
-from game.room import ShopRoom
+from game.room import CoatCheck, ShopRoom
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import parse_note_title_response
-from utils import get_color_code
 
-from .constants import CURRENT_RUN_FILE
-from .decorators import capture_resources_first, requires_current_room, auto_save, handle_command_safely
+from .menu import CURRENT_RUN_FILE
+from .decorators import auto_save, capture_resources_first, requires_current_room, handle_command_safely, requires_shop_room
 from .action_handler import ActionHandler
 
 
@@ -48,7 +47,6 @@ class CommandHandler:
 
     @handle_command_safely
     @requires_current_room
-    @auto_save
     def capture_note(self) -> bool:
         """Capture a note for the current room."""
         print("Capturing note...")
@@ -81,22 +79,18 @@ class CommandHandler:
 
     @handle_command_safely
     @requires_current_room
+    @requires_shop_room
     @auto_save
     def stock_shelves(self) -> bool:
         """Stock shelves in the current room."""
         print("Stocking shelves...")
-        if isinstance(self.agent.game_state.current_room, ShopRoom):
-            stock_shelves(self.reader, self.agent.game_state.current_room)
-            print("Shelves stocked.")
-            return True
-        else:
-            print("Current room is not a SHOP ROOM, cannot stock shelves.")
-            return False
+        stock_shelves(self.reader, self.agent.game_state.current_room)  # type: ignore
+        print("Shelves stocked.")
+        return True
 
     @handle_command_safely
     @capture_resources_first
     @requires_current_room
-    @auto_save
     def take_action(self) -> bool:
         """Use LLM to decide on actions based on current state."""
         return self.action_handler.handle_take_action()
@@ -118,7 +112,7 @@ class CommandHandler:
     @handle_command_safely
     @requires_current_room
     @auto_save
-    def set_dig_spots(self) -> bool:
+    def set_dig_spots(self) -> bool:        #TODO: allow for any room.. not just current
         """Set dig spots in the current room."""
         self.agent.game_state.current_room.set_dig_spots()  # type: ignore
         return True
@@ -126,7 +120,7 @@ class CommandHandler:
     @handle_command_safely
     @requires_current_room
     @auto_save
-    def set_trunks(self) -> bool:
+    def set_trunks(self) -> bool:        #TODO: allow for any room.. not just current
         """Set trunks in the current room."""
         self.agent.game_state.current_room.set_trunks()  # type: ignore
         return True
@@ -143,15 +137,12 @@ class CommandHandler:
 
     @handle_command_safely
     @requires_current_room
+    @requires_shop_room
     @auto_save
     def edit_items_for_sale(self) -> bool:
         """Edit items for sale in the current room."""
-        if isinstance(self.agent.game_state.current_room, ShopRoom):
-            self.agent.game_state.current_room.edit_items_for_sale()
-            return True
-        else:
-            print("Current ROOM is not a SHOP ROOM, cannot edit items for sale.")
-            return False
+        self.agent.game_state.current_room.edit_items_for_sale()  # type: ignore
+        return True
 
     @handle_command_safely
     @auto_save
@@ -181,15 +172,8 @@ class CommandHandler:
         self.agent.game_state.house.generic_autofill_room_attributes(room_to_edit, room_name)
         room_to_edit = self.agent.game_state.house.specialize_room(room_to_edit)
         self.agent.game_state.house.update_room_in_house(room_to_edit)
-        print(f"Room updated to {room_name}.")
         self.agent.room_memory.add_room(room_to_edit)
-        return True
-
-    @handle_command_safely
-    def save_game_state(self) -> bool:      #TODO: look at this.. unnecessary?
-        """Save the current game state to a JSON file."""
-        self.agent.game_state.save_to_file(CURRENT_RUN_FILE)
-        print("Game state saved.")
+        print(f"Room updated to {room_name}.")
         return True
 
     @handle_command_safely
@@ -199,7 +183,7 @@ class CommandHandler:
         print(f"\nManual LLM Follow Up Response:\n{response}")
         return True
 
+    @handle_command_safely
     def call_it_a_day(self) -> bool:
         """End the current run and save progress."""
-        self.agent.end_run()
-        return True 
+        return self.action_handler._handle_call_it_a_day()

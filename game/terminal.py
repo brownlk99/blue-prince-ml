@@ -1,5 +1,5 @@
 import time
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class Terminal:
@@ -259,6 +259,15 @@ class LabTerminal(Terminal):
             }
         ]
 
+    def set_experimental_house_feature(self, dict_input: Optional[dict] = None) -> None:
+        """
+            Set the experimental house feature.
+        """
+        if dict_input:
+            self.experimental_house_feature = dict_input
+        else:
+            self.experimental_house_feature = {}
+    
     def to_dict(self):
         data = super().to_dict()
         data.update({

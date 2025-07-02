@@ -425,8 +425,13 @@ class BluePrinceAgent:
         user_message = (prompt_base +
             "If you do not like any of the available options, return only this JSON:\n"
             '{\n'
-            '  "action": "LOGIN TO NETWORK|EXIT",\n'
+            '  "action": "EXIT",\n'
             '  "explanation": "why a you don\'t like the available options"\n'
+            '}\n'
+            "If you wish to pause/clear the current experiment, return only this JSON:\n"
+            '{\n'
+            '  "action": "PAUSE EXPERIMENT",\n'
+            '  "explanation": "why you want to pause the current experiment"\n'
             '}\n'
             "Otherwise, return only this JSON:\n"
             '{\n'
@@ -551,34 +556,3 @@ class BluePrinceAgent:
         with thinking_animation("LLM Taking Action: Analyzing previous decision"):
             response = self._invoke(system_message, user_message)
         return response
-
-    def end_run(self):
-        """Saves the current run, gets a reason from the user, and updates run memory."""
-        
-        # Save the final state for this day
-        self.game_state.save_to_file(f'./jsons/runs/day_{self.game_state.day}.json')
-
-        reason_for_ending = input("Reason for ending the run: ")
-
-        # Determine what item is in the coat check for the next run
-        coat_check = self.game_state.house.get_room_by_name("COAT CHECK")
-        previous_run = self.previous_run_memory.get_most_recent_run()
-        previous_stored_item = previous_run.get("stored_item", "")
-        stored_item = ""
-
-        if isinstance(coat_check, CoatCheck):
-            # Player interacted with coat check this run
-            current_stored_item = coat_check.stored_item
-
-            if current_stored_item != previous_stored_item:
-                # Player swapped out or added a new item
-                stored_item = current_stored_item
-            else:
-                # Player did not exchange any item, keep previous
-                stored_item = previous_stored_item
-        else:
-            # Coat check not present, keep previous stored item
-            stored_item = previous_stored_item
-
-        self.previous_run_memory.add_run(self.game_state.day, reason_for_ending, stored_item)
-        print(f"\nDay {self.game_state.day} has ended. Run data saved.")

@@ -1,9 +1,11 @@
 import json
 import time
 
+from capture.constants import DIRECTORY
+
 from .door import Door
 from .house_map import HouseMap
-from .room import CoatCheck, PuzzleRoom, Room, ShopRoom, UtilityCloset
+from .room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
 from utils import get_color_code
 
 
@@ -224,7 +226,7 @@ class GameState:
             "day": self.day
         }
 
-    def save_to_file(self, filepath: str):
+    def save(self, filepath: str = './jsons/current_run.json'):
         """Serialize the game state to a JSON file."""
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(self.to_dict(), f, indent=2)

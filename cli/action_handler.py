@@ -2,7 +2,7 @@
 Action handlers for LLM-based commands.
 """
 import time
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional, Union, cast
 
 import easyocr
 from google.cloud import vision
@@ -23,9 +23,8 @@ from llm.llm_parsers import (
 )
 from utils import get_color_code
 
-from .constants import SWITCH_ACTIONS
 from .terminal_handler import TerminalCommandProcessor
-from .decorators import capture_resources_first, requires_current_room
+from .decorators import auto_save, capture_resources_first, requires_coat_check, requires_current_room, requires_puzzle_room, requires_secret_passage, requires_shop_room, requires_utility_closet
 
 
 class ActionHandler:
@@ -75,11 +74,10 @@ class ActionHandler:
             return self._handle_store_coat_check_action(context)
         elif action == "retrieve_item_from_coat_check":
             return self._handle_retrieve_coat_check_action(context)
-        elif action in SWITCH_ACTIONS:
+        elif action in ["toggle_keycard_entry_switch", "toggle_gymnasium_switch", "toggle_darkroom_switch", "toggle_garage_switch"]:
             return self._handle_switch_action(action)
         elif action == "call_it_a_day":
-            self.agent.end_run()
-            return True
+            return self._handle_call_it_a_day()
         else:
             print(f"Unknown action: {action}")
             return False
@@ -95,6 +93,7 @@ class ActionHandler:
         time.sleep(2)
         return True
 
+    @auto_save
     def _handle_door_action(self, context: str) -> bool:
         """Handle door opening action."""
         response = self.agent.decide_door_to_open(context)
@@ -103,26 +102,26 @@ class ActionHandler:
         self.agent.decision_memory.add_decision(parsed_response)
         print(f"\nDoor Opening Response:\nDirection: {parsed_response['door_direction']}\nSpecial Item: {parsed_response['special_item']}\nExplanation: {parsed_response['explanation']}")
         
-        #TODO: move this inside of game_state as a function and implement its own save method
         if parsed_response["special_item"] != "NONE":
             if parsed_response["special_item"] in self.agent.game_state.items.keys():
                 self.agent.game_state.items.pop(parsed_response["special_item"])
+                print(f"Used {parsed_response['special_item']}")
             else:
                 print(f"Special item {parsed_response['special_item']} not found in inventory.")
         time.sleep(2)
         return True
 
+    @requires_shop_room
+    @auto_save
     def _handle_peruse_shop_action(self) -> bool:
         """Handle peruse shop action."""
-        if isinstance(self.agent.game_state.current_room, ShopRoom):
-            input(f"\nPlease access the {self.agent.game_state.current_room.name} shop inventory and press 'Enter' to stock shelves: ")
-            stock_shelves(self.reader, self.agent.game_state.current_room)
-            print("\nStocked shelves")
-            return True
-        else:
-            print("Current room is not a SHOP ROOM, cannot stock shelves.")
-            return False
+        input(f"\nPlease access the {self.agent.game_state.current_room.name} shop inventory and press 'Enter' to stock shelves: ")  # type: ignore
+        stock_shelves(self.reader, self.agent.game_state.current_room)  # type: ignore
+        print("\nStocked shelves")
+        return True
 
+    @requires_shop_room
+    @auto_save
     def _handle_purchase_action(self, context: str) -> bool:
         """Handle purchase item action."""
         response = self.agent.decide_purchase_item(context)
@@ -133,39 +132,37 @@ class ActionHandler:
         self.agent.game_state.purchase_item()
         return True
 
+    @requires_puzzle_room
+    @auto_save
     def _handle_solve_puzzle_action(self, context: str) -> bool:
         """Handle solve puzzle action."""
-        if isinstance(self.agent.game_state.current_room, PuzzleRoom):
-            response = self.agent.solve_parlor_puzzle(self.reader, context, self.editor_path)
-            parsed_response = parse_parlor_response(response)
-            parsed_response["context"] = context
-            self.agent.decision_memory.add_decision(parsed_response)
-            print(f"Parlor Response:\nBox: {get_color_code(parsed_response['box'])}\nExplanation: {parsed_response['explanation']}")
-            self.agent.game_state.current_room.has_been_solved = True
-            return True
-        else:
-            print("Current room is not a PUZZLE ROOM, cannot mark as solved.")
-            return False
+        response = self.agent.solve_parlor_puzzle(self.reader, context, self.editor_path)
+        parsed_response = parse_parlor_response(response)
+        parsed_response["context"] = context
+        self.agent.decision_memory.add_decision(parsed_response)
+        print(f"Parlor Response:\nBox: {get_color_code(parsed_response['box'])}\nExplanation: {parsed_response['explanation']}")
+        self.agent.game_state.current_room.has_been_solved = True  # type: ignore
+        return True
 
+    @requires_secret_passage
+    @auto_save
     def _handle_secret_passage_action(self, context: str) -> bool:
         """Handle open secret passage action."""
-        if isinstance(self.agent.game_state.current_room, SecretPassage):
-            response = self.agent.open_secret_passage(context)
-            parsed_response = parse_secret_passage_response(response)
-            parsed_response["context"] = context
-            self.agent.decision_memory.add_decision(parsed_response)
-            print(f"Secret Passage Response:\nRoom Type: {parsed_response['room_type']}\nExplanation: {parsed_response['explanation']}")
-            self.agent.game_state.current_room.has_been_used = True
-            return True
-        else:
-            print("Current room is not a SECRET PASSAGE, cannot mark as used.")
-            return False
+        response = self.agent.open_secret_passage(context)
+        parsed_response = parse_secret_passage_response(response)
+        parsed_response["context"] = context
+        self.agent.decision_memory.add_decision(parsed_response)
+        print(f"Secret Passage Response:\nRoom Type: {parsed_response['room_type']}\nExplanation: {parsed_response['explanation']}")
+        self.agent.game_state.current_room.has_been_used = True  # type: ignore
+        return True
 
+    @auto_save
     def _handle_dig_action(self) -> bool:
         """Handle dig action."""
         self.agent.game_state.current_room.set_dig_spots()  # type: ignore
         return True
 
+    @auto_save
     def _handle_trunk_action(self) -> bool:
         """Handle open trunk action."""
         self.agent.game_state.current_room.set_trunks()  # type: ignore
@@ -173,71 +170,94 @@ class ActionHandler:
 
     def _handle_terminal_action(self, context: str) -> bool:
         """Handle use terminal action."""
-        if isinstance(self.agent.game_state.current_room, (Security, Shelter, Office, Laboratory)):
-            response = self.agent.use_terminal(context)
-            parsed_response = parse_terminal_response(response)
-            parsed_response["context"] = context
-            self.agent.decision_memory.add_decision(parsed_response)
-            print(f"Terminal Response:\nCommand: {parsed_response['command']}\nExplanation: {parsed_response['explanation']}")
-            
-            command = parsed_response.get("command", "").upper()
-            return self.terminal_processor.process_terminal_command(command, context)
-        else:
-            print("No terminal found in the current room.")
-            time.sleep(1)
-            return False
+        response = self.agent.use_terminal(context)
+        parsed_response = parse_terminal_response(response)
+        parsed_response["context"] = context
+        self.agent.decision_memory.add_decision(parsed_response)
+        print(f"Terminal Response:\nCommand: {parsed_response['command']}\nExplanation: {parsed_response['explanation']}")
+        
+        command = parsed_response.get("command", "").upper()
+        return self.terminal_processor.process_terminal_command(command, context)
 
+    @requires_coat_check
+    @auto_save
     def _handle_store_coat_check_action(self, context: str) -> bool:
         """Handle store item in coat check action."""
         response = self.agent.coat_check_prompt("STORE", context)
-        parsed_response = parse_coat_check_response(response)
-        parsed_response["context"] = context
-        self.agent.decision_memory.add_decision(parsed_response)
-        coat_check = self.agent.game_state.house.get_room_by_name("COAT CHECK")
-        print(f"Coat Check Response:\nItem: {parsed_response['item']}\nExplanation: {parsed_response['explanation']}")
-        
-        if parsed_response["item"] in self.agent.game_state.items and isinstance(coat_check, CoatCheck):
-            coat_check.stored_item = parsed_response["item"]
-            print(f"Stored {parsed_response['item']} in Coat Check.")
-            return True
-        elif not coat_check:
-            print("No COAT CHECK room found in the house, cannot store item.")
-            return False
-        else:
-            print(f"Item {parsed_response['item']} not found in inventory.")
-            return False
+        parsed = parse_coat_check_response(response)
+        parsed["context"] = context
+        self.agent.decision_memory.add_decision(parsed)
+        print(f"Coat Check Response:\nItem: {parsed['item']}\nExplanation: {parsed['explanation']}")
 
+        if parsed["item"] not in self.agent.game_state.items:
+            print(f"Item {parsed['item']} not found in inventory.")
+            return False
+        
+        self.agent.game_state.current_room.stored_item = parsed["item"]  # type: ignore
+        self.agent.game_state.items.pop(parsed["item"])
+
+        print(f"Stored {parsed['item']} in Coat Check.")
+        return True
+
+    @requires_coat_check
+    @auto_save
     def _handle_retrieve_coat_check_action(self, context: str) -> bool:
         """Handle retrieve item from coat check action."""
         response = self.agent.coat_check_prompt("RETRIEVE", context)
         parsed_response = parse_coat_check_response(response)
         parsed_response["context"] = context
         self.agent.decision_memory.add_decision(parsed_response)
-        coat_check = self.agent.game_state.house.get_room_by_name("COAT CHECK")
         print(f"Coat Check Response:\nItem: {parsed_response['item']}\nExplanation: {parsed_response['explanation']}")
         
-        if isinstance(coat_check, CoatCheck) and coat_check.stored_item == parsed_response["item"]:
-            self.agent.game_state.items[parsed_response["item"]] = DIRECTORY["ITEMS"][parsed_response["item"]]
-            coat_check.stored_item = ""
-            print(f"Retrieved {parsed_response['item']} from Coat Check.")
-            return True
-        elif not coat_check:
-            print("No COAT CHECK room found in the house, cannot retrieve item.")
-            return False
-        else:
+        if parsed_response["item"] not in self.agent.game_state.current_room.stored_item or parsed_response["item"] not in DIRECTORY["ITEMS"]:  # type: ignore
             print(f"Item {parsed_response['item']} not found in Coat Check.")
             return False
+        
+        self.agent.game_state.items[parsed_response["item"]] = DIRECTORY["ITEMS"][parsed_response["item"]]
+        self.agent.game_state.current_room.stored_item = ""  # type: ignore
+        print(f"Retrieved {parsed_response['item']} from Coat Check.")
+        return True
 
+    @requires_utility_closet
+    @auto_save
     def _handle_switch_action(self, action: str) -> bool:
         """Handle utility closet switch actions."""
-        utility_closet = self.agent.game_state.house.get_room_by_name("UTILITY CLOSET")
-        if isinstance(utility_closet, UtilityCloset):
-            switch_name = action.replace("toggle_", "")
-            utility_closet.toggle_switch(switch_name)
-            if switch_name == "keycard_entry_system_switch":
-                self.agent.game_state.house.update_security_doors()
-            print(f"Toggled {switch_name}")
-            return True
+        switch_name = action.replace("toggle_", "")
+        self.agent.game_state.current_room.toggle_switch(switch_name)  # type: ignore
+        if switch_name == "keycard_entry_system_switch":
+            self.agent.game_state.house.update_security_doors()
+        print(f"Toggled {switch_name}")
+        return True
+
+    @auto_save
+    def _handle_call_it_a_day(self) -> bool:
+        """End the current run and save progress."""
+        
+        # Save the final state for this day
+        self.agent.game_state.save(f'./jsons/runs/day_{self.agent.game_state.day}.json')
+
+        reason_for_ending = input("Reason for ending the run: ")
+
+        # Determine what item is in the coat check for the next run
+        coat_check = self.agent.game_state.house.get_room_by_name("COAT CHECK")
+        previous_run = self.agent.previous_run_memory.get_most_recent_run()
+        previous_stored_item = previous_run.get("stored_item", "")
+        stored_item = ""
+
+        if isinstance(coat_check, CoatCheck):
+            # Player interacted with coat check this run
+            current_stored_item = coat_check.stored_item
+
+            if current_stored_item != previous_stored_item:
+                # Player swapped out or added a new item
+                stored_item = current_stored_item
+            else:
+                # Player did not exchange any item, keep previous
+                stored_item = previous_stored_item
         else:
-            print("No UTILITY CLOSET found in the house, cannot toggle switches.")
-            return False
+            # Coat check not present, keep previous stored item
+            stored_item = previous_stored_item
+
+        self.agent.previous_run_memory.add_run(self.agent.game_state.day, reason_for_ending, stored_item)
+        print(f"\nDay {self.agent.game_state.day} has ended. Run data saved.")
+        return True 

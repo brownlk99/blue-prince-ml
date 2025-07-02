@@ -96,6 +96,5 @@ class DraftingHandler:
                 selected_room.edit_doors()
 
         self.agent.game_state.house.update_security_doors()
-        self.agent.game_state.save_to_file('./jsons/current_run.json')
         print(self.agent.game_state.house.print_map())
         return True 
