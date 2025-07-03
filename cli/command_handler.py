@@ -6,22 +6,16 @@ from typing import Optional
 import easyocr
 from google.cloud import vision
 
-from capture.constants import DIRECTORY
-from capture.drafting import capture_drafting_options
 from capture.items import capture_items
-from capture.lab import capture_lab_experiment_options
 from capture.note_capture import capture_note
 from capture.resources import capture_resources
 from capture.shops import stock_shelves
-from capture.vision_utils import get_current_room
 from cli.drafting_handler import DraftingHandler
-from game.room import CoatCheck, ShopRoom
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import parse_note_title_response
 
-from .menu import CURRENT_RUN_FILE
-from .decorators import auto_save, capture_resources_first, requires_current_room, handle_command_safely, requires_shop_room
 from .action_handler import ActionHandler
+from .decorators import auto_save, capture_resources_first, requires_current_room, handle_command_safely, requires_shop_room
 
 
 class CommandHandler:

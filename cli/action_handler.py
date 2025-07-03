@@ -2,29 +2,23 @@
 Action handlers for LLM-based commands.
 """
 import time
-from typing import List, Literal, Optional, Union, cast
+from typing import Optional
 
 import easyocr
 from google.cloud import vision
 
 from capture.constants import DIRECTORY
 from capture.shops import stock_shelves
-from capture.drafting import capture_drafting_options
-from capture.vision_utils import get_current_room
-from game.room import (
-    Room, ShopRoom, PuzzleRoom, SecretPassage, CoatCheck, UtilityCloset,
-    Security, Office, Laboratory, Shelter
-)
+from game.room import CoatCheck
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import (
     parse_action_response, parse_move_response, parse_door_opening_response,
-    parse_purchase_response, parse_drafting_response, parse_parlor_response,
-    parse_terminal_response, parse_coat_check_response, parse_secret_passage_response
+    parse_purchase_response, parse_parlor_response, parse_terminal_response, parse_coat_check_response, parse_secret_passage_response
 )
 from utils import get_color_code
 
+from .decorators import auto_save, requires_coat_check, requires_puzzle_room, requires_secret_passage, requires_shop_room, requires_utility_closet
 from .terminal_handler import TerminalCommandProcessor
-from .decorators import auto_save, capture_resources_first, requires_coat_check, requires_current_room, requires_puzzle_room, requires_secret_passage, requires_shop_room, requires_utility_closet
 
 
 class ActionHandler:
