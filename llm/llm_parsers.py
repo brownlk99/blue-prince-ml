@@ -108,6 +108,26 @@ def parse_terminal_response(response: str):
     }
 
 
+def parse_password_guess_response(response: str):
+    """Parse the password guess response from the LLM"""
+    data = _parse_json_response(response)
+    password = data.get("password", "").strip().upper()
+    explanation = data.get("explanation", "").strip()
+    return {
+        "password": password,
+        "explanation": explanation
+    }
+
+def parse_special_order_response(response: str):
+    """Parse the special order response from the LLM"""
+    data = _parse_json_response(response)
+    item = data.get("item", "NONE").strip().upper()
+    explanation = data.get("explanation", "").strip()
+    return {
+        "item": item,
+        "explanation": explanation
+    }
+
 def parse_security_level_response(response: str):
     """Parse the security level response from the LLM"""
     data = _parse_json_response(response)

@@ -25,6 +25,7 @@ class GameState:
         self.current_position = (2, 8)
         self.current_room = self.house.get_room_by_position(self.current_position[0], self.current_position[1])
         self.day = current_day
+        self.special_order = None
 
     def setup_default_rooms(self):
         entrance_hall = Room(
@@ -79,6 +80,8 @@ class GameState:
             summary.extend([f"  - {name}: {desc}" for name, desc in self.items.items()])
         else:
             summary.append("  None")
+        if self.special_order:
+            summary.append(f"Special order for COMMISSARY: {self.special_order}")
         summary.append("Rooms Currently in House:")
         for row in self.house.grid:
             for room in row:
@@ -211,6 +214,8 @@ class GameState:
                         continue
                     item_name = items[idx][0]
                     del self.current_room.items_for_sale[item_name]
+                    if item_name == self.special_order:
+                        self.special_order = None
                     print(f"Removed {item_name} from items for sale.")
                 except Exception as e:
                     print("\nPlease enter a valid option.")
@@ -223,7 +228,8 @@ class GameState:
             "current_room": self.current_room.to_dict() if self.current_room else None,
             "items": self.items,
             "house": self.house.to_dict(),
-            "day": self.day
+            "day": self.day,
+            "special_order": self.special_order
         }
 
     def save(self, filepath: str = './jsons/current_run.json'):
@@ -244,4 +250,5 @@ class GameState:
         gs.house = HouseMap.from_dict(data.get('house', {}))
         gs.current_room = Room.from_dict(data.get("current_room", {}))  #TODO: this might need to be specified
         gs.day = data.get("day", 1)
+        gs.special_order = data.get("special_order", None)
         return gs

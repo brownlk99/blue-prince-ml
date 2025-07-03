@@ -338,6 +338,75 @@ class BluePrinceAgent:
             response = self._invoke(system_message, user_message)
         return response
 
+    def guess_network_password(self, context: str) -> str:
+        """
+        Have the LLM attempt to guess the network password based on context and notes.
+        
+        Args:
+            context: Current game state context
+            
+        Returns:
+            str: JSON string with the password guess and reasoning
+        """
+        prompt_base = self._build_prompt(context)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
+            "You need to guess the password to access the network.\n"
+            "Based on your notes, game context, and any clues you've discovered, what password would you try?\n\n"
+            "Return only valid JSON in this exact shape:\n"
+            '{\n'
+            '  "password": "YOUR GUESS",\n'
+            '  "explanation": "why you think this might be the password based on clues or context"\n'
+            '}\n'
+            "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
+        )
+        
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + user_message)
+        print("\n")
+        with thinking_animation("LLM Taking Action: Guessing network password"):
+            response = self._invoke(system_message, user_message)
+        return response
+
+    def decide_special_order(self, available_items: List[str], context: str) -> str:
+        """
+        Decide which special order item to request from the commissary.
+        
+        Args:
+            available_items: List of items available for special order
+            context: Current game state context
+            
+        Returns:
+            str: JSON string with the special order decision
+        """
+        items_list = "\n".join([f" - {item}" for item in available_items])
+        
+        additional_sections = {
+            "special_order_info": f"AVAILABLE SPECIAL ORDER ITEMS:\n{items_list}\n\nSpecial orders take 1-3 days to arrive at the COMMISSARY."
+        }
+        
+        prompt_base = self._build_prompt(context, additional_sections, include_rooms=False, include_notes=False)
+        
+        system_message = SYSTEM_EXPLORER
+        user_message = (prompt_base +
+            "Based on the above context, which special order item (if any) would you want to order?\n\n"
+            "If you don't want to order anything, return 'NONE' as the item.\n\n"
+            "Return only valid JSON in this exact shape:\n"
+            '{\n'
+            '  "item": "ITEM NAME|NONE",\n'
+            '  "explanation": "why this item would be useful or why you chose not to order"\n'
+            '}\n'
+            "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
+        )
+        
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + user_message)
+        print("\n")
+        with thinking_animation("LLM Taking Action: Deciding special order"):
+            response = self._invoke(system_message, user_message)
+        return response
+
     def decide_security_level(self, context: str) -> str:
         """
             Decide the security level for the estate based on the current GAME STATE and available security levels.

@@ -10,8 +10,10 @@ from cli.decorators import auto_save, requires_laboratory, requires_office, requ
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import (
     parse_lab_experiment_response,
+    parse_password_guess_response,
     parse_security_level_response,
-    parse_mode_response
+    parse_mode_response,
+    parse_special_order_response
 )
 
 class TerminalCommandProcessor:
@@ -27,26 +29,81 @@ class TerminalCommandProcessor:
         command = command.upper()
         
         if command == "RUN EXPERIMENT SETUP":
-            return self.handle_lab_experiment(context)
+            return self._handle_lab_experiment(context)
         elif command == "VIEW ESTATE INVENTORY":
-            return self.handle_estate_inventory()
+            return self._handle_estate_inventory()
         elif command == "ALTER SECURITY LEVEL":
-            return self.handle_security_level(context)
+            return self._handle_security_level(context)
         elif command == "ALTER MODE":
-            return self.handle_mode(context)
+            return self._handle_mode(context)
         elif command == "RUN PAYROLL":
-            return self.handle_payroll()
+            return self._handle_payroll()
         elif command == "SPREAD GOLD IN ESTATE":
-            return self.handle_gold_spread()
+            return self._handle_gold_spread()
         elif command == "TIME LOCK SAFE":
-            return self.handle_time_lock_safe()
+            return self._handle_time_lock_safe()
+        elif command == "LOGIN TO THE NETWORK":
+            return self._handle_login_to_network(context)
+        elif command == "SPECIAL ORDERS":
+            return self._handle_special_orders(context)
         else:
             print(f"Unknown terminal command: {command}")
             return False
 
+    @auto_save
+    def _handle_login_to_network(self, context: str) -> bool:
+        """Handle login to network - LLM guesses password."""
+        current_room = self.agent.game_state.current_room
+        
+        if not hasattr(current_room, 'terminal'):
+            print("No terminal found in current room.")
+            return False
+        
+        terminal = current_room.terminal  # type: ignore
+        
+        # If already logged in, no need to guess again
+        if terminal.knows_password:
+            print("Already logged into network.")
+            return True
+        
+        # Have LLM guess the password
+        response = self.agent.guess_network_password(context)
+        parsed_response = parse_password_guess_response(response)
+        parsed_response["context"] = context
+        self.agent.decision_memory.add_decision(parsed_response)
+        
+        print(f"Password Guess: {parsed_response['password']}\nExplanation: {parsed_response['explanation']}")
+        
+        # Try the password
+        success = terminal.login_to_the_network(parsed_response['password'])
+        
+        if success:
+            print("Network access granted! Special orders are now available!")
+        
+        return success
+
+    @auto_save
+    def _handle_special_orders(self, context: str) -> bool:
+        """Handle special orders command."""
+        current_room = self.agent.game_state.current_room
+        terminal = current_room.terminal  # type: ignore
+        
+        available_items = terminal.get_special_order_items()
+        response = self.agent.decide_special_order(available_items, context)
+        parsed_response = parse_special_order_response(response)
+        
+        if parsed_response["item"] != "NONE":
+            print(f"Special order placed: {parsed_response['item']}")
+            print(f"Reasoning: {parsed_response['explanation']}")
+            self.agent.game_state.special_order = parsed_response["item"]
+        else:
+            print("No special order placed.")
+        
+        return True
+
     @requires_laboratory
     @auto_save
-    def handle_lab_experiment(self, context: str) -> bool:
+    def _handle_lab_experiment(self, context: str) -> bool:
         """Handle laboratory experiment setup."""
         options = capture_lab_experiment_options(self.google_client, self.editor_path)
         response = self.agent.decide_lab_experiment(options, context)
@@ -65,14 +122,14 @@ class TerminalCommandProcessor:
 
     @requires_security
     @auto_save
-    def handle_estate_inventory(self) -> bool:
+    def _handle_estate_inventory(self) -> bool:
         """Handle viewing estate inventory."""
         self.agent.game_state.current_room.terminal.set_estate_inventory()  # type: ignore
         return True
 
     @requires_security
     @auto_save
-    def handle_security_level(self, context: str) -> bool:
+    def _handle_security_level(self, context: str) -> bool:
         """Handle altering security level."""
         response = self.agent.decide_security_level(context)
         parsed_response = parse_security_level_response(response)
@@ -84,7 +141,7 @@ class TerminalCommandProcessor:
 
     @requires_security
     @auto_save
-    def handle_mode(self, context: str) -> bool:
+    def _handle_mode(self, context: str) -> bool:
         """Handle altering security mode."""
         response = self.agent.decide_mode(context)
         parsed_response = parse_mode_response(response)
@@ -97,7 +154,7 @@ class TerminalCommandProcessor:
 
     @requires_office
     @auto_save
-    def handle_payroll(self) -> bool:
+    def _handle_payroll(self) -> bool:
         """Handle running payroll."""
         self.agent.game_state.current_room.terminal.payroll_ran = True  # type: ignore
         print("Payroll has been run.")
@@ -105,7 +162,7 @@ class TerminalCommandProcessor:
 
     @requires_office
     @auto_save
-    def handle_gold_spread(self) -> bool:
+    def _handle_gold_spread(self) -> bool:
         """Handle spreading gold in estate."""
         self.agent.game_state.current_room.terminal.gold_spread = True  # type: ignore
         print("Gold has been spread in the estate.")
@@ -113,7 +170,7 @@ class TerminalCommandProcessor:
 
     @requires_shelter
     @auto_save
-    def handle_time_lock_safe(self) -> bool:
+    def _handle_time_lock_safe(self) -> bool:
         """Handle time lock safe command."""
         self.agent.game_state.current_room.terminal.time_lock_safe = True  # type: ignore
         print("Time lock safe has been activated.")

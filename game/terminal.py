@@ -22,7 +22,7 @@ class Terminal:
         """
             Return a structured list of menu commands with descriptions and sub-commands.
         """
-        return [
+        base_menu = [
             {
                 "command": "Login to Network",
                 "description": "Access the secure network.",
@@ -32,6 +32,13 @@ class Terminal:
                 "description": "Log out of the terminal.",
             }
         ]
+
+        if self.knows_password:
+            base_menu.append({
+                "command": "Special Orders",
+                "description": "If you would like to get a specific brand of gum or your favorite fruit, the Comissary is now taking Special Orders for all members of the staff.\n(Special Orders can take 1-3 days)"
+            })
+        return base_menu
 
     def display_menu(self) -> None:
         """
@@ -46,20 +53,12 @@ class Terminal:
             Attempt to login to the network with the provided password.
         """
         if password == self.network_password:
-            print("Login successful.")
             self.knows_password = True
             return True
         else:
             print("Login failed. Incorrect password.")
             return False
         
-    def logged_in_menu(self) -> None:
-        if self.knows_password:
-            self.get_menu_structure().append({
-                "command": "SPECIAL ORDERS",
-                "description": "If you would like to get a specific brand of gum or your favorite fruit, the Comissary is now taking Special Orders for all members of the staff.\n(Special Orders can take 1-3 days)"
-            })
-
     #TODO: maybe this should be an attribute?
     def get_special_order_items(self) -> List[str]:
         """
