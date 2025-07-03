@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="torch.utils.data
 
 
 
-def main(day, load, verbose, editor_path, model_name):
+def main(day, load, verbose, editor_path, model_name, use_utility_model):
     """Main function - now much simpler and cleaner."""
     with thinking_animation("Initializing Blue Prince ML"):
         # Initialize game state
@@ -32,7 +32,7 @@ def main(day, load, verbose, editor_path, model_name):
         # Initialize clients and agent
         google_client = vision.ImageAnnotatorClient()
         reader = easyocr.Reader(['en'], gpu=False)
-        agent = BluePrinceAgent(game_state, verbose, model_name)
+        agent = BluePrinceAgent(game_state, verbose, model_name, use_utility_model)
 
         # Clear memory if a completely fresh run
         if agent.game_state.day == 1 and not load:
@@ -63,8 +63,9 @@ if __name__ == "__main__":
     parser.add_argument('--load', '-l', type=str, help='Path to saved game state JSON')
     parser.add_argument('--day', '-d', type=int, required=True, help='Day/run number for this session')
     parser.add_argument('--model', '-m', type=str, default="openai:o4-mini", help='Model to use for LLM (default: o4-mini)')
+    parser.add_argument('--use_utility_model', '-u', action='store_true', help='Use utility model for LLM (default: False)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Show full LLM prompts')
     parser.add_argument('--editor', '-e', type=str, default=os.environ.get('EDITOR_PATH'), help='Path to text editor (default: from EDITOR_PATH env var)')
     args = parser.parse_args()
 
-    main(args.day, args.load, args.verbose, args.editor, args.model) 
+    main(args.day, args.load, args.verbose, args.editor, args.model, args.use_utility_model) 

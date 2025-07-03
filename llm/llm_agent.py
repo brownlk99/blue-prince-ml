@@ -28,7 +28,7 @@ SYSTEM_ASSISTANT = "You are a helpful assistant."
 SYSTEM_DEDUCTION = "You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."
 
 class BluePrinceAgent:
-    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:gpt-4o-mini"):
+    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:gpt-4o-mini", use_utility_model: bool = False):
         self.llm_client = LLMClient(model_name)
         self.note_memory = NoteMemory()
         self.term_memory = TermMemory()
@@ -40,12 +40,18 @@ class BluePrinceAgent:
         self.previously_chosen_door = ""
         self.verbose = verbose
 
-    def _invoke(self, system_message: str, user_message: str) -> str:
+        if use_utility_model:
+            self.utility_client = LLMClient(self.llm_client._get_default_utility_model())
+        else:
+            self.utility_client = None
+
+    def _invoke(self, system_message: str, user_message: str, use_utility_model: bool = False) -> str:
         """Invoke the LLM and handle usage tracking"""
-        response, usage = self.llm_client.chat(system_message, user_message)
+        client = self.utility_client if (use_utility_model and self.utility_client) else self.llm_client
+        response, usage = client.chat(system_message, user_message)
         
         # Print usage statistics
-        ctx_limit = _context_window(self.llm_client.model_name)
+        ctx_limit = _context_window(client.model_name)
         pct = f"{usage.input_tokens/ctx_limit:.1%}" if ctx_limit else "?"
         
         print(f"[TOKENS] prompt={usage.input_tokens}  completion={usage.output_tokens}  "
@@ -597,7 +603,7 @@ class BluePrinceAgent:
                   "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
         
-        response = self._invoke(system_message, user_message)
+        response = self._invoke(system_message, user_message, use_utility_model=True)
         return response
 
     def manual_llm_follow_up(self) -> str:

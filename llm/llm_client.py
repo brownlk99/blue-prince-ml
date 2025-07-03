@@ -141,6 +141,16 @@ class LLMClient:
             package = provider_packages.get(self.provider, "unknown")
             raise LLMError(f"{self.provider.title()} SDK not found. Install with: pip install {package}") from e
 
+    def _get_default_utility_model(self) -> str:
+        """Get provider-appropriate cheap model for simple tasks"""
+        if self.provider == "openai":
+            return "gpt-4o-mini"
+        elif self.provider == "anthropic":
+            return "claude-3-5-haiku-20241022"
+        elif self.provider == "gemini":
+            return "gemini-1.5-flash"
+        return self.model_name  # fallback to main model
+
     def chat(self, system: str, user: str, generation_config: Optional[Dict[str, Any]] = None) -> Tuple[str, UsageStats]:
         """
         Send a prompt and return the assistant message content and usage stats.
