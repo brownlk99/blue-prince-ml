@@ -11,6 +11,7 @@ from capture.note_capture import capture_note
 from capture.resources import capture_resources
 from capture.shops import stock_shelves
 from cli.drafting_handler import DraftingHandler
+from game.room import Room
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import parse_note_title_response
 
@@ -103,20 +104,73 @@ class CommandHandler:
         self.agent.term_memory.user_facilitated_add_term()
         return True
 
+    def _select_room_for_editing(self, action_description: str) -> Optional[Room]:
+        """Helper method to select a room for editing."""
+        current_room = self.agent.game_state.current_room
+        
+        # Main choice loop
+        while True:
+            if not current_room:
+                print("No current room detected. Please select a room from the house.")
+                choice = "2"
+            else:
+                print(f"\nSelect room to {action_description}:")
+                print(f"1. Current room ({current_room.name})")
+                print("2. Choose another room")
+                print("q. Cancel")
+                
+                choice = input("Enter choice (1, 2, or q): ").strip().lower()
+            
+            if choice == "1" and current_room:
+                return current_room
+            elif choice == "2":
+                # Room selection loop
+                while True:
+                    room_name = input("\nEnter room name ('list' for all rooms, 'back' to go back): ").strip().upper()
+                    
+                    if room_name == "LIST":
+                        print("\nRooms in house:")
+                        for row in self.agent.game_state.house.grid:
+                            for room in row:
+                                if room is not None:
+                                    print(f"  - {room.name} at {room.position}")
+                    elif room_name == "BACK":
+                        break  # Go back to main choice
+                    else:
+                        target_room = self.agent.game_state.house.get_room_by_name(room_name)
+                        if target_room:
+                            return target_room
+                        else:
+                            print(f"Room '{room_name}' not found.")
+            elif choice == "q":
+                return None
+            else:
+                print("Invalid choice. Please enter 1, 2, or q.")
+
     @handle_command_safely
     @requires_current_room
     @auto_save
-    def set_dig_spots(self) -> bool:        #TODO: allow for any room.. not just current
+    def set_dig_spots(self) -> bool:
         """Set dig spots in the current room."""
-        self.agent.game_state.current_room.set_dig_spots()  # type: ignore
+        room = self._select_room_for_editing("SET DIG SPOTS")
+        if room:
+            room.set_dig_spots()
+            print(f"Dig spots set for {room.name}.")
+        else:
+            print("No room selected.")
         return True
 
     @handle_command_safely
     @requires_current_room
     @auto_save
-    def set_trunks(self) -> bool:        #TODO: allow for any room.. not just current
+    def set_trunks(self) -> bool:
         """Set trunks in the current room."""
-        self.agent.game_state.current_room.set_trunks()  # type: ignore
+        room = self._select_room_for_editing("SET TRUNKS")
+        if room:
+            room.set_trunks()
+            print(f"Trunks set for {room.name}.")
+        else:
+            print("No room selected.")
         return True
 
     @handle_command_safely
