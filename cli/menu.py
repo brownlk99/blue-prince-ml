@@ -78,10 +78,6 @@ class CliMenu:
             if user_input == 'q':
                 print("Exiting script.")
                 break
-            
-            if user_input == 'q':
-                print("Exiting script.")
-                break
 
             if user_input not in MENU_OPTIONS:
                 print("Invalid input. Please enter a number between 1 and 15, or 'q' to quit.")
@@ -89,9 +85,6 @@ class CliMenu:
                 success = self.execute_command(user_input)
                 if not success:
                     print("Command failed to execute. Please check your current state and try again.")
-            
-            # Always save to file after each command (matching original behavior)
-            self.command_handler.agent.game_state.save('./jsons/current_run.json')
                     
             # Small pause for readability
             time.sleep(1) 
