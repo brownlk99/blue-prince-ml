@@ -1,8 +1,8 @@
 from typing import Union, cast
 
-from capture.constants import DIRECTORY
-from .door import Door
-from .room import (CoatCheck,
+from game.constants import DIRECTORY
+from game.door import Door
+from game.room import (CoatCheck,
     Laboratory,
     Office,
     PuzzleRoom,
@@ -13,6 +13,7 @@ from .room import (CoatCheck,
     ShopRoom,
     UtilityCloset,
 )
+from utils import get_color_code
 
 
 class HouseMap:
@@ -426,13 +427,22 @@ class HouseMap:
             hm.grid.append(grid_row)
         return hm
 
-    #TODO: look at this a bit more
-    @staticmethod
-    def has_door(room, orientation):
-        return any(door.orientation == orientation for door in room.doors)
-
     def print_map(self):
-        print("\nCurrent House Map:\n")
+        """Print an enhanced, informative house map with different symbols for door states"""
+        print("\n" + "="*60)
+        print("CURRENT HOUSE MAP")
+        print("="*60)
+        
+        # Legend
+        print("\nLEGEND:")
+        print("   Rooms: [A] = First letter of room name (color-coded)")
+        print("   Connections:")
+        print("     - | = Open passage     ? = Unknown door")
+        print("     X   = Blocked door     L = Locked door")
+        print("     S   = Security door    = | = Unlocked passage")
+        print("     *   = Special door")
+        print("-"*60)
+        
         for y in range(self.height):
             row_str = ""
             connector_str = ""
@@ -440,38 +450,137 @@ class HouseMap:
             for x in range(self.width):
                 room = self.grid[y][x]
                 if room:
-                    row_str += f"[{room.name[0]}]"
+                    # Get room abbreviation (first letter only)
+                    abbrev = self._get_room_abbreviation(room.name)
+                    room_display = f"{abbrev}  "
+                    row_str += f"[{room_display}]"
                 else:
-                    row_str += "[ ]"
+                    row_str += "[   ]"
 
                 # Horizontal connector to room on the right
                 if x < self.width - 1:
                     right_room = self.grid[y][x + 1]
-                    if (
-                        room and right_room and
-                        self.has_door(room, "E") and self.has_door(right_room, "W")
-                    ):
-                        row_str += "─"
-                    else:
-                        row_str += " "
+                    connector = self._get_horizontal_connector(room, right_room)
+                    row_str += connector
 
             print(row_str)
 
-            # Now print vertical connections if not last row
+            # Vertical connections if not last row
             if y < self.height - 1:
                 for x in range(self.width):
                     current = self.grid[y][x]
                     below = self.grid[y + 1][x]
-                    if (
-                        current and below and
-                        self.has_door(current, "S") and self.has_door(below, "N")
-                    ):
-                        connector_str += " │ "
-                    else:
-                        connector_str += "   "
+                    connector = self._get_vertical_connector(current, below)
+                    connector_str += connector
+                    
                     if x < self.width - 1:
-                        connector_str += " "
-                print(connector_str)
+                        connector_str += "  "  # Space between vertical connectors
+                        
+                if connector_str.strip():  # Only print if there are actual connectors
+                    print(connector_str)
+                connector_str = ""
+
+        print("="*60)
+        print("TIP: Use 'edit_doors' to modify door properties")
+        print("="*60)
+
+    def _get_room_abbreviation(self, room_name: str) -> str:
+        """Get the first letter of room name with color coding"""
+        if not room_name:
+            return " "
+        
+        # Get the color-coded full name
+        colored_name = get_color_code(room_name)
+        
+        # If it's the same as the input (no color applied), just return first letter
+        if colored_name == room_name.upper():
+            return room_name[0]
+        
+        # Extract the color code and apply it to just the first letter
+        # The format is: \033[XXm + NAME + \033[0m
+        # We want: \033[XXm + FIRST_LETTER + \033[0m
+        if '\033[' in colored_name:
+            # Find the first reset code
+            reset_pos = colored_name.find('\033[0m')
+            if reset_pos != -1:
+                # Extract color code (everything before the room name)
+                color_start = colored_name.find('\033[')
+                color_end = colored_name.find('m', color_start) + 1
+                color_code = colored_name[color_start:color_end]
+                return f"{color_code}{room_name[0]}\033[0m"
+        
+        return room_name[0]
+
+    def _get_horizontal_connector(self, left_room, right_room) -> str:
+        """Get the appropriate horizontal connector symbol between two rooms"""
+        if not left_room or not right_room:
+            return "  "
+        
+        # Check if rooms have connecting doors
+        left_door = self._get_door_by_orientation(left_room, "E")
+        right_door = self._get_door_by_orientation(right_room, "W")
+        
+        if not left_door or not right_door:
+            return "  "
+        
+        # Determine connector type based on door states
+        connector = self._get_door_connector_symbol(left_door, right_door, horizontal=True)
+        return f"{connector} "
+
+    def _get_vertical_connector(self, top_room, bottom_room) -> str:
+        """Get the appropriate vertical connector symbol between two rooms"""
+        if not top_room or not bottom_room:
+            return "     "
+        
+        # Check if rooms have connecting doors
+        top_door = self._get_door_by_orientation(top_room, "S")
+        bottom_door = self._get_door_by_orientation(bottom_room, "N")
+        
+        if not top_door or not bottom_door:
+            return "     "
+        
+        # Determine connector type based on door states
+        connector = self._get_door_connector_symbol(top_door, bottom_door, horizontal=False)
+        return f"  {connector}  "
+
+    def _get_door_by_orientation(self, room, orientation: str):
+        """Get a door from a room by its orientation"""
+        if not room or not hasattr(room, 'doors'):
+            return None
+        return next((door for door in room.doors if door.orientation == orientation), None)
+
+    def _get_door_connector_symbol(self, door1, door2, horizontal: bool = True) -> str:
+        """Get the appropriate connector symbol based on door states"""
+        if not door1 or not door2:
+            return "X"
+        
+        # Check for blocked connections
+        if (hasattr(door1, 'leads_to') and door1.leads_to == "BLOCKED") or \
+           (hasattr(door2, 'leads_to') and door2.leads_to == "BLOCKED"):
+            return "X"
+        
+        # Check for unknown/unexplored doors
+        if (hasattr(door1, 'leads_to') and door1.leads_to == "?") or \
+           (hasattr(door2, 'leads_to') and door2.leads_to == "?"):
+            return "?"
+        
+        # Check for security doors
+        if (hasattr(door1, 'is_security') and str(door1.is_security).lower() == "true") or \
+           (hasattr(door2, 'is_security') and str(door2.is_security).lower() == "true"):
+            return "S"
+        
+        # Check for locked doors
+        if (hasattr(door1, 'locked') and str(door1.locked).lower() == "true") or \
+           (hasattr(door2, 'locked') and str(door2.locked).lower() == "true"):
+            return "L"
+        
+        # Check for special unlocked passages (both doors explicitly unlocked)
+        if (hasattr(door1, 'locked') and str(door1.locked).lower() == "false") and \
+           (hasattr(door2, 'locked') and str(door2.locked).lower() == "false"):
+            return "=" if horizontal else "|"
+        
+        # Default open passage
+        return "-" if horizontal else "|"
 
     def __repr__(self):
         return f"<HouseMap {self.width}x{self.height}>"

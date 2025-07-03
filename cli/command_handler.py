@@ -10,13 +10,13 @@ from capture.items import capture_items
 from capture.note_capture import capture_note
 from capture.resources import capture_resources
 from capture.shops import stock_shelves
+from cli.action_handler import ActionHandler
+from cli.decorators import auto_save, capture_resources_first, requires_current_room, handle_command_safely, requires_shop_room
 from cli.drafting_handler import DraftingHandler
 from game.room import Room
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import parse_note_title_response
 
-from .action_handler import ActionHandler
-from .decorators import auto_save, capture_resources_first, requires_current_room, handle_command_safely, requires_shop_room
 
 
 class CommandHandler:
@@ -155,9 +155,9 @@ class CommandHandler:
         room = self._select_room_for_editing("SET DIG SPOTS")
         if room:
             room.set_dig_spots()
-            print(f"Dig spots set for {room.name}.")
+            print(f"\nDig spots set for {room.name}")
         else:
-            print("No room selected.")
+            print("No room selected")
         return True
 
     @handle_command_safely
@@ -168,9 +168,9 @@ class CommandHandler:
         room = self._select_room_for_editing("SET TRUNKS")
         if room:
             room.set_trunks()
-            print(f"Trunks set for {room.name}.")
+            print(f"\nTrunks set for {room.name}")
         else:
-            print("No room selected.")
+            print("No room selected")
         return True
 
     @handle_command_safely
@@ -229,6 +229,12 @@ class CommandHandler:
         """Analyze previous LLM decision."""
         response = self.agent.manual_llm_follow_up()
         print(f"\nManual LLM Follow Up Response:\n{response}")
+        return True
+
+    @handle_command_safely
+    def show_house_map(self) -> bool:
+        """Display the current house layout with door states."""
+        self.agent.game_state.house.print_map()
         return True
 
     @handle_command_safely
