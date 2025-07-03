@@ -4,7 +4,7 @@ import sys
 import threading
 import time
 
-from capture.constants import DIRECTORY
+from game.constants import DIRECTORY
 
 def animate(stop, text="Thinking"):
     for i in itertools.cycle(['   ', '.  ', '.. ', '...']):
@@ -58,8 +58,9 @@ def get_color_code(input: str) -> str:
     BLUE = '\033[34m'           # Blue
     LIGHT_BLUE = '\033[94m'     # Light Blue
     PINK = '\033[95m'           # Pink
-    RESET = '\033[0m'           # Reset color
+    PURPLE = '\033[35m'         # Purple
     BLACK = '\033[90m'          # Gray (using it for black)
+    RESET = '\033[0m'           # Reset color
     
     # Check which category the room belongs to in DIRECTORY
     if input.upper() == "GEMS":
@@ -72,6 +73,8 @@ def get_color_code(input: str) -> str:
         return f"{BLACK}{input.upper()}{RESET}"
     elif input.upper() == "BLUE" or input.upper() in DIRECTORY["FLOORPLANS"]["ROOMS"] and input.upper() not in ["ENTRANCE HALL", "THE FOUNDATION", "ANTECHAMBER"]:
         return f"{BLUE}{input.upper()}{RESET}"
+    elif input.upper() in DIRECTORY["FLOORPLANS"]["BEDROOMS"]:
+        return f"{PURPLE}{input.upper()}{RESET}"
     elif input.upper() in DIRECTORY["FLOORPLANS"]["HALLWAYS"]:
         return f"{ORANGE}{input}{RESET}"
     elif input.upper() in DIRECTORY["FLOORPLANS"]["SHOPS"]:
