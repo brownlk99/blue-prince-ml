@@ -11,3 +11,4 @@ screenshots/
 note_db/
 *.txt
 .cursorignore
+.cursor/
