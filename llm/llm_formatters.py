@@ -5,9 +5,9 @@ from game.room import Laboratory, Office, Room, Security, Shelter, ShopRoom
 
 def format_term_memory_section(term_memory):
     """Format the term memory section for LLM prompts"""
-    if term_memory.terms:
+    if term_memory.data:
         terms_section = "\nTERMS & DEFINITIONS:\n"
-        for k, v in term_memory.terms.items():
+        for k, v in term_memory.data.items():
             terms_section += f"{k}: {v}\n"
         return terms_section
     return ""
@@ -15,9 +15,9 @@ def format_term_memory_section(term_memory):
 
 def format_room_memory_section(room_memory):
     """Format the room memory section for LLM prompts"""
-    if room_memory.rooms:
+    if room_memory.data:
         room_section = "The following section is a memory of rooms encountered in previous runs. These rooms are not necessarily present in the current house, but may help you make more informed decisions.\nROOM MEMORY:\n"
-        for k, v in room_memory.rooms.items():
+        for k, v in room_memory.data.items():
             room_section += f"{k}:\n"
             for attr, val in v.items():
                 room_section += f"  {attr}: {val}\n"
@@ -66,10 +66,10 @@ def format_redraw_count(game_state) -> str:
         str: Formatted string of available redraws (empty if no redraws are available).
     """
     redraw_dict = game_state.get_available_redraws()
-    redraw_text = "You may REDRAW the listed DRAFTS if you do not like the current options based upon the amount allotted below:\n"
+    redraw_text = "\nYou may REDRAW the listed DRAFTS if you do not like the current options based upon the amount allotted below:\n"
     total_redraws = sum(redraw_dict.values())
     if total_redraws == 0:
-        return "AVAILABLE REDRAWS: 0\n"
+        return "\nAVAILABLE REDRAWS: 0\n"
     if redraw_dict.get("dice", 0) > 0:
         redraw_text += f" - IVORY DICE: {redraw_dict['dice']} (each can be spent for a redraw at any time)\n"
     if redraw_dict.get("room", 0) > 0:

@@ -4,9 +4,9 @@ import easyocr
 
 from game.game_state import GameState
 from game.memory import NoteMemory, PreviousRunMemory, RoomMemory, TermMemory, DecisionMemory
-from game.room import Room, PuzzleRoom, CoatCheck
-from .llm_client import LLMClient, _context_window
-from .llm_formatters import (
+from game.room import Room, PuzzleRoom
+from llm.llm_client import LLMClient, _context_window
+from llm.llm_formatters import (
     format_term_memory_section,
     format_room_memory_section,
     format_draft_summary,
@@ -607,10 +607,10 @@ class BluePrinceAgent:
         return response
 
     def manual_llm_follow_up(self) -> str:
-        if not self.decision_memory.decisions:
+        if not self.decision_memory.data:
             return "No previous decisions to follow up on."
 
-        most_recent_decision = self.decision_memory.decisions[-1].copy()
+        most_recent_decision = self.decision_memory.data[-1].copy()
         most_recent_context = most_recent_decision['context']
         most_recent_decision.pop("context", None)           # remove context from decision
         input_section = input("Please enter any additional specific questions that may be relevant to the previous LLM decision: ")

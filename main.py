@@ -41,7 +41,7 @@ def main(day, load, verbose, editor_path, model_name, use_utility_model):
             agent.decision_memory.reset()
         elif load:
             # Search through decisions in reverse order (most recent first)
-            for decision in reversed(agent.decision_memory.decisions):
+            for decision in reversed(agent.decision_memory.data):
                 # Check if this decision contains door opening data
                 if isinstance(decision, dict) and "door_direction" in decision:
                     # This is a door opening decision - use current room from game state
@@ -54,7 +54,7 @@ def main(day, load, verbose, editor_path, model_name, use_utility_model):
                 print("No previous door opening decision found in memory.")
 
     # Create and run the game menu
-    menu = CliMenu(agent, google_client, reader, editor_path)
+    menu = CliMenu(agent, google_client, reader, editor_path, verbose)
     menu.run()
 
 

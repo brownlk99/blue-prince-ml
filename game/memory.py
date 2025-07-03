@@ -4,9 +4,9 @@ import time
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 
-from capture.constants import DIRECTORY
-from .note import Note
-from .room import Room
+from game.constants import DIRECTORY
+from game.note import Note
+from game.room import Room
 
 
 class BaseMemory(ABC):
@@ -43,7 +43,6 @@ class BaseMemory(ABC):
 class NoteMemory(BaseMemory):
     def __init__(self, path: str = "./jsons/notes.json"):
         super().__init__(path)
-        self.notes = self.data  # Alias for clarity
         self._ensure_intro_note()
     
     def _get_default_data(self) -> List[Dict[str, Any]]:
@@ -76,16 +75,15 @@ class NoteMemory(BaseMemory):
         self.add_to_json(intro_note)
         
     def add_to_json(self, note: Note) -> None:
-        existing_hashes = {n.get("hash") for n in self.notes}
+        existing_hashes = {n.get("hash") for n in self.data}
         if note.hash not in existing_hashes:
-            self.notes.append(note.to_dict())
+            self.data.append(note.to_dict())
             self.save()
 
 
 class TermMemory(BaseMemory):
     def __init__(self, path="./jsons/term_memory.json"):
         super().__init__(path)
-        self.terms = self.data  # Alias for clarity
 
     def _get_default_data(self) -> Dict[str, str]:
         return {
@@ -127,15 +125,15 @@ class TermMemory(BaseMemory):
         }
 
     def automated_add_term(self, key, description):
-        if key.upper() not in self.terms:
-            self.terms[key.upper()] = description
+        if key.upper() not in self.data:
+            self.data[key.upper()] = description
             self.save()
 
     def user_facilitated_add_term(self):
         # Combine TERMS and ITEMS for selection
         all_terms = {**DIRECTORY.get("TERMS", {}), **DIRECTORY.get("ITEMS", {})}
         # Only show terms/items not already in persistent memory
-        available_terms = {k: v for k, v in all_terms.items() if k.upper() not in self.terms}
+        available_terms = {k: v for k, v in all_terms.items() if k.upper() not in self.data}
 
         if not available_terms:
             print("All terms/items are already in persistent memory.")
@@ -170,19 +168,18 @@ class TermMemory(BaseMemory):
         
 
     def get_term(self, key):
-        return self.terms.get(key.upper())
+        return self.data.get(key.upper())
     
 
 class RoomMemory(BaseMemory):
     def __init__(self, path="./jsons/room_memory.json"):
         super().__init__(path)
-        self.rooms = self.data  # Alias for clarity
 
     def _get_default_data(self) -> Dict[str, Any]:
         return {}
 
     def add_room(self, room: Room):
-        if room.name.upper() in self.rooms:
+        if room.name.upper() in self.data:
             print(f"{room.name} is already in memory. Skipping.")
             return
         room_data = room.to_dict()
@@ -194,11 +191,11 @@ class RoomMemory(BaseMemory):
             "shape": room_data["shape"],
             "rarity": room_data["rarity"],
         }
-        self.rooms[room.name.upper()] = filtered_data
+        self.data[room.name.upper()] = filtered_data
         self.save()
 
     def get_room(self, room_name):
-        return self.rooms.get(room_name.upper())
+        return self.data.get(room_name.upper())
 
 
 class PreviousRunMemory(BaseMemory):
@@ -210,7 +207,6 @@ class PreviousRunMemory(BaseMemory):
                     path (str): the path to the previous run memory file
         """
         super().__init__(path)
-        self.previous_runs = self.data  # Alias for clarity
 
     def _get_default_data(self) -> List[Dict[str, Any]]:
         return []
@@ -224,7 +220,7 @@ class PreviousRunMemory(BaseMemory):
                     reason (str): the reason for ending the run
                     stored_item (str): the item stored in coat check (optional)
         """
-        self.previous_runs.append({
+        self.data.append({
             "day": day,
             "reason": reason,
             "stored_item": stored_item
@@ -238,27 +234,26 @@ class PreviousRunMemory(BaseMemory):
                 Returns:
                     dict: the most recent run, or an empty dict if none exist
         """
-        if self.previous_runs:
-            return self.previous_runs[-1]
+        if self.data:
+            return self.data[-1]
         return {}
 
 
 class DecisionMemory(BaseMemory):
     def __init__(self, path: str = "./jsons/decision_memory.json"):
         super().__init__(path)
-        self.decisions = self.data  # Alias for clarity
 
     def _get_default_data(self) -> List[Dict[str, Any]]:
         return []
 
     def add_decision(self, decision: Dict[str, Any]) -> None:
-        self.decisions.append(decision)
+        self.data.append(decision)
         self.save()
 
     def get_move_context(self) -> Optional[Dict[str, Any]]:
         """Get the most recent move decision context if it exists"""
         # Search through decisions in reverse order (most recent first)
-        for decision in reversed(self.decisions):
+        for decision in reversed(self.data):
             if isinstance(decision, dict) and decision.get("action") == "move":
                 return {
                     "target_room": decision.get("target_room", ""),
@@ -277,7 +272,6 @@ class BookMemory(BaseMemory):
                     path (str): the path to the book memory file
         """
         super().__init__(path)
-        self.books = self.data  # Alias for clarity
 
     def _get_default_data(self) -> List[Dict[str, Any]]:
         return []
@@ -289,5 +283,5 @@ class BookMemory(BaseMemory):
                 Args:
                     book (dict): the book to add
         """
-        self.books.append(book)
+        self.data.append(book)
         self.save()
