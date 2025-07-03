@@ -11,7 +11,7 @@ from google.cloud import vision
 
 from game.game_state import GameState
 from llm.llm_agent import BluePrinceAgent
-from cli.menu import GameMenu
+from cli.menu import CliMenu
 from utils import thinking_animation
 
 
@@ -54,7 +54,7 @@ def main(day, load, verbose, editor_path, model_name):
                 print("No previous door opening decision found in memory.")
 
     # Create and run the game menu
-    menu = GameMenu(agent, google_client, reader, editor_path)
+    menu = CliMenu(agent, google_client, reader, editor_path)
     menu.run()
 
 

@@ -37,7 +37,7 @@ q. Quit                     - Exit the script.
 
 CURRENT_RUN_FILE = './jsons/current_run.json'
 
-class GameMenu:
+class CliMenu:
     """Main game menu and command dispatcher."""
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str]) -> None:
