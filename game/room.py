@@ -4,9 +4,9 @@ from typing import Optional
 import easyocr
 
 from capture import parlor
-from capture.constants import DIRECTORY
-from .door import Door
-from .terminal import SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal
+from game.constants import DIRECTORY
+from game.door import Door
+from game.terminal import SecurityTerminal, LabTerminal, OfficeTerminal, ShelterTerminal
 from utils import get_color_code
 
 
@@ -162,7 +162,6 @@ class Room:
                 time.sleep(2)
                 return
             self.trunks = count
-            print(f"Set {count} trunks in this room.")
         except ValueError:
             print("\nInvalid input. Please enter a number.")
             time.sleep(2)
@@ -175,7 +174,6 @@ class Room:
                 time.sleep(2)
                 return
             self.dig_spots = count
-            print(f"Set {count} dig spots in this room.")
         except ValueError:
             print("\nInvalid input. Please enter a number.")
             time.sleep(2)
@@ -341,7 +339,7 @@ class PuzzleRoom(Room):
                 print("1. Capture with screenshot")
                 print("2. Enter manually")
                 
-                capture_choice = input("\n\nEnter your choice (1/2): ").strip()
+                capture_choice = input("Enter your choice (1/2): ").strip()
                 
                 if capture_choice == "1":
                     # Screenshot capture path

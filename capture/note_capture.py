@@ -8,9 +8,9 @@ import mouse
 import numpy as np
 from google.cloud import vision
 
-from .ocr import google_vision
-from .screen_capture import ScreenCapture
-from .vision_utils import edit_text_in_editor, generic_autocorrect
+from capture.ocr import google_vision
+from capture.screen_capture import ScreenCapture
+from capture.vision_utils import edit_text_in_editor, generic_autocorrect
 from game.note import Note
 from game.room import Room
 

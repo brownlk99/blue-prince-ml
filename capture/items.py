@@ -4,11 +4,10 @@ import cv2
 import numpy as np
 from google.cloud import vision
 
-from .constants import DIRECTORY
-from .ocr import google_vision
-from .screen_capture import ScreenCapture
-from .vision_utils import best_match
-
+from capture.ocr import google_vision
+from capture.screen_capture import ScreenCapture
+from capture.vision_utils import best_match
+from game.constants import DIRECTORY
 
 def capture_items(client: vision.ImageAnnotatorClient):
     print("1. Capture with screenshot")

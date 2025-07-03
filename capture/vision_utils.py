@@ -8,9 +8,10 @@ import cv2
 import numpy as np
 from textblob import TextBlob
 
-from .constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LOOKUP
-from .ocr import easy_ocr
-from .screen_capture import ScreenCapture
+from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS
+from capture.ocr import easy_ocr
+from capture.screen_capture import ScreenCapture
+from game.constants import ROOM_LOOKUP
 
 
 def best_match(text, options):

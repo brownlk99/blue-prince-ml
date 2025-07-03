@@ -1,11 +1,10 @@
 import json
 import time
 
-from capture.constants import DIRECTORY
-
-from .door import Door
-from .house_map import HouseMap
-from .room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
+from game.constants import DIRECTORY
+from game.door import Door
+from game.house_map import HouseMap
+from game.room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
 from utils import get_color_code
 
 

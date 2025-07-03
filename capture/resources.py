@@ -7,9 +7,9 @@ import cv2
 import numpy as np
 from google.cloud import vision
 
-from .constants import REGIONS
-from .ocr import google_vision
-from .screen_capture import ScreenCapture
+from capture.constants import REGIONS
+from capture.ocr import google_vision
+from capture.screen_capture import ScreenCapture
 from utils import get_color_code
 
 
@@ -145,7 +145,7 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
         if result == "":
             # Try template matching as fallback
             value = recognize_number(resource_screenshot, number_template_paths)
-            print(f"Resource {resource}: OCR failed, template matched for: {value}")
+            print(f"\nResource {resource}: OCR failed, template {value} was matched")
             
             # Save template and ask user what number it is
             if value is None:
@@ -156,7 +156,7 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
             except ValueError:
                 # Try template matching as fallback
                 value = recognize_number(resource_screenshot, number_template_paths)
-                print(f"Resource {resource}: OCR conversion failed, template matched for: {value}")
+                print(f"\nResource {resource}: OCR conversion failed, template {value} was matched")
                 
                 # Save template and ask user what number it is
                 if value is None:

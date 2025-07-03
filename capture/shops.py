@@ -2,10 +2,11 @@ import cv2
 import easyocr
 import numpy as np
 
-from .constants import REGIONS, DIRECTORY, ALPHANUMERIC_ALLOWLIST
-from .ocr import easy_ocr
-from .screen_capture import ScreenCapture
-from .vision_utils import best_match
+from capture.constants import REGIONS, ALPHANUMERIC_ALLOWLIST
+from capture.ocr import easy_ocr
+from capture.screen_capture import ScreenCapture
+from capture.vision_utils import best_match
+from game.constants import DIRECTORY
 from game.room import ShopRoom
 
 

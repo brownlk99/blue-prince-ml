@@ -7,8 +7,10 @@ from typing import Optional
 import easyocr
 from google.cloud import vision
 
-from capture.constants import DIRECTORY
 from capture.shops import stock_shelves
+from cli.decorators import auto_save, requires_coat_check, requires_puzzle_room, requires_secret_passage, requires_shop_room, requires_utility_closet
+from cli.terminal_handler import TerminalCommandProcessor
+from game.constants import DIRECTORY
 from game.room import CoatCheck
 from llm.llm_agent import BluePrinceAgent
 from llm.llm_parsers import (
@@ -16,9 +18,6 @@ from llm.llm_parsers import (
     parse_purchase_response, parse_parlor_response, parse_terminal_response, parse_coat_check_response, parse_secret_passage_response
 )
 from utils import get_color_code
-
-from .decorators import auto_save, requires_coat_check, requires_puzzle_room, requires_secret_passage, requires_shop_room, requires_utility_closet
-from .terminal_handler import TerminalCommandProcessor
 
 
 class ActionHandler:

@@ -1,6 +1,6 @@
 import json
 
-from .llm_agent import BluePrinceAgent
+from llm.llm_agent import BluePrinceAgent
 
 
 def _parse_json_response(response: str):

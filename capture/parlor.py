@@ -4,10 +4,10 @@ import cv2
 import easyocr
 import numpy as np
 
-from .constants import ALPHANUMERIC_ALLOWLIST
-from .ocr import easy_ocr
-from .screen_capture import ScreenCapture
-from .vision_utils import edit_text_in_editor, generic_autocorrect
+from capture.constants import ALPHANUMERIC_ALLOWLIST
+from capture.ocr import easy_ocr
+from capture.screen_capture import ScreenCapture
+from capture.vision_utils import edit_text_in_editor, generic_autocorrect
 
 
 def capture_hint(reader: easyocr.Reader, editor_path: Optional[str] = None):

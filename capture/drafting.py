@@ -6,10 +6,11 @@ import easyocr
 import numpy as np
 from google.cloud import vision
 
-from .constants import ALPHANUMERIC_ALLOWLIST, REGIONS, ROOM_LIST, ROOM_LOOKUP
-from .ocr import easy_ocr, google_vision
-from .screen_capture import ScreenCapture
-from .vision_utils import best_match
+from capture.constants import ALPHANUMERIC_ALLOWLIST, REGIONS
+from capture.ocr import easy_ocr, google_vision
+from capture.screen_capture import ScreenCapture
+from capture.vision_utils import best_match
+from game.constants import ROOM_LIST, ROOM_LOOKUP
 from game.door import Door
 from game.house_map import HouseMap
 from game.room import CoatCheck, PuzzleRoom, Room, SecretPassage, ShopRoom, UtilityCloset
