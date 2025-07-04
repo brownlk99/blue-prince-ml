@@ -39,6 +39,7 @@ def main(day, load, verbose, editor_path, model_name, use_utility_model):
             agent.room_memory.reset()
             agent.term_memory.reset()
             agent.decision_memory.reset()
+            agent.previous_run_memory.reset()
         elif load:
             # Search through decisions in reverse order (most recent first)
             for decision in reversed(agent.decision_memory.data):
