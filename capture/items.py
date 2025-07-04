@@ -1,4 +1,5 @@
 import time
+from typing import Dict, Optional, Union
 
 import cv2
 import numpy as np
@@ -9,7 +10,16 @@ from capture.screen_capture import ScreenCapture
 from capture.vision_utils import best_match
 from game.constants import DIRECTORY
 
-def capture_items(client: vision.ImageAnnotatorClient):
+def capture_items(client: vision.ImageAnnotatorClient) -> Optional[Union[str, dict]]:
+    """
+        Capture item information either through screenshot or manual entry
+
+            Args:
+                client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+
+            Returns:
+                Optional[Union[str, dict]]: Item details dictionary, cancellation message string, or None if failed
+    """
     print("1. Capture with screenshot")
     print("2. Enter manually")
     
@@ -39,7 +49,13 @@ def capture_items(client: vision.ImageAnnotatorClient):
         time.sleep(2)
         return None
 
-def manually_obtain_item():
+def manually_obtain_item() -> Optional[dict]:
+    """
+        Manually enter item information by selecting from available items
+
+            Returns:
+                Optional[dict]: Item details dictionary or None if cancelled
+    """
     item_dict = DIRECTORY.get("ITEMS", {})
     print("Available items:")
     for item in item_dict.keys():

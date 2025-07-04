@@ -2,7 +2,7 @@ NUMERIC_ALLOWLIST = "0123456789"
 ALPHABETICAL_ALLOWLIST = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 ALPHANUMERIC_ALLOWLIST = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ,;:.?!-'"
 
-#(x1, y1, x2, y2) for 2560x1440 resolution
+# (x1, y1, x2, y2) for 2560x1440 resolution
 REGIONS = {
     "drafting" : {
         "left" : (791, 249, 1231, 689),

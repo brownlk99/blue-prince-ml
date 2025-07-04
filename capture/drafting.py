@@ -18,17 +18,29 @@ from utils import get_color_code
 
 
 def capture_drafting_options(reader: easyocr.Reader, google_client: vision.ImageAnnotatorClient, current_room: Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage], chosen_door: Door) -> List[Room]:
+    """
+        Capture and process drafting options from the screen, creating Room objects for each draft
+
+            Args:
+                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
+                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+                current_room (Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]): Current room object
+                chosen_door (Door): Door object representing the entry door
+
+            Returns:
+                List[Room]: List of room objects representing the drafting options
+    """
     drafting_options = []
-    draft_regions = REGIONS["drafting"]                                         #regions for the left, center, and right drafts
+    draft_regions = REGIONS["drafting"]  # regions for the left, center, and right drafts
     for draft, draft_region in draft_regions.items():
         draft_screenshot = ScreenCapture(draft_region).run()
         draft_screenshot = np.array(draft_screenshot)
         draft_screenshot = cv2.cvtColor(draft_screenshot, cv2.COLOR_RGB2BGR)
 
         draft_room_name = None
-        if current_room.name == "DARKROOM":                 #edge case for dark room
+        if current_room.name == "DARKROOM":  # edge case for dark room
             avg_brightness = np.mean(draft_screenshot)
-            if avg_brightness < 15:                         #if dark room effect is active, we will not be able to read the draft.. if inactive, continue as normal
+            if avg_brightness < 15:  # if dark room effect is active, we will not be able to read the draft, if inactive, continue as normal
                 draft_room_name = "UNKNOWN"
                 cost = get_unknown_room_gem_requirement(draft)
                 type = []
@@ -50,11 +62,11 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
             shape = "UNKNOWN"
             doors = None
             rarity = "UNKNOWN"
-        elif draft_room_name != "UNKNOWN":      # if we have a valid/possible room name
-            detected_doors = get_doors(draft_screenshot)                #get the detected doors from the draft screenshot
-            valid = door_check(draft_room_name, len(detected_doors))          #make sure the number of doors matches the expected number for the room
-            orientation = get_orientation(chosen_door, list(detected_doors))  #get the orientation of the doors based on the chosen door from the previous room and detected doors
-            room = ROOM_LOOKUP[draft_room_name]                               #get the room data from the ROOM_LOOKUP dictionary
+        elif draft_room_name != "UNKNOWN":  # if we have a valid/possible room name
+            detected_doors = get_doors(draft_screenshot)  # get the detected doors from the draft screenshot
+            valid = door_check(draft_room_name, len(detected_doors))  # make sure the number of doors matches the expected number for the room
+            orientation = get_orientation(chosen_door, list(detected_doors))  # get the orientation of the doors based on the chosen door from the previous room and detected doors
+            room = ROOM_LOOKUP[draft_room_name]  # get the room data from the ROOM_LOOKUP dictionary
             cost = room["COST"]
             type = room["TYPE"]
             description = room["DESCRIPTION"]
@@ -91,6 +103,17 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
 
 
 def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: vision.ImageAnnotatorClient) -> str:
+    """
+        Extract room name from a draft image using OCR
+
+            Args:
+                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
+                img (np.ndarray): Draft image as numpy array
+                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+
+            Returns:
+                str: Detected room name or empty string if not found
+    """
     top_half_of_draft = img[:img.shape[0] // 2, :, :]
     results = easy_ocr(reader, top_half_of_draft, True, ALPHANUMERIC_ALLOWLIST)
     for _, text in results:
@@ -98,7 +121,7 @@ def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: 
         if found_room_name:
             return found_room_name
     
-    #for "ARCHIVED FLOOR PLAN"
+    # for "ARCHIVED FLOOR PLAN"
     h = img.shape[0]
     middle_slice = img[int(h * 0.3):int(h * 0.7), :, :]
     middle_slice = cv2.cvtColor(middle_slice, cv2.COLOR_BGR2GRAY)
@@ -106,19 +129,20 @@ def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: 
 
     if "ARCHIVED" in results.strip().upper():
         return "ARCHIVED FLOOR PLAN"
-    print("No room name found in draft.")   #TODO: could potentially be an issue if it gets to this point (maybe manual entry?)
+    print("No room name found in draft.")  # TODO: could potentially be an issue if it gets to this point (maybe manual entry)
     return ""
 
 
 def door_check(room_name: str, actual_number: int) -> bool:
     """
-        Checks if the actual number of doors in a room matches the expected number from the ROOM_LOOKUP directory.
-            
+        Checks if the actual number of doors in a room matches the expected number from the ROOM_LOOKUP directory
+
             Args:
-                room_name: The name of the room to check.
-                actual_number: The actual number of doors detected (via OCR) in the room.
+                room_name (str): The name of the room to check
+                actual_number (int): The actual number of doors detected (via OCR) in the room
+
             Returns:
-                True if the actual number matches the expected number, False otherwise.
+                bool: True if the actual number matches the expected number, False otherwise
     """
     characteristics = ROOM_LOOKUP.get(room_name)
     if not characteristics:
@@ -135,25 +159,25 @@ def door_check(room_name: str, actual_number: int) -> bool:
     return True
 
 
-def get_doors(img: np.ndarray, strip_length=8, offset=5, strip_height=8):
+def get_doors(img: np.ndarray, strip_length: int = 8, offset: int = 5, strip_height: int = 8) -> set:
     """
-    Detects which sides of a room have doors by sampling brightness at the center of each wall.
+        Detects which sides of a room have doors by sampling brightness at the center of each wall
 
-    Args:
-        img: The room image as a NumPy array.
-        strip_length: Width of the sampling strip along the wall.
-        offset: Distance from the edge of the image to start sampling.
-        strip_height: Height of the sampling strip.
+            Args:
+                img (np.ndarray): The room image as a NumPy array
+                strip_length (int): Width of the sampling strip along the wall
+                offset (int): Distance from the edge of the image to start sampling
+                strip_height (int): Height of the sampling strip
 
-    Returns:
-        A set containing the directions ("top", "bottom", "left", "right") where doors are detected.
+            Returns:
+                set: A set containing the directions ("top", "bottom", "left", "right") where doors are detected
     """
     height, width, _ = img.shape
 
-    # Calculate the center coordinates of the image
+    # calculate the center coordinates of the image
     mid_x, mid_y = width // 2, height // 2
 
-    # Define sampling regions for each wall (top, bottom, left, right)
+    # define sampling regions for each wall (top, bottom, left, right)
     regions = {
         "top": ((mid_x - strip_length//2, offset),
                 (mid_x + strip_length//2, offset + strip_height)),
@@ -165,12 +189,12 @@ def get_doors(img: np.ndarray, strip_length=8, offset=5, strip_height=8):
                   (width - offset, mid_y + strip_height//2)),
     }
 
-    detected_doors = set()  # Initialize an empty set to store detected doors within the draft image
-    # For each wall, sample the region and check brightness
+    detected_doors = set()  # initialize an empty set to store detected doors within the draft image
+    # for each wall, sample the region and check brightness
     for dir, (pt1, pt2) in regions.items():
         region_crop = img[pt1[1]:pt2[1], pt1[0]:pt2[0]]
         avg_brightness = np.mean(region_crop)
-        # If the region is dark enough, assume a door is present
+        # if the region is dark enough, assume a door is present
         if avg_brightness < 20:
             detected_doors.add(dir)
 
@@ -178,23 +202,23 @@ def get_doors(img: np.ndarray, strip_length=8, offset=5, strip_height=8):
 
 def get_orientation(chosen_door: Door, detected_doors: List[str]) -> List[str]:
     """
-    Maps detected door positions on the image to cardinal directions,
-    based on the direction the player entered the room.
+        Maps detected door positions on the image to cardinal directions,
+        based on the direction the player entered the room
 
-    Args:
-        chosen_door: The Door object representing the entry door, with an 'orientation' attribute ("N", "S", "E", "W").
-        detected_doors: Iterable of strings ("top", "bottom", "left", "right") indicating where doors were detected on the image.
+            Args:
+                chosen_door (Door): The Door object representing the entry door, with an 'orientation' attribute ("N", "S", "E", "W")
+                detected_doors (List[str]): Iterable of strings ("top", "bottom", "left", "right") indicating where doors were detected on the image
 
-    Returns:
-        A list of cardinal directions ("N", "S", "E", "W") corresponding to the detected doors, 
-        adjusted for the entry orientation.
+            Returns:
+                List[str]: A list of cardinal directions ("N", "S", "E", "W") corresponding to the detected doors, 
+                adjusted for the entry orientation
     """
     entry_orientation = chosen_door.orientation.upper()
     detected_doors = [d.upper() for d in detected_doors]
 
     orientation_map = {}
 
-    # Set up the mapping from image sides to cardinal directions based on entry orientation
+    # set up the mapping from image sides to cardinal directions based on entry orientation
     if entry_orientation == "N":
         orientation_map = {
             "TOP": "N",
@@ -223,15 +247,20 @@ def get_orientation(chosen_door: Door, detected_doors: List[str]) -> List[str]:
             "LEFT": "S",
             "RIGHT": "N"
         }
-    # Map each detected door position to its corresponding cardinal direction
+    # map each detected door position to its corresponding cardinal direction
     return [orientation_map[d] for d in detected_doors if d in orientation_map]
 
-def get_new_room_position(current_position, direction):
+def get_new_room_position(current_position: tuple, direction: str) -> tuple:
     """
-    Given a current (x, y) position and a cardinal direction,
-    returns the new (x, y) position after moving one step.
-    
-    Direction must be one of: "N", "S", "E", "W"
+        Given a current (x, y) position and a cardinal direction,
+        returns the new (x, y) position after moving one step
+
+            Args:
+                current_position (tuple): Current (x, y) position
+                direction (str): Cardinal direction, must be one of: "N", "S", "E", "W"
+
+            Returns:
+                tuple: New (x, y) position after moving one step
     """
     x, y = current_position
     offsets = {
@@ -248,7 +277,16 @@ def get_new_room_position(current_position, direction):
     return (x + dx, y + dy)
 
 
-def get_unknown_room_gem_requirement(draft: str):
+def get_unknown_room_gem_requirement(draft: str) -> int:
+    """
+        Determine the gem requirement for an unknown room draft using template matching
+
+            Args:
+                draft (str): Draft position identifier (left, center, right)
+
+            Returns:
+                int: Number of gems required for the room
+    """
     bbox = REGIONS["gem_requirement"][draft]
     gem_requirement_screenshot = ScreenCapture(bbox).run()
     gem_requirement_screenshot = np.array(gem_requirement_screenshot)
@@ -275,6 +313,17 @@ def get_unknown_room_gem_requirement(draft: str):
     return number_of_gems
 
 def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: float = 0.8) -> int:
+    """
+        Count the number of gems in a draft image using template matching
+
+            Args:
+                draft_img (np.ndarray): Draft image as numpy array
+                gem_template_paths (list[str]): List of paths to gem template images
+                threshold (float): Matching threshold for template matching
+
+            Returns:
+                int: Number of gems detected in the image
+    """
     draft_filtered = isolate_pink(draft_img)
     draft_gray = cv2.cvtColor(draft_filtered, cv2.COLOR_BGR2GRAY)
 
@@ -298,6 +347,15 @@ def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: 
     return len(total_matches)
 
 def isolate_pink(image: np.ndarray) -> np.ndarray:
+    """
+        Isolate pink colored regions in an image using HSV color filtering
+
+            Args:
+                image (np.ndarray): Input image as numpy array
+
+            Returns:
+                np.ndarray: Filtered image with only pink regions preserved
+    """
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     lower_pink = np.array([140, 50, 50])
     upper_pink = np.array([170, 255, 255])

@@ -16,7 +16,7 @@ from game.room import Room
 
 
 def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str], editor_path: Optional[str] = None) -> None:
-    time.sleep(1)  # Allow time so there's no overlap with clicking to activate and triggering the capture
+    time.sleep(1)  # allow time so there's no overlap with clicking to activate and triggering the capture
     note_screenshot = ScreenCapture().run()
     if note_screenshot is None:
         print("Screenshot failed or was cancelled.")
@@ -38,30 +38,30 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor
     capture_and_process_helper(client, pages, editor_path)
     print("Left click to capture next page. Right click to finish note capture.")
 
-    stop_capture = Event()       # Used to signal when to stop capturing
-    hook_ref: list = [None]            # Holds the current mouse hook reference (list allows mutation in nested scope)
+    stop_capture = Event()  # used to signal when to stop capturing
+    hook_ref: list = [None]  # holds the current mouse hook reference (list allows mutation in nested scope)
 
     def on_mouse(event):
-        # Only respond to actual mouse button down events (ignore movement or button-up)
+        # only respond to actual mouse button down events (ignore movement or button-up)
         if not isinstance(event, mouse.ButtonEvent):
             return
         if event.event_type != 'down':
             return
 
-        # Safely unhook the current mouse listener if it exists
+        # safely unhook the current mouse listener if it exists
         if hook_ref[0] is not None:
             mouse.unhook(hook_ref[0])
-            hook_ref[0] = None  # Clear the reference to prevent unhooking twice
+            hook_ref[0] = None  # clear the reference to prevent unhooking twice
 
         if event.button == 'left':
             print("Left click detected — capturing next page.")
             capture_and_process_helper(client, pages, editor_path)
             print("Left click to capture next page. Right click to finish note capture.")
-            # Delay re-hooking the listener in a background thread (avoids GUI click bleed-over)
+            # delay re-hooking the listener in a background thread (avoids GUI click bleed-over)
             def delayed_rehook():
-                time.sleep(0.5)  # Let the OS settle the click queue
-                if not stop_capture.is_set():  # Only rehook if capture session is still active
-                    hook_ref[0] = mouse.hook(on_mouse)  # Re-register the listener
+                time.sleep(0.5)  # let the OS settle the click queue
+                if not stop_capture.is_set():  # only rehook if capture session is still active
+                    hook_ref[0] = mouse.hook(on_mouse)  # re-register the listener
 
             threading.Thread(target=delayed_rehook, daemon=True).start()
 
@@ -69,15 +69,15 @@ def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor
             print("Right click detected — finishing note capture.")
             stop_capture.set()  # This will break the capture loop below
 
-    # Register the initial mouse hook and store its reference
+    # register the initial mouse hook and store its reference
     hook_ref[0] = mouse.hook(on_mouse)
 
     try:
-        # Keep looping until right-click signals we're done
+        # keep looping until right-click signals we're done
         while not stop_capture.is_set():
             time.sleep(0.1)
     finally:
-        # Clean up hook if still active (e.g. if right-click didn't already unhook)
+        # clean up hook if still active (e.g. if right-click didn't already unhook)
         if hook_ref[0] is not None:
             mouse.unhook(hook_ref[0])
 

@@ -15,37 +15,64 @@ from utils import get_color_code
 
 last_resource_hashes = {}
 
-def image_hash(img):
+def image_hash(img: np.ndarray) -> str:
+    """
+        Calculate MD5 hash of an image
+
+            Args:
+                img (np.ndarray): Input image as numpy array
+
+            Returns:
+                str: MD5 hash of the image as hexadecimal string
+    """
     return hashlib.md5(img.tobytes()).hexdigest()
 
 def trim_template(template_img: np.ndarray) -> np.ndarray:
-    """Trim whitespace/background from template image."""
-    # Convert to grayscale if needed
+    """
+        Trim whitespace/background from template image
+
+            Args:
+                template_img (np.ndarray): The template image to trim
+
+            Returns:
+                np.ndarray: The trimmed template image
+    """
+    # convert to grayscale if needed
     if len(template_img.shape) == 3:
         gray = cv2.cvtColor(template_img, cv2.COLOR_BGR2GRAY)
     else:
         gray = template_img
     
-    # Find non-zero pixels (the actual number)
+    # find non-zero pixels (the actual number)
     coords = cv2.findNonZero(gray)
     if coords is None:
         return template_img
     
-    # Get bounding rectangle
+    # get bounding rectangle
     x, y, w, h = cv2.boundingRect(coords)
     
-    # Crop to just the number
+    # crop to just the number
     return template_img[y:y+h, x:x+w]
 
 def recognize_number(resource_img: np.ndarray, number_template_paths: list[str], threshold: float = 0.75) -> Optional[int]:
-    """Recognize the actual number in resource image using template matching."""
-    # Check if image is already grayscale (single channel)
+    """
+        Recognize the actual number in resource image using template matching
+
+            Args:
+                resource_img (np.ndarray): The resource image containing the number
+                number_template_paths (list[str]): List of paths to number template images
+                threshold (float): Matching threshold for template matching
+
+            Returns:
+                Optional[int]: The recognized number, or None if no match found
+    """
+    # check if image is already grayscale (single channel)
     if len(resource_img.shape) == 3:
         resource_gray = cv2.cvtColor(resource_img, cv2.COLOR_BGR2GRAY)
     else:
         resource_gray = resource_img
     
-    # Sort templates by length (longest first) to prioritize multi-digit numbers
+    # sort templates by length (longest first) to prioritize multi-digit numbers
     template_paths_sorted = sorted(
         number_template_paths,
         key=lambda x: len(os.path.basename(x).split('_')[0]),
@@ -60,17 +87,17 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
         if number_template is None:
             continue
             
-        # Get the number from filename (e.g., "44_1.png" -> "44")
+        # get the number from filename (e.g., "44_1.png" -> "44")
         template_name = os.path.basename(template_path).split('_')[0]
         try:
             template_number = int(template_name)
         except ValueError:
-            continue  # Skip if filename isn't a number
+            continue  # skip if filename isn't a number
             
-        # Trim the template to just the number
+        # trim the template to just the number
         number_template = trim_template(number_template)
         
-        # Convert to grayscale if it's not already
+        # convert to grayscale if it's not already
         if len(number_template.shape) == 3:
             number_gray = cv2.cvtColor(number_template, cv2.COLOR_BGR2GRAY)
         else:
@@ -83,14 +110,26 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
             best_score = max_score
             best_match = template_number
     
-    return best_match  # Returns None if no match found
+    return best_match  # returns None if no match found
 
 def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, template_folder: str, prefix: str = "unknown") -> int:
+    """
+        Save a resource screenshot as a new template and prompt user for the number value
+
+            Args:
+                resource_screenshot (np.ndarray): Screenshot of the resource as numpy array
+                resource (str): Name of the resource being captured
+                template_folder (str): Path to folder where templates are stored
+                prefix (str): Prefix for the filename if needed
+
+            Returns:
+                int: The number value provided by the user
+    """
     while True:
         user_number = input(f"\nWhat is the current value of {get_color_code(resource)} (or press Enter to skip): ").strip()
         if user_number and user_number.isdigit():
             base = user_number
-            # Find all files that start with the digit and underscore
+            # find all files that start with the digit and underscore
             existing = [f for f in os.listdir(template_folder) if f.startswith(f"{base}_") and f.endswith('.png')]
             indices = []
             for f in existing:
@@ -110,10 +149,20 @@ def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, tem
             time.sleep(2)
 
 def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_resources: dict) -> dict:
+    """
+        Capture current resource values from the screen using OCR and template matching
+
+            Args:
+                client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+                current_game_state_resources (dict): Current game state resources for caching
+
+            Returns:
+                dict: Dictionary containing current resource values
+    """
     available_resources = {}
     template_folder = "./capture/number_templates"
     
-    # Get all number template paths
+    # get all number template paths
     number_template_paths = [
         os.path.join(template_folder, f)
         for f in os.listdir(template_folder)
@@ -127,8 +176,8 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
         resource_screenshot = cv2.resize(resource_screenshot, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
         _, resource_screenshot = cv2.threshold(resource_screenshot, 205, 255, cv2.THRESH_BINARY_INV)
 
-        # Check if image is completely white (no content detected)
-        if np.mean(resource_screenshot) > 253:  # Threshold for "mostly white"
+        # check if image is completely white (no content detected)
+        if np.mean(resource_screenshot) > 253:  # threshold for "mostly white"
             available_resources[resource] = 0
             continue
 
@@ -143,22 +192,22 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
         last_resource_hashes[resource] = img_hash
 
         if result == "":
-            # Try template matching as fallback
+            # try template matching as fallback
             value = recognize_number(resource_screenshot, number_template_paths)
             print(f"\nResource {resource}: OCR failed, template {value} was matched")
             
-            # Save template and ask user what number it is
+            # save template and ask user what number it is
             if value is None:
                 value = save_and_rename_template(resource_screenshot, resource, template_folder, "unknown")
-        else:       #gets words back from OCR
+        else:  # gets words back from OCR
             try:
                 value = int(result)
             except ValueError:
-                # Try template matching as fallback
+                # try template matching as fallback
                 value = recognize_number(resource_screenshot, number_template_paths)
                 print(f"\nResource {resource}: OCR conversion failed, template {value} was matched")
                 
-                # Save template and ask user what number it is
+                # save template and ask user what number it is
                 if value is None:
                     value = save_and_rename_template(resource_screenshot, resource, template_folder, "failed_convert")
 

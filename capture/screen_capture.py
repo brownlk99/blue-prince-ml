@@ -1,13 +1,17 @@
 import tkinter as tk
+from typing import Optional, Union
 
-from PIL import ImageGrab
+from PIL import Image, ImageGrab
 
 
 class ScreenCapture:
-    def __init__(self, bbox=None):
+    def __init__(self, bbox: Optional[tuple] = None) -> None:
         """
-        bbox: (left, top, right, bottom) — screen region to capture.
-        If None, launch interactive snipping tool.
+            Initialize screen capture with optional bounding box
+
+                Args:
+                    bbox (tuple): (left, top, right, bottom) — screen region to capture
+                                  If None, launch interactive snipping tool
         """
         self.img = None
         self.bbox = bbox
@@ -15,11 +19,22 @@ class ScreenCapture:
         self.start_y = None
         self.rect = None
 
-    def grab_region(self, bbox):
-        """Capture a specific screen region and save it."""
+    def grab_region(self, bbox: tuple) -> None:
+        """
+            Capture a specific screen region and save it
+
+                Args:
+                    bbox (tuple): (left, top, right, bottom) coordinates for capture region
+        """
         self.img = ImageGrab.grab(bbox=bbox)
 
-    def on_mouse_down(self, event):
+    def on_mouse_down(self, event: tk.Event) -> None:
+        """
+            Handle mouse button press to start selection rectangle
+
+                Args:
+                    event (tk.Event): Mouse event containing position information
+        """
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
         self.rect = self.canvas.create_rectangle(
@@ -27,12 +42,24 @@ class ScreenCapture:
             outline='red', width=2
         )
 
-    def on_mouse_drag(self, event):
+    def on_mouse_drag(self, event: tk.Event) -> None:
+        """
+            Handle mouse drag to update selection rectangle
+
+                Args:
+                    event (tk.Event): Mouse event containing position information
+        """
         if self.rect and self.start_x and self.start_y:
             cur_x, cur_y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
 
-    def on_mouse_up(self, event):
+    def on_mouse_up(self, event: tk.Event) -> None:
+        """
+            Handle mouse button release to complete selection and capture region
+
+                Args:
+                    event (tk.Event): Mouse event containing position information
+        """
         if self.start_x and self.start_y:
             end_x = self.canvas.canvasx(event.x)
             end_y = self.canvas.canvasy(event.y)
@@ -43,13 +70,20 @@ class ScreenCapture:
             self.root.destroy()
             self.grab_region((x1, y1, x2, y2))
 
-    def on_escape(self, event):
-        """Cancel capture on Escape key."""
+    def on_escape(self, event: tk.Event) -> None:
+        """
+            Cancel capture on Escape key
+
+                Args:
+                    event (tk.Event): The keyboard event
+        """
         self.img = None
         self.root.destroy()
 
-    def run_gui(self):
-        """Launch an interactive snip overlay."""
+    def run_gui(self) -> None:
+        """
+            Launch an interactive snip overlay
+        """
         self.root = tk.Tk()
         self.root.attributes('-fullscreen', True)
         self.root.attributes('-alpha', 0.3)
@@ -60,19 +94,25 @@ class ScreenCapture:
         self.canvas = tk.Canvas(self.root, bg='black', cursor='cross')
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        # Bind mouse and keyboard events
+        # bind mouse and keyboard events
         self.canvas.bind("<ButtonPress-1>", self.on_mouse_down)
         self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_mouse_up)
         self.root.bind("<Escape>", self.on_escape)
 
-        # Force focus and capture input
+        # force focus and capture input
         self.root.focus_force()
         self.root.grab_set()
 
         self.root.mainloop()
 
-    def run(self):
+    def run(self) -> Optional[Image.Image]:
+        """
+            Execute the screen capture process
+
+                Returns:
+                    Optional[Image.Image]: Captured image or None if cancelled
+        """
         if self.bbox:
             self.grab_region(self.bbox)
         else:

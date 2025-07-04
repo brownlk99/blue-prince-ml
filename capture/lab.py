@@ -12,10 +12,14 @@ from capture.vision_utils import generic_autocorrect, edit_text_in_editor
 
 def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient, editor_path: Optional[str] = None) -> dict:
     """
-    Capture options for the lab experiment.
-    
-    Returns:
-        dict: A dictionary containing the options for the lab experiment.
+        Capture options for the lab experiment
+
+            Args:
+                google_client (vision.ImageAnnotatorClient): Google Vision API client
+                editor_path (Optional[str]): Path to the text editor to use
+
+            Returns:
+                dict: A dictionary containing the options for the lab experiment
     """
     options = {"causes": [], "effects": []}
     for type, list in REGIONS["laboratory"].items():
