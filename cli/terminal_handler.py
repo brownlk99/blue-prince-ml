@@ -17,7 +17,14 @@ from llm.llm_parsers import (
 )
 
 class TerminalCommandProcessor:
-    """Handles terminal command processing."""
+    """
+        Handles terminal command processing for different room types
+
+            Attributes:
+                agent (BluePrinceAgent): The LLM agent for making decisions
+                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+                editor_path (Optional[str]): Path to text editor for manual editing
+    """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, editor_path: Optional[str]) -> None:
         self.agent = agent
@@ -25,7 +32,16 @@ class TerminalCommandProcessor:
         self.editor_path = editor_path
 
     def process_terminal_command(self, command: str, context: str) -> bool:
-        """Process a terminal command and return success status."""
+        """
+            Process a terminal command and return success status
+
+                Args:
+                    command (str): The terminal command to process
+                    context (str): Current game state context
+
+                Returns:
+                    bool: True if command was processed successfully
+        """
         command = command.upper()
         
         if command == "RUN EXPERIMENT SETUP":
@@ -52,7 +68,15 @@ class TerminalCommandProcessor:
 
     @auto_save
     def _handle_login_to_network(self, context: str) -> bool:
-        """Handle login to network - LLM guesses password."""
+        """
+            Handle login to network by having LLM guess the password
+
+                Args:
+                    context (str): Current game state context
+
+                Returns:
+                    bool: True if login was successful
+        """
         current_room = self.agent.game_state.current_room
         
         if not hasattr(current_room, 'terminal'):
@@ -61,12 +85,12 @@ class TerminalCommandProcessor:
         
         terminal = current_room.terminal  # type: ignore
         
-        # If already logged in, no need to guess again
+        # if already logged in, no need to guess again
         if terminal.knows_password:
             print("Already logged into network.")
             return True
         
-        # Have LLM guess the password
+        # have LLM guess the password
         response = self.agent.guess_network_password(context)
         parsed_response = parse_password_guess_response(response)
         parsed_response["context"] = context
@@ -74,7 +98,7 @@ class TerminalCommandProcessor:
         
         print(f"Password Guess: {parsed_response['password']}\nExplanation: {parsed_response['explanation']}")
         
-        # Try the password
+        # try the password
         success = terminal.login_to_the_network(parsed_response['password'])
         
         if success:
@@ -84,7 +108,15 @@ class TerminalCommandProcessor:
 
     @auto_save
     def _handle_special_orders(self, context: str) -> bool:
-        """Handle special orders command."""
+        """
+            Handle special orders command by having LLM decide what to order
+
+                Args:
+                    context (str): Current game state context
+
+                Returns:
+                    bool: True if special orders were handled successfully
+        """
         current_room = self.agent.game_state.current_room
         terminal = current_room.terminal  # type: ignore
         
@@ -104,7 +136,15 @@ class TerminalCommandProcessor:
     @requires_laboratory
     @auto_save
     def _handle_lab_experiment(self, context: str) -> bool:
-        """Handle laboratory experiment setup."""
+        """
+            Handle laboratory experiment setup by capturing options and having LLM decide
+
+                Args:
+                    context (str): Current game state context
+
+                Returns:
+                    bool: True if lab experiment was handled successfully
+        """
         options = capture_lab_experiment_options(self.google_client, self.editor_path)
         response = self.agent.decide_lab_experiment(options, context)
         parsed_response = parse_lab_experiment_response(response)
@@ -123,14 +163,27 @@ class TerminalCommandProcessor:
     @requires_security
     @auto_save
     def _handle_estate_inventory(self) -> bool:
-        """Handle viewing estate inventory."""
+        """
+            Handle viewing estate inventory in security room
+
+                Returns:
+                    bool: True if estate inventory was viewed successfully
+        """
         self.agent.game_state.current_room.terminal.set_estate_inventory()  # type: ignore
         return True
 
     @requires_security
     @auto_save
     def _handle_security_level(self, context: str) -> bool:
-        """Handle altering security level."""
+        """
+            Handle altering security level by having LLM decide
+
+                Args:
+                    context (str): Current game state context
+
+                Returns:
+                    bool: True if security level was altered successfully
+        """
         response = self.agent.decide_security_level(context)
         parsed_response = parse_security_level_response(response)
         parsed_response["context"] = context
@@ -142,7 +195,15 @@ class TerminalCommandProcessor:
     @requires_security
     @auto_save
     def _handle_mode(self, context: str) -> bool:
-        """Handle altering security mode."""
+        """
+            Handle altering security mode by having LLM decide
+
+                Args:
+                    context (str): Current game state context
+
+                Returns:
+                    bool: True if security mode was altered successfully
+        """
         response = self.agent.decide_mode(context)
         parsed_response = parse_mode_response(response)
         parsed_response["context"] = context
@@ -155,7 +216,12 @@ class TerminalCommandProcessor:
     @requires_office
     @auto_save
     def _handle_payroll(self) -> bool:
-        """Handle running payroll."""
+        """
+            Handle running payroll in office room
+
+                Returns:
+                    bool: True if payroll was run successfully
+        """
         self.agent.game_state.current_room.terminal.payroll_ran = True  # type: ignore
         print("Payroll has been run.")
         return True
@@ -163,7 +229,12 @@ class TerminalCommandProcessor:
     @requires_office
     @auto_save
     def _handle_gold_spread(self) -> bool:
-        """Handle spreading gold in estate."""
+        """
+            Handle spreading gold in estate from office room
+
+                Returns:
+                    bool: True if gold was spread successfully
+        """
         self.agent.game_state.current_room.terminal.gold_spread = True  # type: ignore
         print("Gold has been spread in the estate.")
         return True
@@ -171,7 +242,12 @@ class TerminalCommandProcessor:
     @requires_shelter
     @auto_save
     def _handle_time_lock_safe(self) -> bool:
-        """Handle time lock safe command."""
+        """
+            Handle time lock safe command in shelter room
+
+                Returns:
+                    bool: True if time lock safe was activated successfully
+        """
         self.agent.game_state.current_room.terminal.time_lock_safe = True  # type: ignore
         print("Time lock safe has been activated.")
         return True

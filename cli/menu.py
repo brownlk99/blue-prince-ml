@@ -39,29 +39,40 @@ q. Quit                    - Exit the script.
 CURRENT_RUN_FILE = './jsons/current_run.json'
 
 class CliMenu:
-    """Main game menu and command dispatcher."""
+    """
+        Main game menu and command dispatcher for user interactions
+
+            Attributes:
+                command_handler (CommandHandler): Handler for executing menu commands
+                verbose (bool): Whether to show verbose error information
+    """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str], verbose: bool = False) -> None:
         self.command_handler = CommandHandler(agent, google_client, reader, editor_path)
         self.verbose = verbose
 
     def print_menu(self) -> None:
-        """Print the main menu options."""
+        """
+            Print the main menu options with formatted display
+
+                Returns:
+                    None
+        """
         print(MENU_HEADER)
         
-        # Find the longest command name to determine padding
+        # find the longest command name to determine padding
         max_command_length = 0
         commands = {}
         
         for key, (_, description) in MENU_OPTIONS.items():
-            # Split on first " - " to separate command from description
+            # split on first " - " to separate command from description
             parts = description.split(' - ', 1)
             command_name = parts[0]
             desc = parts[1] if len(parts) > 1 else ""
             commands[key] = (command_name, desc)
             max_command_length = max(max_command_length, len(command_name))
         
-        # Print each option with proper spacing
+        # print each option with proper spacing
         for key, (command_name, desc) in commands.items():
             padded_command = command_name.ljust(max_command_length)
             print(f"{key:>2}. {padded_command}   - {desc}")
@@ -69,7 +80,15 @@ class CliMenu:
         print(MENU_FOOTER)
 
     def execute_command(self, command_key: str) -> bool:
-        """Execute a command based on the menu selection."""
+        """
+            Execute a command based on the menu selection
+
+                Args:
+                    command_key (str): The menu option key selected by user
+
+                Returns:
+                    bool: True if command was executed successfully
+        """
         if command_key in MENU_OPTIONS:
             method_name, _ = MENU_OPTIONS[command_key]
             if hasattr(self.command_handler, method_name):
@@ -86,11 +105,20 @@ class CliMenu:
         return False
 
     def _handle_command_error(self, command_name: str, error: Exception) -> None:
-        """Handle and display user-friendly error messages."""
+        """
+            Handle and display user-friendly error messages
+
+                Args:
+                    command_name (str): Name of the command that failed
+                    error (Exception): The exception that occurred
+
+                Returns:
+                    None
+        """
         error_type = type(error).__name__
         error_msg = str(error)
         
-        # Check for common error patterns and provide friendly messages
+        # check for common error patterns and provide friendly messages
         if "google.api_core.exceptions.ServiceUnavailable" in str(type(error)):
             print(f"\nNetwork Error: Unable to connect to Google Vision API")
             print("   This is usually a temporary connection issue. Please try again in a moment.")
@@ -120,22 +148,27 @@ class CliMenu:
             print(f"   {error_msg}")
             
         else:
-            # Generic error with shortened message
+            # generic error with shortened message
             print(f"\n{command_name.replace('_', ' ').title()} Failed")
-            # Show only the last line of the error message (usually the most relevant)
+            # show only the last line of the error message (usually the most relevant)
             clean_msg = error_msg.split('\n')[-1] if '\n' in error_msg else error_msg
             if len(clean_msg) > 100:
                 clean_msg = clean_msg[:97] + "..."
             print(f"   Error: {clean_msg}")
         
-        # Only show debug info in verbose mode
+        # only show debug info in verbose mode
         if self.verbose:
             print(f"   (Debug: {error_type})")
-            if len(error_msg) > 200:  # Show more detail in verbose mode
+            if len(error_msg) > 200:  # show more detail in verbose mode
                 print(f"   (Full error: {error_msg[:200]}...)")
 
     def run(self) -> None:
-        """Run the main menu loop."""
+        """
+            Run the main menu loop and handle user interactions
+
+                Returns:
+                    None
+        """
         print("Script is running. Type a number (1-15) and press Enter to interact. Type 'q' to quit.")
         
         while True:
@@ -153,5 +186,5 @@ class CliMenu:
                 if not success:
                     print("\nYou can try the command again or choose a different option.")
                     
-            # Small pause for readability
+            # small pause for readability
             time.sleep(1) 
