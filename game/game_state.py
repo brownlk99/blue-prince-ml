@@ -44,7 +44,7 @@ class GameState:
         self.current_position = (2, 8)
         self.current_room = self.house.get_room_by_position(self.current_position[0], self.current_position[1])
         self.day = current_day
-        self.special_order = None
+        self.special_order: Optional[str] = None
 
     def setup_default_rooms(self) -> None:
         """

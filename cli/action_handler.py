@@ -25,14 +25,23 @@ class ActionHandler:
         Handles LLM-based actions and decision making for the game
 
             Attributes:
-                agent (BluePrinceAgent): The LLM agent for making decisions
-                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
-                reader (easyocr.Reader): EasyOCR reader for text recognition
-                editor_path (Optional[str]): Path to text editor for manual editing
-                terminal_processor (TerminalCommandProcessor): Processor for terminal commands
+                agent: The LLM agent for making decisions
+                google_client: Google Vision API client for OCR
+                reader: EasyOCR reader for text recognition
+                editor_path: Path to text editor for manual editing
+                terminal_processor: Processor for terminal commands
     """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str]) -> None:
+        """
+            Initialize ActionHandler with required dependencies for game action processing
+
+                Args:
+                    agent: The LLM agent for making decisions
+                    google_client: Google Vision API client for OCR
+                    reader: EasyOCR reader for text recognition
+                    editor_path: Path to text editor for manual editing
+        """
         self.agent = agent
         self.google_client = google_client
         self.reader = reader
@@ -45,7 +54,7 @@ class ActionHandler:
             Handle the main LLM action decision process by analyzing game state and taking appropriate actions
 
                 Returns:
-                    bool: True if action was handled successfully
+                    True if action was handled successfully
         """
         self.agent.game_state.current_position = self.agent.game_state.current_room.position  # type: ignore
 
@@ -94,10 +103,10 @@ class ActionHandler:
             Handle move action by having the LLM decide on movement
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if move action was handled successfully
+                    True if move action was handled successfully
         """
         response = self.agent.decide_move(context)
         parsed_response = parse_move_response(response)
@@ -114,10 +123,10 @@ class ActionHandler:
             Handle door opening action by having the LLM decide which door to open
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if door action was handled successfully
+                    True if door action was handled successfully
         """
         response = self.agent.decide_door_to_open(context)
         parsed_response = parse_door_opening_response(response, self.agent)
@@ -141,7 +150,7 @@ class ActionHandler:
             Handle peruse shop action by stocking shelves in the current shop room
 
                 Returns:
-                    bool: True if shop perusal was handled successfully
+                    True if shop perusal was handled successfully
         """
         input(f"\nPlease access the {self.agent.game_state.current_room.name} shop inventory and press 'Enter' to stock shelves: ")  # type: ignore
         stock_shelves(self.reader, self.agent.game_state.current_room)  # type: ignore
@@ -155,10 +164,10 @@ class ActionHandler:
             Handle purchase item action by having the LLM decide what to buy
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if purchase action was handled successfully
+                    True if purchase action was handled successfully
         """
         response = self.agent.decide_purchase_item(context)
         parsed_response = parse_purchase_response(response)
@@ -175,10 +184,10 @@ class ActionHandler:
             Handle solve puzzle action by having the LLM solve parlor puzzles
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if puzzle solving was handled successfully
+                    True if puzzle solving was handled successfully
         """
         response = self.agent.solve_parlor_puzzle(self.reader, context, self.editor_path)
         parsed_response = parse_parlor_response(response)
@@ -195,10 +204,10 @@ class ActionHandler:
             Handle open secret passage action by having the LLM decide on passage usage
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if secret passage action was handled successfully
+                    True if secret passage action was handled successfully
         """
         response = self.agent.open_secret_passage(context)
         parsed_response = parse_secret_passage_response(response)
@@ -214,7 +223,7 @@ class ActionHandler:
             Handle dig action by setting dig spots in the current room
 
                 Returns:
-                    bool: True if dig action was handled successfully
+                    True if dig action was handled successfully
         """
         self.agent.game_state.current_room.set_dig_spots()  # type: ignore
         return True
@@ -225,7 +234,7 @@ class ActionHandler:
             Handle open trunk action by setting trunks in the current room
 
                 Returns:
-                    bool: True if trunk action was handled successfully
+                    True if trunk action was handled successfully
         """
         self.agent.game_state.current_room.set_trunks()  # type: ignore
         return True
@@ -235,10 +244,10 @@ class ActionHandler:
             Handle use terminal action by having the LLM decide on terminal commands
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if terminal action was handled successfully
+                    True if terminal action was handled successfully
         """
         response = self.agent.use_terminal(context)
         parsed_response = parse_terminal_response(response)
@@ -256,10 +265,10 @@ class ActionHandler:
             Handle store item in coat check action by having the LLM decide what to store
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if store action was handled successfully
+                    True if store action was handled successfully
         """
         response = self.agent.coat_check_prompt("STORE", context)
         parsed = parse_coat_check_response(response)
@@ -284,10 +293,10 @@ class ActionHandler:
             Handle retrieve item from coat check action by having the LLM decide what to retrieve
 
                 Args:
-                    context (str): Current game state context for decision making
+                    context: Current game state context for decision making
 
                 Returns:
-                    bool: True if retrieve action was handled successfully
+                    True if retrieve action was handled successfully
         """
         response = self.agent.coat_check_prompt("RETRIEVE", context)
         parsed_response = parse_coat_check_response(response)
@@ -311,10 +320,10 @@ class ActionHandler:
             Handle utility closet switch actions by toggling the specified switch
 
                 Args:
-                    action (str): The switch action to perform
+                    action: The switch action to perform
 
                 Returns:
-                    bool: True if switch action was handled successfully
+                    True if switch action was handled successfully
         """
         switch_name = action.replace("toggle_", "")
         self.agent.game_state.current_room.toggle_switch(switch_name)  # type: ignore
@@ -329,7 +338,7 @@ class ActionHandler:
             End the current run and save progress to complete the day
 
                 Returns:
-                    bool: True if day ending was handled successfully
+                    True if day ending was handled successfully
         """
         
         # save the final state for this day

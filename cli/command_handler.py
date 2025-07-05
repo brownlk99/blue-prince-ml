@@ -24,15 +24,24 @@ class CommandHandler:
         Handles all menu command implementations and user interactions
 
             Attributes:
-                agent (BluePrinceAgent): The LLM agent for making decisions
-                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
-                reader (easyocr.Reader): EasyOCR reader for text recognition
-                editor_path (Optional[str]): Path to text editor for manual editing
-                action_handler (ActionHandler): Handler for LLM-based actions
-                drafting_handler (DraftingHandler): Handler for drafting operations
+                agent: The LLM agent for making decisions
+                google_client: Google Vision API client for OCR
+                reader: EasyOCR reader for text recognition
+                editor_path: Path to text editor for manual editing
+                action_handler: Handler for LLM-based actions
+                drafting_handler: Handler for drafting operations
     """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str]) -> None:
+        """
+            Initialize CommandHandler with required dependencies for menu command processing
+
+                Args:
+                    agent: The LLM agent for making decisions
+                    google_client: Google Vision API client for OCR
+                    reader: EasyOCR reader for text recognition
+                    editor_path: Path to text editor for manual editing
+        """
         self.agent = agent
         self.google_client = google_client
         self.reader = reader
@@ -47,7 +56,7 @@ class CommandHandler:
             Capture resources using OCR and update game state
 
                 Returns:
-                    bool: True if resources were captured successfully
+                    True if resources were captured successfully
         """
         print("Capturing resources...")
         current_resources = capture_resources(self.google_client, self.agent.game_state.resources)
@@ -62,7 +71,7 @@ class CommandHandler:
             Capture a note for the current room using OCR and generate a title
 
                 Returns:
-                    bool: True if note was captured successfully
+                    True if note was captured successfully
         """
         print("Capturing note...")
         note = capture_note(self.google_client, self.agent.game_state.current_room, self.editor_path)  # type: ignore
@@ -80,7 +89,7 @@ class CommandHandler:
             Capture items using OCR and update inventory
 
                 Returns:
-                    bool: True if items were captured successfully
+                    True if items were captured successfully
         """
         print("Capturing items...")
         item_val = capture_items(self.google_client)
@@ -106,7 +115,7 @@ class CommandHandler:
             Stock shelves in the current shop room using OCR
 
                 Returns:
-                    bool: True if shelves were stocked successfully
+                    True if shelves were stocked successfully
         """
         print("Stocking shelves...")
         stock_shelves(self.reader, self.agent.game_state.current_room)  # type: ignore
@@ -121,7 +130,7 @@ class CommandHandler:
             Use LLM to decide on actions based on current state
 
                 Returns:
-                    bool: True if action was taken successfully
+                    True if action was taken successfully
         """
         return self.action_handler.handle_take_action()
 
@@ -134,7 +143,7 @@ class CommandHandler:
             Capture drafting options for the current room
 
                 Returns:
-                    bool: True if drafting options were handled successfully
+                    True if drafting options were handled successfully
         """
         return self.drafting_handler.handle_drafting_options()
 
@@ -144,7 +153,7 @@ class CommandHandler:
             Add a term to memory through user input
 
                 Returns:
-                    bool: True if term was added successfully
+                    True if term was added successfully
         """
         self.agent.term_memory.user_facilitated_add_term()
         return True
@@ -154,10 +163,10 @@ class CommandHandler:
             Helper method to select a room for editing through user interaction
 
                 Args:
-                    action_description (str): Description of the action being performed
+                    action_description: Description of the action being performed
 
                 Returns:
-                    Optional[Room]: Selected room object or None if cancelled
+                    Selected room object or None if cancelled
         """
         current_room = self.agent.game_state.current_room
         
@@ -208,7 +217,7 @@ class CommandHandler:
             Set dig spots in a selected room
 
                 Returns:
-                    bool: True if dig spots were set successfully
+                    True if dig spots were set successfully
         """
         room = self._select_room_for_editing("SET DIG SPOTS")
         if room:
@@ -226,7 +235,7 @@ class CommandHandler:
             Set trunks in a selected room
 
                 Returns:
-                    bool: True if trunks were set successfully
+                    True if trunks were set successfully
         """
         room = self._select_room_for_editing("SET TRUNKS")
         if room:
@@ -244,7 +253,7 @@ class CommandHandler:
             Edit doors in the current room and update connections
 
                 Returns:
-                    bool: True if doors were edited successfully
+                    True if doors were edited successfully
         """
         self.agent.game_state.current_room.edit_doors()  # type: ignore
         self.agent.game_state.house.connect_adjacent_doors(self.agent.game_state.current_room)  # type: ignore
@@ -260,7 +269,7 @@ class CommandHandler:
             Edit items for sale in the current shop room
 
                 Returns:
-                    bool: True if items were edited successfully
+                    True if items were edited successfully
         """
         self.agent.game_state.current_room.edit_items_for_sale()  # type: ignore
         return True
@@ -272,7 +281,7 @@ class CommandHandler:
             Autofill attributes for a room based on its position
 
                 Returns:
-                    bool: True if room attributes were filled successfully
+                    True if room attributes were filled successfully
         """
         potential_rooms_to_edit = self.agent.game_state.house.get_rooms_by_name("UNKNOWN")
         
@@ -308,7 +317,7 @@ class CommandHandler:
             Analyze previous LLM decision and provide feedback
 
                 Returns:
-                    bool: True if analysis was completed successfully
+                    True if analysis was completed successfully
         """
         response = self.agent.manual_llm_follow_up()
         print(f"\nManual LLM Follow Up Response:\n{response}")
@@ -320,7 +329,7 @@ class CommandHandler:
             Display the current house layout with door states
 
                 Returns:
-                    bool: True if house map was displayed successfully
+                    True if house map was displayed successfully
         """
         self.agent.game_state.house.print_map()
         return True
@@ -331,6 +340,6 @@ class CommandHandler:
             End the current run and save progress
 
                 Returns:
-                    bool: True if day was ended successfully
+                    True if day was ended successfully
         """
         return self.action_handler._handle_call_it_a_day()

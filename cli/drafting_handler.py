@@ -16,12 +16,20 @@ class DraftingHandler:
         Handles drafting operations and room selection logic
 
             Attributes:
-                agent (BluePrinceAgent): The LLM agent for making decisions
-                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
-                reader (easyocr.Reader): EasyOCR reader for text recognition
+                agent: The LLM agent for making decisions
+                google_client: Google Vision API client for OCR
+                reader: EasyOCR reader for text recognition
     """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader) -> None:
+        """
+            Initialize DraftingHandler with required dependencies for drafting operations
+
+                Args:
+                    agent: The LLM agent for making decisions
+                    google_client: Google Vision API client for OCR
+                    reader: EasyOCR reader for text recognition
+        """
         self.agent = agent
         self.google_client = google_client
         self.reader = reader
@@ -31,7 +39,7 @@ class DraftingHandler:
             Handle drafting options capture and selection process
 
                 Returns:
-                    bool: True if drafting options were handled successfully
+                    True if drafting options were handled successfully
         """
         self.agent.game_state.current_position = self.agent.game_state.current_room.position  # type: ignore
 
@@ -70,11 +78,11 @@ class DraftingHandler:
             Handle room selection from drafting options and process the choice
 
                 Args:
-                    parsed_response (dict): Parsed LLM response containing room selection
-                    drafting_options (List[Room]): Available room options to choose from
+                    parsed_response: Parsed LLM response containing room selection
+                    drafting_options: Available room options to choose from
 
                 Returns:
-                    Union[bool, Literal["RETRY"]]: True if successful, False if failed, "RETRY" if should retry
+                    True if successful, False if failed, "RETRY" if should retry
         """
         print(f"Drafting Response:\nRoom: {get_color_code(parsed_response['room'])}\nEnter: {get_color_code(parsed_response['enter'])}\nExplanation: {parsed_response['explanation']}")
         

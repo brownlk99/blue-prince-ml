@@ -43,20 +43,27 @@ class CliMenu:
         Main game menu and command dispatcher for user interactions
 
             Attributes:
-                command_handler (CommandHandler): Handler for executing menu commands
-                verbose (bool): Whether to show verbose error information
+                command_handler: Handler for executing menu commands
+                verbose: Whether to show verbose error information
     """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str], verbose: bool = False) -> None:
+        """
+            Initialize CliMenu with required dependencies for menu operations and command handling
+
+                Args:
+                    agent: The LLM agent for making decisions
+                    google_client: Google Vision API client for OCR
+                    reader: EasyOCR reader for text recognition
+                    editor_path: Path to text editor for manual editing
+                    verbose: Whether to show verbose error information
+        """
         self.command_handler = CommandHandler(agent, google_client, reader, editor_path)
         self.verbose = verbose
 
     def print_menu(self) -> None:
         """
             Print the main menu options with formatted display
-
-                Returns:
-                    None
         """
         print(MENU_HEADER)
         
@@ -84,10 +91,10 @@ class CliMenu:
             Execute a command based on the menu selection
 
                 Args:
-                    command_key (str): The menu option key selected by user
+                    command_key: The menu option key selected by user
 
                 Returns:
-                    bool: True if command was executed successfully
+                    True if command was executed successfully
         """
         if command_key in MENU_OPTIONS:
             method_name, _ = MENU_OPTIONS[command_key]
@@ -109,11 +116,8 @@ class CliMenu:
             Handle and display user-friendly error messages
 
                 Args:
-                    command_name (str): Name of the command that failed
-                    error (Exception): The exception that occurred
-
-                Returns:
-                    None
+                    command_name: Name of the command that failed
+                    error: The exception that occurred
         """
         error_type = type(error).__name__
         error_msg = str(error)

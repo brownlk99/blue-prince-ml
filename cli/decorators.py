@@ -18,10 +18,10 @@ def requires_current_room(func: F) -> F:
         Decorator that ensures current room is set before executing command
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that checks for current room
+                Decorated function that checks for current room
     """
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> bool:
@@ -37,10 +37,10 @@ def capture_resources_first(func: F) -> F:
         Decorator that captures resources before executing command
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that captures resources first
+                Decorated function that captures resources first
     """
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
@@ -56,10 +56,10 @@ def handle_command_safely(func: F) -> F:
         Decorator that provides error handling for commands
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function with error handling
+                Decorated function with error handling
     """
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> bool:
@@ -76,10 +76,10 @@ def auto_save(func: F) -> F:
         Decorator that automatically saves game state after command execution
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that auto-saves after execution
+                Decorated function that auto-saves after execution
     """
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
@@ -93,10 +93,10 @@ def _requires_room_type(*required_types: type) -> Callable[[F], F]:
         Decorator that ensures current room is one of the specified room classes
 
             Args:
-                *required_types (type): Room class types that are required
+                *required_types: Room class types that are required
 
             Returns:
-                Callable[[F], F]: Decorator function for room type validation
+                Decorator function for room type validation
     """
     def decorator(func: F) -> F:
         @wraps(func)
@@ -124,10 +124,10 @@ def requires_shop_room(func: F) -> F:
         Decorator that ensures current room is a ShopRoom
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires shop room
+                Decorated function that requires shop room
     """
     return _requires_room_type(ShopRoom)(func)
 
@@ -136,10 +136,10 @@ def requires_puzzle_room(func: F) -> F:
         Decorator that ensures current room is a PuzzleRoom
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires puzzle room
+                Decorated function that requires puzzle room
     """
     return _requires_room_type(PuzzleRoom)(func)
 
@@ -148,10 +148,10 @@ def requires_secret_passage(func: F) -> F:
         Decorator that ensures current room is a SecretPassage
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires secret passage
+                Decorated function that requires secret passage
     """
     return _requires_room_type(SecretPassage)(func)
 
@@ -160,10 +160,10 @@ def requires_coat_check(func: F) -> F:
         Decorator that ensures current room is a CoatCheck
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires coat check
+                Decorated function that requires coat check
     """
     return _requires_room_type(CoatCheck)(func)
 
@@ -172,10 +172,10 @@ def requires_utility_closet(func: F) -> F:
         Decorator that ensures current room is a UtilityCloset
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires utility closet
+                Decorated function that requires utility closet
     """
     return _requires_room_type(UtilityCloset)(func)
 
@@ -184,10 +184,10 @@ def requires_security(func: F) -> F:
         Decorator that ensures current room is a Security
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires security room
+                Decorated function that requires security room
     """
     return _requires_room_type(Security)(func)
 
@@ -196,10 +196,10 @@ def requires_office(func: F) -> F:
         Decorator that ensures current room is an Office
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires office room
+                Decorated function that requires office room
     """
     return _requires_room_type(Office)(func)
 
@@ -208,10 +208,10 @@ def requires_laboratory(func: F) -> F:
         Decorator that ensures current room is a Laboratory
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires laboratory room
+                Decorated function that requires laboratory room
     """
     return _requires_room_type(Laboratory)(func)
 
@@ -220,9 +220,9 @@ def requires_shelter(func: F) -> F:
         Decorator that ensures current room is a Shelter
 
             Args:
-                func (F): Function to be decorated
+                func: Function to be decorated
 
             Returns:
-                F: Decorated function that requires shelter room
+                Decorated function that requires shelter room
     """
     return _requires_room_type(Shelter)(func)

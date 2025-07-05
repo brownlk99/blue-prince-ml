@@ -21,12 +21,20 @@ class TerminalCommandProcessor:
         Handles terminal command processing for different room types
 
             Attributes:
-                agent (BluePrinceAgent): The LLM agent for making decisions
-                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
-                editor_path (Optional[str]): Path to text editor for manual editing
+                agent: The LLM agent for making decisions
+                google_client: Google Vision API client for OCR
+                editor_path: Path to text editor for manual editing
     """
     
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, editor_path: Optional[str]) -> None:
+        """
+            Initialize TerminalCommandProcessor with required dependencies for terminal operations
+
+                Args:
+                    agent: The LLM agent for making decisions
+                    google_client: Google Vision API client for OCR
+                    editor_path: Path to text editor for manual editing
+        """
         self.agent = agent
         self.google_client = google_client
         self.editor_path = editor_path
@@ -36,11 +44,11 @@ class TerminalCommandProcessor:
             Process a terminal command and return success status
 
                 Args:
-                    command (str): The terminal command to process
-                    context (str): Current game state context
+                    command: The terminal command to process
+                    context: Current game state context
 
                 Returns:
-                    bool: True if command was processed successfully
+                    True if command was processed successfully
         """
         command = command.upper()
         
@@ -72,10 +80,10 @@ class TerminalCommandProcessor:
             Handle login to network by having LLM guess the password
 
                 Args:
-                    context (str): Current game state context
+                    context: Current game state context
 
                 Returns:
-                    bool: True if login was successful
+                    True if login was successful
         """
         current_room = self.agent.game_state.current_room
         
@@ -112,10 +120,10 @@ class TerminalCommandProcessor:
             Handle special orders command by having LLM decide what to order
 
                 Args:
-                    context (str): Current game state context
+                    context: Current game state context
 
                 Returns:
-                    bool: True if special orders were handled successfully
+                    True if special orders were handled successfully
         """
         current_room = self.agent.game_state.current_room
         terminal = current_room.terminal  # type: ignore
@@ -140,10 +148,10 @@ class TerminalCommandProcessor:
             Handle laboratory experiment setup by capturing options and having LLM decide
 
                 Args:
-                    context (str): Current game state context
+                    context: Current game state context
 
                 Returns:
-                    bool: True if lab experiment was handled successfully
+                    True if lab experiment was handled successfully
         """
         options = capture_lab_experiment_options(self.google_client, self.editor_path)
         response = self.agent.decide_lab_experiment(options, context)
@@ -167,7 +175,7 @@ class TerminalCommandProcessor:
             Handle viewing estate inventory in security room
 
                 Returns:
-                    bool: True if estate inventory was viewed successfully
+                    True if estate inventory was viewed successfully
         """
         self.agent.game_state.current_room.terminal.set_estate_inventory()  # type: ignore
         return True
@@ -179,10 +187,10 @@ class TerminalCommandProcessor:
             Handle altering security level by having LLM decide
 
                 Args:
-                    context (str): Current game state context
+                    context: Current game state context
 
                 Returns:
-                    bool: True if security level was altered successfully
+                    True if security level was altered successfully
         """
         response = self.agent.decide_security_level(context)
         parsed_response = parse_security_level_response(response)
@@ -199,10 +207,10 @@ class TerminalCommandProcessor:
             Handle altering security mode by having LLM decide
 
                 Args:
-                    context (str): Current game state context
+                    context: Current game state context
 
                 Returns:
-                    bool: True if security mode was altered successfully
+                    True if security mode was altered successfully
         """
         response = self.agent.decide_mode(context)
         parsed_response = parse_mode_response(response)
@@ -220,7 +228,7 @@ class TerminalCommandProcessor:
             Handle running payroll in office room
 
                 Returns:
-                    bool: True if payroll was run successfully
+                    True if payroll was run successfully
         """
         self.agent.game_state.current_room.terminal.payroll_ran = True  # type: ignore
         print("Payroll has been run.")
@@ -233,7 +241,7 @@ class TerminalCommandProcessor:
             Handle spreading gold in estate from office room
 
                 Returns:
-                    bool: True if gold was spread successfully
+                    True if gold was spread successfully
         """
         self.agent.game_state.current_room.terminal.gold_spread = True  # type: ignore
         print("Gold has been spread in the estate.")
@@ -246,7 +254,7 @@ class TerminalCommandProcessor:
             Handle time lock safe command in shelter room
 
                 Returns:
-                    bool: True if time lock safe was activated successfully
+                    True if time lock safe was activated successfully
         """
         self.agent.game_state.current_room.terminal.time_lock_safe = True  # type: ignore
         print("Time lock safe has been activated.")
