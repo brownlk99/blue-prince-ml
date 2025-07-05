@@ -6,7 +6,15 @@ import time
 
 from game.constants import DIRECTORY
 
+
 def animate(stop, text="Thinking"):
+    """
+        Display animated thinking dots in the console
+
+            Args:
+                stop: Function that returns True when animation should stop
+                text: Text to display before the animated dots
+    """
     for i in itertools.cycle(['   ', '.  ', '.. ', '...']):
         if stop():  # Check if we should stop
             break
@@ -15,6 +23,15 @@ def animate(stop, text="Thinking"):
         time.sleep(0.5)
 
 def start_animation(text="Thinking"):
+    """
+        Start an animation thread for displaying thinking dots
+
+            Args:
+                text: Text to display before the animated dots
+
+            Returns:
+                Tuple containing the thread object and stop function
+    """
     stop_thread = threading.Event()
     t = threading.Thread(target=animate, args=(stop_thread.is_set, text))
     t.daemon = True
@@ -23,7 +40,12 @@ def start_animation(text="Thinking"):
 
 @contextlib.contextmanager
 def thinking_animation(text="Thinking"):
-    """Context manager for thinking animation that hides the cursor."""
+    """
+        Context manager for thinking animation that hides the cursor
+
+            Args:
+                text: Text to display before the animated dots
+    """
     # Hide cursor
     sys.stdout.write('\033[?25l')
     sys.stdout.flush()
@@ -41,14 +63,13 @@ def thinking_animation(text="Thinking"):
 
 def get_color_code(input: str) -> str:
     """
-    Get the ANSI color code for a room based on its type from the DIRECTORY.
-    
-    Args:
-        room_name: Name of the room
-        room_type: List of room types (optional, for more precise coloring)
-    
-    Returns:
-        ANSI color code string
+        Get the ANSI color code for a room based on its type from the DIRECTORY
+        
+            Args:
+                input: Name of the room or item to get color code for
+            
+            Returns:
+                ANSI color code string
     """
     # ANSI color codes
     ORANGE = '\033[33m'         # Yellow/Orange
