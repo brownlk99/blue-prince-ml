@@ -26,7 +26,6 @@ class Door:
         self.is_security = is_security      # true if this is a security door
         self.orientation = orientation      # NSWE
 
-
     def to_dict(self) -> dict:
         """
             Convert the Door instance to a dictionary representation

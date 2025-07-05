@@ -49,6 +49,7 @@ def capture_items(client: vision.ImageAnnotatorClient) -> Optional[Union[str, di
         time.sleep(2)
         return None
 
+
 def manually_obtain_item() -> Optional[dict]:
     """
         Manually enter item information by selecting from available items

@@ -27,6 +27,7 @@ def image_hash(img: np.ndarray) -> str:
     """
     return hashlib.md5(img.tobytes()).hexdigest()
 
+
 def trim_template(template_img: np.ndarray) -> np.ndarray:
     """
         Trim whitespace/background from template image
@@ -53,6 +54,7 @@ def trim_template(template_img: np.ndarray) -> np.ndarray:
     
     # crop to just the number
     return template_img[y:y+h, x:x+w]
+
 
 def recognize_number(resource_img: np.ndarray, number_template_paths: list[str], threshold: float = 0.75) -> Optional[int]:
     """
@@ -112,6 +114,7 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
     
     return best_match  # returns None if no match found
 
+
 def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, template_folder: str, prefix: str = "unknown") -> int:
     """
         Save a resource screenshot as a new template and prompt user for the number value
@@ -147,6 +150,7 @@ def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, tem
         else:
             print("\nInvalid input. Please enter a valid number.")
             time.sleep(2)
+
 
 def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_resources: dict) -> dict:
     """

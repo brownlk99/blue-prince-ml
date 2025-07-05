@@ -31,7 +31,6 @@ class CommandHandler:
                 action_handler: Handler for LLM-based actions
                 drafting_handler: Handler for drafting operations
     """
-    
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str]) -> None:
         """
             Initialize CommandHandler with required dependencies for menu command processing

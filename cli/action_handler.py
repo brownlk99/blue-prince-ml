@@ -31,7 +31,6 @@ class ActionHandler:
                 editor_path: Path to text editor for manual editing
                 terminal_processor: Processor for terminal commands
     """
-    
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str]) -> None:
         """
             Initialize ActionHandler with required dependencies for game action processing
@@ -47,7 +46,6 @@ class ActionHandler:
         self.reader = reader
         self.editor_path = editor_path
         self.terminal_processor = TerminalCommandProcessor(agent, google_client, editor_path)
-
 
     def handle_take_action(self) -> bool:
         """

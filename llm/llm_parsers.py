@@ -195,6 +195,7 @@ def parse_password_guess_response(response: str) -> Dict[str, str]:
         "explanation": explanation
     }
 
+
 def parse_special_order_response(response: str) -> Dict[str, str]:
     """
         Parse the special order response from the LLM
@@ -212,6 +213,7 @@ def parse_special_order_response(response: str) -> Dict[str, str]:
         "item": item,
         "explanation": explanation
     }
+
 
 def parse_security_level_response(response: str) -> Dict[str, str]:
     """

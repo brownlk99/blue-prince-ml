@@ -128,6 +128,7 @@ class Terminal:
         terminal.knows_password = data.get("knows_password", False)
         return terminal
 
+
 class SecurityTerminal(Terminal):
     """
         Security terminal with estate inventory and security controls
@@ -369,6 +370,7 @@ class OfficeTerminal(Terminal):
         """
         return super().__str__() + f", payroll_ran={self.payroll_ran}, gold_spread={self.gold_spread}"
 
+
 class LabTerminal(Terminal):
     """
         Laboratory terminal with experimental house feature capabilities
@@ -459,6 +461,7 @@ class LabTerminal(Terminal):
                     String representation showing the lab terminal's properties
         """
         return super().__str__() + f", experimental_house_feature={self.experimental_house_feature}"
+
 
 class ShelterTerminal(Terminal):
     """

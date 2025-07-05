@@ -15,7 +15,6 @@ class ScreenCapture:
                 start_y: Starting y coordinate for selection
                 rect: Rectangle object for selection visualization
     """
-    
     def __init__(self, bbox: Optional[tuple] = None) -> None:
         """
             Initialize screen capture with optional bounding box

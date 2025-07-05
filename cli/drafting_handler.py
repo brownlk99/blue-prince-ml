@@ -20,7 +20,6 @@ class DraftingHandler:
                 google_client: Google Vision API client for OCR
                 reader: EasyOCR reader for text recognition
     """
-    
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader) -> None:
         """
             Initialize DraftingHandler with required dependencies for drafting operations

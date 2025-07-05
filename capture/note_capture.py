@@ -38,6 +38,7 @@ def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[
     pages.append(edited_page)
     print()
 
+
 def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor_path: Optional[str] = None) -> Note:
     """
         Capture a multi-page note using mouse input for page navigation

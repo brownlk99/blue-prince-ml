@@ -407,7 +407,6 @@ class HouseMap:
                             neighbor_door.locked = "N/A"
                             neighbor_door.is_security = "N/A"
 
-
     def update_security_doors(self) -> None:
         """
             Update all security doors based on current Security room terminal settings and the Utility Closet keycard_entry_system_switch status

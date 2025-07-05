@@ -21,6 +21,7 @@ def easy_ocr(reader: easyocr.Reader, img: np.ndarray, paragraph: bool, allowlist
     results = reader.readtext(img, detail=1, paragraph=paragraph, allowlist=allowlist)
     return results
 
+
 def google_vision(client: vision.ImageAnnotatorClient, img: np.ndarray) -> str:
     """
         Perform OCR on an image using Google Vision API

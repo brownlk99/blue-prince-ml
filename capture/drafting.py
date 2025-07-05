@@ -200,6 +200,7 @@ def get_doors(img: np.ndarray, strip_length: int = 8, offset: int = 5, strip_hei
 
     return detected_doors
 
+
 def get_orientation(chosen_door: Door, detected_doors: List[str]) -> List[str]:
     """
         Determine the orientation of doors in a room based on the chosen door and detected doors
@@ -247,6 +248,7 @@ def get_orientation(chosen_door: Door, detected_doors: List[str]) -> List[str]:
         }
     # map each detected door position to its corresponding cardinal direction
     return [orientation_map[d] for d in detected_doors if d in orientation_map]
+
 
 def get_new_room_position(current_position: tuple, direction: str) -> tuple:
     """
@@ -309,6 +311,7 @@ def get_unknown_room_gem_requirement(draft: str) -> int:
 
     return number_of_gems
 
+
 def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: float = 0.8) -> int:
     """
         Count the number of gems in a draft image using template matching
@@ -342,6 +345,7 @@ def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: 
 
     print(f"\nTotal GEM matches: {len(total_matches)}")
     return len(total_matches)
+
 
 def isolate_pink(image: np.ndarray) -> np.ndarray:
     """

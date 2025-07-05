@@ -36,7 +36,8 @@ def best_match(text: str, options: Iterable[str]) -> Optional[str]:
     else:
         print(f"\nNo close match found for '{text}' in AVAILABLE OPTIONS.")
         return None
-    
+
+
 def generic_autocorrect(text: str) -> str:
     """
         Apply autocorrection to text using TextBlob
@@ -50,6 +51,7 @@ def generic_autocorrect(text: str) -> str:
     blob = TextBlob(text)
     corrected = blob.correct()
     return str(corrected)
+
 
 def edit_text_in_editor(text: str, editor_path: Optional[str] = None) -> str:
     print("Editing text in external editor, save and close to continue.")
@@ -73,6 +75,7 @@ def edit_text_in_editor(text: str, editor_path: Optional[str] = None) -> str:
         edited = tf.read()  # read the edited content
     os.remove(tf.name)
     return edited.strip()
+
 
 def get_current_room(reader: easyocr.Reader, house) -> Union[None, object]:
     """
@@ -98,6 +101,7 @@ def get_current_room(reader: easyocr.Reader, house) -> Union[None, object]:
             print(f"\nCurrent room '{current_room_name}' not found in HOUSE. Prompting user for manual input...")
             current_room_obj = house.prompt_for_room_name(current_room_name)
             return current_room_obj
+
 
 def get_current_room_name(reader: easyocr.Reader) -> str:
     """

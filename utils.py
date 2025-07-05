@@ -38,6 +38,7 @@ def start_animation(text="Thinking"):
     t.start()
     return t, stop_thread.set
 
+
 @contextlib.contextmanager
 def thinking_animation(text="Thinking"):
     """
@@ -60,6 +61,7 @@ def thinking_animation(text="Thinking"):
         sys.stdout.write('\r' + ' ' * (len(text) + 4) + '\r')
         sys.stdout.write('\033[?25h')
         sys.stdout.flush()
+
 
 def get_color_code(input: str) -> str:
     """

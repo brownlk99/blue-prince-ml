@@ -16,6 +16,7 @@ from llm.llm_parsers import (
     parse_special_order_response
 )
 
+
 class TerminalCommandProcessor:
     """
         Handles terminal command processing for different room types
@@ -25,7 +26,6 @@ class TerminalCommandProcessor:
                 google_client: Google Vision API client for OCR
                 editor_path: Path to text editor for manual editing
     """
-    
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, editor_path: Optional[str]) -> None:
         """
             Initialize TerminalCommandProcessor with required dependencies for terminal operations

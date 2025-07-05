@@ -10,6 +10,7 @@ from google.cloud import vision
 from cli.command_handler import CommandHandler
 from llm.llm_agent import BluePrinceAgent
 
+
 # Menu configuration
 MENU_OPTIONS = {
     '1': ('capture_resources', 'Capture Resources - Use OCR to capture and update resource counts.'),
@@ -46,7 +47,6 @@ class CliMenu:
                 command_handler: Handler for executing menu commands
                 verbose: Whether to show verbose error information
     """
-    
     def __init__(self, agent: BluePrinceAgent, google_client: vision.ImageAnnotatorClient, reader: easyocr.Reader, editor_path: Optional[str], verbose: bool = False) -> None:
         """
             Initialize CliMenu with required dependencies for menu operations and command handling

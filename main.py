@@ -18,7 +18,6 @@ from utils import thinking_animation
 warnings.filterwarnings("ignore", category=UserWarning, module="torch.utils.data.dataloader")
 
 
-
 def main(day, load, verbose, editor_path, model_name, use_utility_model):
     """Main function - now much simpler and cleaner."""
     with thinking_animation("Initializing Blue Prince ML"):

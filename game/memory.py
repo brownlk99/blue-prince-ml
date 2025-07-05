@@ -17,7 +17,6 @@ class BaseMemory(ABC):
                 path: The file path for storing the memory data
                 data: The actual memory data stored in this instance
     """
-    
     def __init__(self, path: str, default_data: Any = None) -> None:
         """
             Initialize a BaseMemory instance
@@ -252,7 +251,6 @@ class TermMemory(BaseMemory):
                 time.sleep(2)
         self.save()
         
-
     def get_term(self, key: str) -> Optional[str]:
         """
             Get a term definition by key

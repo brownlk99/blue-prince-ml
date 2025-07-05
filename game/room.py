@@ -248,7 +248,6 @@ class Room:
             print("\nInvalid input. Please enter a number.")
             time.sleep(2)
 
-
     def to_dict(self) -> dict:
         """
             Convert the Room instance to a dictionary representation
@@ -308,6 +307,7 @@ class Room:
                     A string representation showing the room's properties
         """
         return f"Room(name={self.name}, cost={self.cost}, type={self.type}, description={self.description}, additional_info={self.additional_info}, shape={self.shape}, doors={self.doors}, position={self.position}, rank={self.rank}, trunks={self.trunks}, dig_spots={self.dig_spots}, rarity={self.rarity}, has_been_entered={self.has_been_entered})"
+
 
 class ShopRoom(Room):
     """
@@ -453,6 +453,7 @@ class ShopRoom(Room):
         """
         return super().__str__() + f", items_for_sale={self.items_for_sale})"
 
+
 class PuzzleRoom(Room):
     """
         A specialized room containing puzzles that can be solved
@@ -524,7 +525,6 @@ class PuzzleRoom(Room):
                     break
                 else:
                     print(f"Let's try again for the {printable_box_color} box.")
-        
         return results
     
     def to_dict(self) -> dict:
@@ -560,6 +560,7 @@ class PuzzleRoom(Room):
                     A string representation showing the puzzle room's properties
         """
         return super().__str__() + f", has_been_solved={self.has_been_solved})"
+
 
 class UtilityCloset(Room):
     """
@@ -659,7 +660,8 @@ class UtilityCloset(Room):
                     A string representation showing the utility closet's properties
         """
         return super().__str__() + f", keycard_entry_system_switch={self.keycard_entry_system_switch}, gymnasium_switch={self.gymnasium_switch}, darkroom_switch={self.darkroom_switch}, garage_switch={self.garage_switch})"
-    
+
+
 class CoatCheck(Room):
     """
         A room that allows the player to store and retrieve an item across runs
@@ -760,6 +762,7 @@ class CoatCheck(Room):
     
 #     def __str__(self):
 #         return super().__str__()
+
 
 class SecretPassage(Room):
     """
@@ -894,6 +897,7 @@ class Security(Room):
         """
         return super().__str__() + f", terminal={self.terminal})"
 
+
 class Office(Room):
     """
         A room representing an office with a terminal
@@ -964,6 +968,7 @@ class Office(Room):
         """
         return super().__str__() + f", terminal={self.terminal})"
 
+
 class Laboratory(Room):
     """
         A room representing a laboratory with a terminal
@@ -1032,6 +1037,7 @@ class Laboratory(Room):
                     A string representation showing the laboratory room's properties
         """
         return super().__str__() + f", terminal={self.terminal})"
+
 
 class Shelter(Room):
     """
