@@ -1,5 +1,6 @@
 import json
 import time
+from typing import Dict, Any, Tuple, Optional, Union
 
 from game.constants import DIRECTORY
 from game.door import Door
@@ -9,7 +10,26 @@ from utils import get_color_code
 
 
 class GameState:
-    def __init__(self, current_day=1):
+    """
+        Manages the current state of the game including resources, items, rooms, and player position
+
+            Attributes:
+                resources (Dict[str, int]): Dictionary of game resources like keys, gems, coins
+                items (Dict[str, str]): Dictionary of special items collected
+                notes (List[Any]): List of notes found in the game
+                house (HouseMap): The current house map containing all rooms
+                current_position (Tuple[int, int]): Current x, y coordinates of the player
+                current_room (Optional[Room]): The room the player is currently in
+                day (int): Current day of the game
+                special_order (Optional[str]): Any special order placed at the commissary
+    """
+    def __init__(self, current_day: int = 1) -> None:
+        """
+            Initialize a new game state with default values
+
+                Args:
+                    current_day: The starting day for the game state
+        """
         self.resources = {
             "footprints": 0,
             "dice": 0,
@@ -26,7 +46,10 @@ class GameState:
         self.day = current_day
         self.special_order = None
 
-    def setup_default_rooms(self):
+    def setup_default_rooms(self) -> None:
+        """
+	        Set up the default rooms in the house including entrance hall and antechamber
+        """
         entrance_hall = Room(
             name="ENTRANCE HALL",
             shape="T",
@@ -61,10 +84,10 @@ class GameState:
 
     def summarize_for_llm(self) -> str:
         """
-            summarizes the current game state for the LLM
+            Summarizes the current game state for the LLM
 
                 Returns:
-                    str: a summary of the current state
+                    A summary of the current state
         """
         x, y = self.current_position
         current_room = self.house.get_room_by_position(x, y)
@@ -124,7 +147,10 @@ class GameState:
         summary.append("If a ROOM has_been_entered, it means the player has been in that room at least once to collect the initial items and information regarding its DOORS.")
         return "\n".join(summary)
 
-    def edit_resources(self):
+    def edit_resources(self) -> None:
+        """
+	        Allow user to interactively edit game resources
+        """
         print("\n\n----- EDIT GAME RESOURCES -----")
 
         while True:
@@ -149,7 +175,13 @@ class GameState:
                 print("\nInvalid number. Please enter an integer.")
                 time.sleep(2)
     
-    def get_available_redraws(self):
+    def get_available_redraws(self) -> Dict[str, int]:
+        """
+            Calculate and return available redraws from different sources
+
+                Returns:
+                    Dictionary containing counts of available redraws by type
+        """
         dice_redraw_count = self.resources.get("dice", 0)
         room_redraw_count = 0
         study_redraw_count = 0
@@ -177,16 +209,9 @@ class GameState:
             "study": study_redraw_count
         }
 
-    def purchase_item(self):
+    def purchase_item(self) -> None:
         """
-            User-driven function to remove an item from the current room's items_for_sale.
-            Displays a numbered list of items and lets the user pick one to remove.
-
-                Args:
-                    None
-
-                Returns:
-                    None
+            User-driven function to remove an item from the current room's items_for_sale
         """
         if isinstance(self.current_room, ShopRoom):
             while True:
@@ -220,7 +245,13 @@ class GameState:
                     print("\nPlease enter a valid option.")
                     time.sleep(2)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
+        """
+            Convert the game state to a dictionary representation
+
+                Returns:
+                    Dictionary containing all game state data
+        """
         return {
             "resources": self.resources,
             "current_position": {"x": self.current_position[0], "y": self.current_position[1]},
@@ -231,14 +262,27 @@ class GameState:
             "special_order": self.special_order
         }
 
-    def save(self, filepath: str = './jsons/current_run.json'):
-        """Serialize the game state to a JSON file."""
+    def save(self, filepath: str = './jsons/current_run.json') -> None:
+        """
+            Serialize the game state to a JSON file
+
+                Args:
+                    filepath: Path to save the game state JSON file
+        """
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(self.to_dict(), f, indent=2)
 
     @staticmethod
-    def load_from_file(filepath: str):
-        """Load the game state from a JSON file and return a GameState object."""
+    def load_from_file(filepath: str) -> 'GameState':
+        """
+            Load the game state from a JSON file and return a GameState object
+
+                Args:
+                    filepath: Path to the JSON file to load
+                    
+                Returns:
+                    GameState object loaded from the file
+        """
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
         gs = GameState()

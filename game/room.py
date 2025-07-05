@@ -11,7 +11,41 @@ from utils import get_color_code
 
 
 class Room:
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False):
+    """
+        Represents a room in the game with doors, items, and various properties
+
+            Attributes:
+                name: The name of the room in uppercase
+                cost: The cost to draft this room
+                type: List of room types (e.g., PERMANENT, BLUEPRINT)
+                description: Detailed description of the room
+                additional_info: Additional information about the room
+                shape: The shape of the room (DEAD END, STRAIGHT, L, T, CROSS)
+                doors: List of Door objects for this room
+                position: Tuple of (x, y) coordinates
+                trunks: Number of trunks in this room
+                dig_spots: Number of dig spots in this room
+                rarity: The rarity of this room type
+                has_been_entered: Whether the player has entered this room
+    """
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False) -> None:
+        """
+            Initialize a Room instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+        """
         self.name = name.upper()
         self.cost = cost
         self.type = type if isinstance(type, list) else [type]
@@ -26,10 +60,19 @@ class Room:
         self.has_been_entered = has_been_entered
 
     @property
-    def rank(self):
+    def rank(self) -> int:
+        """
+            Calculate the rank of the room based on its position
+
+                Returns:
+                    The rank number (1-9)
+        """
         return 9 - self.position[1]
 
-    def edit_doors(self):
+    def edit_doors(self) -> None:
+        """
+            Interactive method to edit doors in this room
+        """
         print(f"\n\n ----- DOOR EDITOR ----- \n")
         print(f"Editing DOORS for room: {get_color_code(self.name)}")
         while True:
@@ -65,7 +108,10 @@ class Room:
                 print("\nInvalid option")
                 time.sleep(2)
 
-    def edit_single_door_interactive(self):
+    def edit_single_door_interactive(self) -> None:
+        """
+            Interactive method to edit a single door in this room
+        """
         try:
             if not self.doors:
                 print("\nNo DOORS to edit in this room.")
@@ -106,8 +152,14 @@ class Room:
             time.sleep(2)
             
     def add_door_interactive(self, count: int = 1) -> None:
+        """
+            Interactive method to add new doors to this room
+
+                Args:
+                    count: Number of doors to add
+        """
         print(f"Adding {count} DOOR(s) to room: {self.name}")
-        #TODO: add input validation for orientation, locked, is_security.. is in ["true", "t", "yes", "y", "1"]
+        # TODO: add input validation for orientation, locked, is_security.. is in ["true", "t", "yes", "y", "1"]
         for i in range(count):
             orientation = input("ORIENTATION (N/S/E/W): ").strip().upper()
             locked = input("LOCKED (True/False/?) [?]: ").strip().lower()
@@ -115,7 +167,10 @@ class Room:
             self.doors.append(Door(orientation=orientation, locked=locked, is_security=is_security))
             print(f"DOOR {i+1} added")
 
-    def remove_door_interactive(self):
+    def remove_door_interactive(self) -> None:
+        """
+            Interactive method to remove a door from this room
+        """
         try:
             door_idx = int(input("Enter DOOR number to REMOVE: ")) - 1
             if 0 <= door_idx < len(self.doors):
@@ -128,21 +183,30 @@ class Room:
             print("\nInvalid INPUT")
             time.sleep(2)
 
-    def get_door_by_orientation(self, door_dir):
+    def get_door_by_orientation(self, door_dir: str) -> Door:
+        """
+            Get a door by its orientation
+
+                Args:
+                    door_dir: The direction of the door (N, S, E, W)
+
+                Returns:
+                    The Door object with the specified orientation
+
+                Raises:
+                    ValueError: If no door with the specified orientation is found
+        """
         door = next((d for d in self.doors if getattr(d, "orientation", None) == door_dir), None)
         if not door:
             raise ValueError(f"DOOR '{door_dir}' not found in room '{self.name}'.")
         return door
     
-    def get_door_count_from_shape(self):
+    def get_door_count_from_shape(self) -> int:
         """
-            returns the number of doors for a given room shape
-
-                Args:
-                    shape (str): the shape of the room (DEAD END, STRAIGHT, L, T, CROSS)
+            Return the number of doors for a given room shape
 
                 Returns:
-                    int: the number of doors for the given shape
+                    The number of doors for the given shape
         """
         shape_to_door_count = {
             "DEAD END": 1,
@@ -154,7 +218,10 @@ class Room:
         
         return shape_to_door_count.get(self.shape.upper(), 0)  # default to 0 if shape not found
     
-    def set_trunks(self):
+    def set_trunks(self) -> None:
+        """
+            Interactive method to set the number of trunks in this room
+        """
         try:
             count = int(input("Enter the number of trunks in this room: ").strip())
             if count < 0:
@@ -166,7 +233,10 @@ class Room:
             print("\nInvalid input. Please enter a number.")
             time.sleep(2)
 
-    def set_dig_spots(self):
+    def set_dig_spots(self) -> None:
+        """
+            Interactive method to set the number of dig spots in this room
+        """
         try:
             count = int(input("Enter the number of dig spots in this room: ").strip())
             if count < 0:
@@ -179,7 +249,13 @@ class Room:
             time.sleep(2)
 
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the Room instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the room
+        """
         return {
             "name": self.name,
             "cost": self.cost,
@@ -197,7 +273,17 @@ class Room:
         }
 
     @classmethod
-    def from_dict(cls, data, **kwargs):
+    def from_dict(cls, data: dict, **kwargs) -> 'Room':
+        """
+            Create a Room instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing room data
+                    **kwargs: Additional keyword arguments
+
+                Returns:
+                    A Room instance created from the dictionary data
+        """
         return cls(
             name=data.get("name", ""),
             cost=data.get("cost", 0),
@@ -214,15 +300,48 @@ class Room:
             **kwargs
         )
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the Room
+
+                Returns:
+                    A string representation showing the room's properties
+        """
         return f"Room(name={self.name}, cost={self.cost}, type={self.type}, description={self.description}, additional_info={self.additional_info}, shape={self.shape}, doors={self.doors}, position={self.position}, rank={self.rank}, trunks={self.trunks}, dig_spots={self.dig_spots}, rarity={self.rarity}, has_been_entered={self.has_been_entered})"
 
 class ShopRoom(Room):
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, items_for_sale: Optional[dict] = None):
+    """
+        A specialized room where items can be purchased
+
+            Attributes:
+                items_for_sale: Dictionary of items available for purchase with their prices
+    """
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, items_for_sale: Optional[dict] = None) -> None:
+        """
+            Initialize a ShopRoom instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+                    items_for_sale: Dictionary of items available for purchase
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.items_for_sale = items_for_sale if items_for_sale else {}
 
-    def edit_items_for_sale(self):
+    def edit_items_for_sale(self) -> None:
+        """
+            Interactive method to edit the items for sale in this shop room
+        """
         while True:
             print(f"\nCurrent items for sale in {self.name}:")
             if not self.items_for_sale:
@@ -241,7 +360,7 @@ class ShopRoom(Room):
             choice = input("\n\nSelect an option: ").strip().lower()
             if choice == "1":
                 item = input("Enter item name: ").strip().upper()
-                # Show suggestions if item not found
+                # show suggestions if item not found
                 if item not in DIRECTORY["ITEMS"]:
                     print("\nInvalid item name. Type '4' to list all valid items.")
                     time.sleep(2)
@@ -300,34 +419,79 @@ class ShopRoom(Room):
                 print("\nInvalid option.")
                 time.sleep(2)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the ShopRoom instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the shop room
+        """
         data = super().to_dict()
         data["items_for_sale"] = self.items_for_sale
         return data
     
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> 'ShopRoom':
+        """
+            Create a ShopRoom instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing shop room data
+
+                Returns:
+                    A ShopRoom instance created from the dictionary data
+        """
         items_for_sale = data.get("items_for_sale", {})
-        return super().from_dict(data, items_for_sale=items_for_sale)
+        return super().from_dict(data, items_for_sale=items_for_sale) # type: ignore
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the ShopRoom
+
+                Returns:
+                    A string representation showing the shop room's properties
+        """
         return super().__str__() + f", items_for_sale={self.items_for_sale})"
 
 class PuzzleRoom(Room):
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, has_been_solved: bool = False):
-        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
-        self.has_been_solved = has_been_solved  # Indicates if the puzzle in this room has been solved
+    """
+        A specialized room containing puzzles that can be solved
 
-    def parlor_puzzle(self, reader: easyocr.Reader, editor_path: Optional[str] = None):
+            Attributes:
+                has_been_solved: Whether the puzzle in this room has been solved
+    """
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, has_been_solved: bool = False) -> None:
         """
-            interactive parlor puzzle solver
+            Initialize a PuzzleRoom instance
 
                 Args:
-                    reader (easyocr.Reader): the OCR reader to capture text
-                    editor_path (str): path to text editor for manual editing
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+                    has_been_solved: Whether the puzzle has been solved
+        """
+        super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
+        self.has_been_solved = has_been_solved  # indicates if the puzzle in this room has been solved
+
+    def parlor_puzzle(self, reader: easyocr.Reader, editor_path: Optional[str] = None) -> dict:
+        """
+            Interactive parlor puzzle solver
+
+                Args:
+                    reader: The OCR reader to capture text
+                    editor_path: Path to text editor for manual editing
 
                 Returns:
-                    dict: the results for each color box
+                    The results for each color box
         """
         colors = ["BLUE", "WHITE", "BLACK"]
         results = {}
@@ -342,12 +506,12 @@ class PuzzleRoom(Room):
                 capture_choice = input("Enter your choice (1/2): ").strip()
                 
                 if capture_choice == "1":
-                    # Screenshot capture path
+                    # screenshot capture path
                     input(f"Please get into position to screenshot the {printable_box_color} box, press Enter to continue...")
                     box_result = parlor.capture_hint(reader, editor_path)
                     print(f"OCR result for {printable_box_color} box: {box_result}")
                 elif capture_choice == "2":
-                    # Manual entry path
+                    # manual entry path
                     box_result = input(f"\nEnter the text for the {printable_box_color} box: ").strip()
                 else:
                     print("\nInvalid choice. Please enter 1 or 2.")
@@ -363,26 +527,72 @@ class PuzzleRoom(Room):
         
         return results
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the PuzzleRoom instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the puzzle room
+        """
         data = super().to_dict()
         data["has_been_solved"] = self.has_been_solved
         return data
     
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> 'PuzzleRoom':
+        """
+            Create a PuzzleRoom instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing puzzle room data
+
+                Returns:
+                    A PuzzleRoom instance created from the dictionary data
+        """
         has_been_solved = data.get("has_been_solved", False)
-        return super().from_dict(data, has_been_solved=has_been_solved)
+        return super().from_dict(data, has_been_solved=has_been_solved) # type: ignore
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the PuzzleRoom
+
+                Returns:
+                    A string representation showing the puzzle room's properties
+        """
         return super().__str__() + f", has_been_solved={self.has_been_solved})"
 
 class UtilityCloset(Room):
     """
-        A utility closet containing various switches for different areas.
+        A utility closet containing various switches for different areas
 
-            Args: True means on, False means off
+            Attributes:
+                keycard_entry_system_switch: State of the keycard system switch
+                gymnasium_switch: State of the gymnasium switch
+                darkroom_switch: State of the darkroom switch
+                garage_switch: State of the garage switch
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, keycard_entry_system_switch: bool = True, gymnasium_switch: bool = True, darkroom_switch: bool = False, garage_switch: bool = False):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, keycard_entry_system_switch: bool = True, gymnasium_switch: bool = True, darkroom_switch: bool = False, garage_switch: bool = False) -> None:
+        """
+            Initialize a UtilityCloset instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+                    keycard_entry_system_switch: State of the keycard system switch
+                    gymnasium_switch: State of the gymnasium switch
+                    darkroom_switch: State of the darkroom switch
+                    garage_switch: State of the garage switch
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.keycard_entry_system_switch = keycard_entry_system_switch
         self.gymnasium_switch = gymnasium_switch
@@ -391,13 +601,10 @@ class UtilityCloset(Room):
 
     def toggle_switch(self, switch_name: str) -> None:
         """
-            toggles the state of a specific switch in the utility closet
+            Toggle the state of a specific switch in the utility closet
 
                 Args:
-                    switch_name (str): the name of the switch to toggle
-
-                Returns:
-                    None
+                    switch_name: The name of the switch to toggle
         """
         if hasattr(self, switch_name):
             current_state = getattr(self, switch_name)
@@ -410,7 +617,13 @@ class UtilityCloset(Room):
         else:
             print(f"Switch {switch_name} does not exist.")
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the UtilityCloset instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the utility closet
+        """
         data = super().to_dict()
         data["keycard_entry_system_switch"] = self.keycard_entry_system_switch
         data["gymnasium_switch"] = self.gymnasium_switch
@@ -419,45 +632,114 @@ class UtilityCloset(Room):
         return data
     
     @classmethod
-    def from_dict(cls, data):
-        base_room = super().from_dict(data)                         #get the base room attributes
-        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}  #remove the doors from the base room attributes
-        utility_closet = cls(**base_data, doors=base_room.doors)         #create the utility closet with the base room attributes
-        utility_closet.keycard_entry_system_switch = data.get("keycard_entry_system_switch", True)  #add the keycard entry system switch attribute to the utility closet
-        utility_closet.gymnasium_switch = data.get("gymnasium_switch", True)  #add the gymnasium switch attribute to the utility closet
-        utility_closet.darkroom_switch = data.get("darkroom_switch", False)  #add the darkroom switch attribute to the utility closet
-        utility_closet.garage_switch = data.get("garage_switch", False)  #add the garage switch attribute to the utility closet
+    def from_dict(cls, data: dict) -> 'UtilityCloset':
+        """
+            Create a UtilityCloset instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing utility closet data
+
+                Returns:
+                    A UtilityCloset instance created from the dictionary data
+        """
+        base_room = super().from_dict(data)                         # get the base room attributes
+        base_data = {k: v for k, v in base_room.to_dict().items() if k not in ["doors", "rank"]}  # remove the doors from the base room attributes
+        utility_closet = cls(**base_data, doors=base_room.doors)         # create the utility closet with the base room attributes
+        utility_closet.keycard_entry_system_switch = data.get("keycard_entry_system_switch", True)  # add the keycard entry system switch attribute to the utility closet
+        utility_closet.gymnasium_switch = data.get("gymnasium_switch", True)  # add the gymnasium switch attribute to the utility closet
+        utility_closet.darkroom_switch = data.get("darkroom_switch", False)  # add the darkroom switch attribute to the utility closet
+        utility_closet.garage_switch = data.get("garage_switch", False)  # add the garage switch attribute to the utility closet
         return utility_closet
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the UtilityCloset
+
+                Returns:
+                    A string representation showing the utility closet's properties
+        """
         return super().__str__() + f", keycard_entry_system_switch={self.keycard_entry_system_switch}, gymnasium_switch={self.gymnasium_switch}, darkroom_switch={self.darkroom_switch}, garage_switch={self.garage_switch})"
     
 class CoatCheck(Room):
     """
-        Allows the player to store and retrieve an item across runs
+        A room that allows the player to store and retrieve an item across runs
+
+            Attributes:
+                stored_item: The item currently stored in the coat check
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, stored_item: str = ""):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, stored_item: str = "") -> None:
+        """
+            Initialize a CoatCheck instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+                    stored_item: The item currently stored in the coat check
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.stored_item = stored_item
 
-    def store_item(self, item: str):
+    def store_item(self, item: str) -> None:
+        """
+            Store an item in the coat check
+
+                Args:
+                    item: The item to store
+        """
         self.stored_item = item
 
     def retrieve_item(self) -> str:
+        """
+            Retrieve the stored item from the coat check
+
+                Returns:
+                    The previously stored item (empty string after retrieval)
+        """
         self.stored_item = ""
         return self.stored_item
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the CoatCheck instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the coat check
+        """
         data = super().to_dict()
         data["stored_item"] = self.stored_item
         return data
 
     @classmethod
-    def from_dict(cls, data):
-        stored_item = data.get("stored_item", "")
-        return super().from_dict(data, stored_item=stored_item)
+    def from_dict(cls, data: dict) -> 'CoatCheck':
+        """
+            Create a CoatCheck instance from a dictionary representation
 
-    def __str__(self):
+                Args:
+                    data: A dictionary containing coat check data
+
+                Returns:
+                    A CoatCheck instance created from the dictionary data
+        """
+        stored_item = data.get("stored_item", "")
+        return super().from_dict(data, stored_item=stored_item) # type: ignore
+
+    def __str__(self) -> str:
+        """
+            Return a string representation of the CoatCheck
+
+                Returns:
+                    A string representation showing the coat check's properties
+        """
         return super().__str__() + f", stored_item={self.stored_item})"
     
 # class Library(Room):
@@ -481,131 +763,335 @@ class CoatCheck(Room):
 
 class SecretPassage(Room):
     """
-        Represents a secret passage room with a hidden door
+        A room representing a secret passage with a hidden door
+
+            Attributes:
+                has_been_used: Whether the secret passage has been used
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, has_been_used: bool = False):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False, has_been_used: bool = False) -> None:
+        """
+            Initialize a SecretPassage instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+                    has_been_used: Whether the secret passage has been used
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.has_been_used = has_been_used
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the SecretPassage instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the secret passage
+        """
         data = super().to_dict()
         data["has_been_used"] = self.has_been_used
         return data
     
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> 'SecretPassage':
+        """
+            Create a SecretPassage instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing secret passage data
+
+                Returns:
+                    A SecretPassage instance created from the dictionary data
+        """
         has_been_used = data.get("has_been_used", False)
-        return super().from_dict(data, has_been_used=has_been_used)
+        return super().from_dict(data, has_been_used=has_been_used) # type: ignore
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the SecretPassage
+
+                Returns:
+                    A string representation showing the secret passage's properties
+        """
         return super().__str__()
 
 
 class Security(Room):
     """
-        Represents a security room with a terminal
+        A room representing a security room with a terminal
+
+            Attributes:
+                terminal: The SecurityTerminal instance for this room
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: SecurityTerminal,trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: SecurityTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False) -> None:
+        """
+            Initialize a Security instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    terminal: The SecurityTerminal instance for this room
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.terminal = terminal
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the Security instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the security room
+        """
         data = super().to_dict()
         data["terminal"] = self.terminal.to_dict()
         return data
     
     @classmethod
-    def from_dict(cls, data):
-        # Handle missing or invalid terminal data
+    def from_dict(cls, data: dict) -> 'Security':
+        """
+            Create a Security instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing security room data
+
+                Returns:
+                    A Security instance created from the dictionary data
+        """
+        # handle missing or invalid terminal data
         terminal_data = data.get("terminal")
         if terminal_data:
             terminal = SecurityTerminal.from_dict(terminal_data)
         else:
-            terminal = SecurityTerminal()  # Create default terminal
+            terminal = SecurityTerminal()  # create default terminal
         
-        return super().from_dict(data, terminal=terminal)
+        return super().from_dict(data, terminal=terminal) # type: ignore
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the Security
+
+                Returns:
+                    A string representation showing the security room's properties
+        """
         return super().__str__() + f", terminal={self.terminal})"
 
 class Office(Room):
     """
-        Represents an office room with a terminal
+        A room representing an office with a terminal
+
+            Attributes:
+                terminal: The OfficeTerminal instance for this room
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: OfficeTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: OfficeTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False) -> None:
+        """
+            Initialize an Office instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    terminal: The OfficeTerminal instance for this room
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.terminal = terminal
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the Office instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the office room
+        """
         data = super().to_dict()
         data["terminal"] = self.terminal.to_dict()
         return data
     
     @classmethod
-    def from_dict(cls, data):
-        # Handle terminal creation
+    def from_dict(cls, data: dict) -> 'Office':
+        """
+            Create an Office instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing office room data
+
+                Returns:
+                    An Office instance created from the dictionary data
+        """
+        # handle terminal creation
         terminal_data = data.get("terminal")
         if terminal_data and isinstance(terminal_data, dict):
             terminal = OfficeTerminal.from_dict(terminal_data)
         else:
-            terminal = OfficeTerminal()  # Create default terminal
+            terminal = OfficeTerminal()  # create default terminal
         
         # Create base room, passing the terminal as an extra argument
-        return super().from_dict(data, terminal=terminal)
+        return super().from_dict(data, terminal=terminal) # type: ignore
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the Office
+
+                Returns:
+                    A string representation showing the office room's properties
+        """
         return super().__str__() + f", terminal={self.terminal})"
 
 class Laboratory(Room):
     """
-        Represents a laboratory room with a terminal
+        A room representing a laboratory with a terminal
+
+            Attributes:
+                terminal: The LabTerminal instance for this room
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: LabTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: LabTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False) -> None:
+        """
+            Initialize a Laboratory instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    terminal: The LabTerminal instance for this room
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.terminal = terminal
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the Laboratory instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the laboratory room
+        """
         data = super().to_dict()
         data["terminal"] = self.terminal.to_dict()
         return data
     
     @classmethod
-    def from_dict(cls, data):
-        # Handle missing or invalid terminal data
+    def from_dict(cls, data: dict) -> 'Laboratory':
+        """
+            Create a Laboratory instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing laboratory room data
+
+                Returns:
+                    A Laboratory instance created from the dictionary data
+        """
+        # handle missing or invalid terminal data
         terminal_data = data.get("terminal")
         if terminal_data:
             terminal = LabTerminal.from_dict(terminal_data)
         else:
-            terminal = LabTerminal()  # Create default terminal
+            terminal = LabTerminal()  # create default terminal
         
-        return super().from_dict(data, terminal=terminal)
+        return super().from_dict(data, terminal=terminal) # type: ignore
     
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+            Return a string representation of the Laboratory
+
+                Returns:
+                    A string representation showing the laboratory room's properties
+        """
         return super().__str__() + f", terminal={self.terminal})"
 
 class Shelter(Room):
     """
-        Represents a shelter room with a terminal
+        A room representing a shelter with a terminal
+
+            Attributes:
+                terminal: The ShelterTerminal instance for this room
     """
-    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: ShelterTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False):
+    def __init__(self, name: str, cost: int, type: list[str], description: str, additional_info: str, shape: str, doors: list[Door], position: tuple, rarity: str, terminal: ShelterTerminal, trunks: int = 0, dig_spots: int = 0, has_been_entered: bool = False) -> None:
+        """
+            Initialize a Shelter instance
+
+                Args:
+                    name: The name of the room
+                    cost: The cost to draft this room
+                    type: List of room types
+                    description: Detailed description of the room
+                    additional_info: Additional information about the room
+                    shape: The shape of the room
+                    doors: List of Door objects for this room
+                    position: Tuple of (x, y) coordinates
+                    rarity: The rarity of this room type
+                    terminal: The ShelterTerminal instance for this room
+                    trunks: Number of trunks in this room
+                    dig_spots: Number of dig spots in this room
+                    has_been_entered: Whether the player has entered this room
+        """
         super().__init__(name, cost, type, description, additional_info, shape, doors, position, rarity, trunks, dig_spots, has_been_entered)
         self.terminal = terminal
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the Shelter instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the shelter room
+        """
         data = super().to_dict()
         data["terminal"] = self.terminal.to_dict()
         return data
     
     @classmethod
-    def from_dict(cls, data):
-        # Handle missing or invalid terminal data
+    def from_dict(cls, data: dict) -> 'Shelter':
+        """
+            Create a Shelter instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing shelter room data
+
+                Returns:
+                    A Shelter instance created from the dictionary data
+        """
+        # handle missing or invalid terminal data
         terminal_data = data.get("terminal")
         if terminal_data:
             terminal = ShelterTerminal.from_dict(terminal_data)
         else:
             terminal = ShelterTerminal()  # Create default terminal
         
-        return super().from_dict(data, terminal=terminal)
+        return super().from_dict(data, terminal=terminal) # type: ignore
     
     def __str__(self):
         return super().__str__() + f", terminal={self.terminal})"

@@ -17,21 +17,45 @@ from utils import get_color_code
 
 
 class HouseMap:
-    def __init__(self, width=5, height=9):
+    """
+        Represents a house map with rooms arranged in a grid layout
+
+            Attributes:
+                width: The width of the house map grid
+                height: The height of the house map grid
+                grid: A 2D list containing room objects or None for empty spaces
+    """
+    def __init__(self, width: int = 5, height: int = 9) -> None:
+        """
+            Initialize a HouseMap instance
+
+                Args:
+                    width: The width of the house map grid
+                    height: The height of the house map grid
+        """
         self.width = width
         self.height = height
         self.grid = [[None for _ in range(width)] for _ in range(height)]
 
-    def add_room_to_house(self, room: Room):
+    def add_room_to_house(self, room: Room) -> None:
+        """
+            Add a room to the house map at the room's position
+
+                Args:
+                    room: The room object to add to the house map
+        """
         x = room.position[0]
         y = room.position[1]
         if not (0 <= x < self.width and 0 <= y < self.height):
             raise ValueError("Room position out of bounds.")
         self.grid[y][x] = room
 
-    def update_room_in_house(self, room: Room):
+    def update_room_in_house(self, room: Room) -> None:
         """
-            Updates the room in the house map at its current position by removing and adding.
+            Update the room in the house map at its current position by removing and adding
+
+                Args:
+                    room: The room object to update in the house map
         """
         x, y = room.position
         if not (0 <= x < self.width and 0 <= y < self.height):
@@ -41,12 +65,31 @@ class HouseMap:
             raise ValueError("No room exists at the specified position to update.")
         self.grid[y][x] = room
 
-    def get_room_by_position(self, x, y) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage, None]:
+    def get_room_by_position(self, x: int, y: int) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage, None]:
+        """
+            Get a room from the house map by its position coordinates
+
+                Args:
+                    x: The x coordinate of the room
+                    y: The y coordinate of the room
+
+                Returns:
+                    The room object at the specified position or None if no room exists
+        """
         if not (0 <= x < self.width and 0 <= y < self.height):
             return None
         return self.grid[y][x]
     
-    def get_room_by_name(self, name: str) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, None]:
+    def get_room_by_name(self, name: str) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage, None]:
+        """
+            Get the first room from the house map by its name
+
+                Args:
+                    name: The name of the room to find
+
+                Returns:
+                    The first room object with the specified name or None if not found
+        """
         for row in self.grid:
             for room in row:
                 if room and room.name == name:
@@ -54,6 +97,15 @@ class HouseMap:
         return None
     
     def get_rooms_by_name(self, name: str) -> list[Room]:
+        """
+            Get all rooms from the house map by their name
+
+                Args:
+                    name: The name of the rooms to find
+
+                Returns:
+                    A list of room objects with the specified name
+        """
         rooms = []
         for row in self.grid:
             for room in row:
@@ -62,6 +114,15 @@ class HouseMap:
         return rooms
 
     def prompt_for_room_name(self, initial_name: str = "") -> Room:
+        """
+            Prompt the user to enter a valid room name and return the room
+
+                Args:
+                    initial_name: The initial room name to check
+
+                Returns:
+                    The room object with the valid name
+        """
         name = initial_name
         while True:
             room = self.get_room_by_name(name)
@@ -70,15 +131,20 @@ class HouseMap:
             name = input(f"Detected room '{name}' - but not found within the house. Please enter a valid room name: ").strip().upper()
     
     def count_occupied_rooms(self) -> int:
+        """
+            Count the number of occupied rooms in the house map
+
+                Returns:
+                    The number of rooms that are not None
+        """
         return sum(1 for row in self.grid for room in row if room)
     
     def scan_rooms_for_available_actions(self) -> dict:
         """
-            scans all rooms in the house and sets flags if a room is a ShopRoom, PuzzleRoom,
-            has a trunk, dig spot, terminal, or is a CoatCheck
+            Scan all rooms in the house and set flags if a room is a ShopRoom, PuzzleRoom, has a trunk, dig spot, terminal, or is a CoatCheck
 
                 Returns:
-                    None
+                    A dictionary containing boolean flags for different room types and features
         """
         flag_dict = {
             "shop_room_present": False,
@@ -131,13 +197,13 @@ class HouseMap:
     @staticmethod
     def specialize_room(room: Room) -> Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage, Security, Office, Laboratory, Shelter]:
         """
-            Specializes a room type based on its name
+            Specialize a room type based on its name
 
                 Args:
-                    room (Room): the room object to specialize
+                    room: The room object to specialize
 
                 Returns:
-                    Room: the specialized room type
+                    The specialized room type
         """
         if room.name in ["KITCHEN", "COMMISSARY", "LOCKSMITH", "SHOWROOM"]:
             return ShopRoom.from_dict(room.to_dict())
@@ -164,14 +230,11 @@ class HouseMap:
     @staticmethod
     def generic_autofill_room_attributes(room: Room, room_name: str) -> None:
         """
-            Autofills room attributes from DIRECTORY using the provided room name
+            Autofill room attributes from DIRECTORY using the provided room name
 
                 Args:
-                    room (Room): the room object to update
-                    room_name (str): the name of the room to look up
-
-                Returns:
-                    None
+                    room: The room object to update
+                    room_name: The name of the room to look up
         """
         for _, rooms in DIRECTORY["FLOORPLANS"].items():
             if room_name in rooms:
@@ -190,13 +253,10 @@ class HouseMap:
 
     def edit_room(self, room: Union[Room, ShopRoom, PuzzleRoom, UtilityCloset]) -> None:
         """
-            Allows the user to view and edit all editable fields of a Room or its subclasses
+            Allow the user to view and edit all editable fields of a Room or its subclasses
 
                 Args:
-                    room (Room): the room object to edit
-
-                Returns:
-                    None
+                    room: The room object to edit
         """
         # gather all editable fields, including subclass-specific ones
         #TODO: maybe add type back in
@@ -277,11 +337,17 @@ class HouseMap:
             setattr(room, field, new_value)
             print(f"{field} updated.")
 
-    def connect_adjacent_doors(self, new_room: Room):
+    def connect_adjacent_doors(self, new_room: Room) -> None:
+        """
+            Connect adjacent doors between the new room and existing neighboring rooms
+
+                Args:
+                    new_room: The new room to connect to its neighbors
+        """
         direction_opposite = {"N": "S", "S": "N", "E": "W", "W": "E"}
         x, y = new_room.position
 
-        # First, connect new_room's doors as before
+        # first, connect new_room's doors as before
         for door in new_room.doors:
             dx, dy = 0, 0
             if door.orientation == "N":
@@ -294,7 +360,7 @@ class HouseMap:
                 dx = -1
             neighbor_x, neighbor_y = x + dx, y + dy
 
-            #if the neighbor would be out of bounds, the door leads to a dead end
+            # if the neighbor would be out of bounds, the door leads to a dead end
             if not (0 <= neighbor_x < self.width and 0 <= neighbor_y < self.height):
                 door.leads_to = "BLOCKED"
                 door.locked = "N/A"
@@ -335,54 +401,54 @@ class HouseMap:
             if neighbor:
                 for neighbor_door in neighbor.doors:
                     if neighbor_door.orientation == opp_dir:
-                        # If new_room does NOT have a door facing neighbor, mark as DEAD END
+                        # if new_room does NOT have a door facing neighbor, mark as DEAD END
                         if not any(d.orientation == dir for d in new_room.doors):
                             neighbor_door.leads_to = "BLOCKED"
                             neighbor_door.locked = "N/A"
                             neighbor_door.is_security = "N/A"
 
 
-    def update_security_doors(self):
-            """
-            Updates all security doors based on current Security room terminal settings
-            and the Utility Closet keycard_entry_system_switch status.
-            
-            If the Security terminal offline_mode is set to "UNLOCKED" AND the 
-            keycard_entry_system_switch in the Utility Closet is toggled to False (off),
-            then all security doors will be unlocked.
-            Otherwise, all security doors remain locked if they are not yet opened.
-            """
-            # Find the Security room and Utility Closet
-            security_room = self.get_room_by_name("SECURITY")
-            utility_closet = self.get_room_by_name("UTILITY CLOSET")
-            
-            # Default to security doors being locked unless specific conditions are met.
-            unlock_all_security = False
-            
-            # Check if conditions are met to globally unlock security doors.
-            # This requires both rooms to be present and of the correct type.
-            if isinstance(security_room, Security) and isinstance(utility_closet, UtilityCloset):
-                if (security_room.terminal.offline_mode == "UNLOCKED" and not utility_closet.keycard_entry_system_switch):
-                    unlock_all_security = True
+    def update_security_doors(self) -> None:
+        """
+            Update all security doors based on current Security room terminal settings and the Utility Closet keycard_entry_system_switch status
+        """
+        # find the Security room and Utility Closet
+        security_room = self.get_room_by_name("SECURITY")
+        utility_closet = self.get_room_by_name("UTILITY CLOSET")
+        
+        # default to security doors being locked unless specific conditions are met
+        unlock_all_security = False
+        
+        # check if conditions are met to globally unlock security doors
+        # this requires both rooms to be present and of the correct type
+        if isinstance(security_room, Security) and isinstance(utility_closet, UtilityCloset):
+            if (security_room.terminal.offline_mode == "UNLOCKED" and not utility_closet.keycard_entry_system_switch):
+                unlock_all_security = True
 
-            # Update all security doors in the house
-            for row in self.grid:
-                for room in row:
-                    if room:
-                        for door in cast(list[Door], room.doors):
-                            # We only care about doors that are marked as security doors
-                            if str(getattr(door, 'is_security', 'false')).lower() != "true":
-                                continue
+        # update all security doors in the house
+        for row in self.grid:
+            for room in row:
+                if room:
+                    for door in cast(list[Door], room.doors):
+                        # we only care about doors that are marked as security doors
+                        if str(getattr(door, 'is_security', 'false')).lower() != "true":
+                            continue
 
-                            if unlock_all_security:
-                                # If the master unlock is active, unlock all security doors.
-                                door.locked = str(False)
-                            elif door.leads_to == "?":
-                                # If the master unlock is NOT active, only lock security doors
-                                # that haven't been opened yet.
-                                door.locked = str(True)
+                        if unlock_all_security:
+                            # if the master unlock is active, unlock all security doors
+                            door.locked = str(False)
+                        elif door.leads_to == "?":
+                            # if the master unlock is NOT active, only lock security doors
+                            # that haven't been opened yet
+                            door.locked = str(True)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """
+            Convert the HouseMap instance to a dictionary representation
+
+                Returns:
+                    A dictionary representation of the house map
+        """
         return {
             "width": self.width,
             "height": self.height,
@@ -393,7 +459,16 @@ class HouseMap:
         }
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> 'HouseMap':
+        """
+            Create a HouseMap instance from a dictionary representation
+
+                Args:
+                    data: A dictionary containing house map data
+
+                Returns:
+                    A HouseMap instance created from the dictionary data
+        """
         hm = HouseMap(width=data.get("width", 5), height=data.get("height", 9))
         hm.grid = []
         for row in data["rooms"]:
@@ -402,7 +477,7 @@ class HouseMap:
                 if room_data is None:
                     grid_row.append(None)
                 else:
-                    # Determine the correct room type and call appropriate from_dict
+                    # determine the correct room type and call appropriate from_dict
                     room_name = room_data.get("name", "")
                     if room_name in ["KITCHEN", "COMMISSARY", "LOCKSMITH", "SHOWROOM"]:
                         grid_row.append(ShopRoom.from_dict(room_data))
@@ -427,13 +502,15 @@ class HouseMap:
             hm.grid.append(grid_row)
         return hm
 
-    def print_map(self):
-        """Print an enhanced, informative house map with different symbols for door states"""
+    def print_map(self) -> None:
+        """
+            Print an enhanced, informative house map with different symbols for door states
+        """
         print("\n" + "="*60)
         print("CURRENT HOUSE MAP")
         print("="*60)
         
-        # Legend
+        # legend
         print("\nLEGEND:")
         print("   Rooms: [A] = First letter of room name (color-coded)")
         print("   Connections:")
@@ -450,14 +527,14 @@ class HouseMap:
             for x in range(self.width):
                 room = self.grid[y][x]
                 if room:
-                    # Get room abbreviation (first letter only)
+                    # get room abbreviation (first letter only)
                     abbrev = self._get_room_abbreviation(room.name)
                     room_display = f"{abbrev}  "
                     row_str += f"[{room_display}]"
                 else:
                     row_str += "[   ]"
 
-                # Horizontal connector to room on the right
+                # horizontal connector to room on the right
                 if x < self.width - 1:
                     right_room = self.grid[y][x + 1]
                     connector = self._get_horizontal_connector(room, right_room)
@@ -465,7 +542,7 @@ class HouseMap:
 
             print(row_str)
 
-            # Vertical connections if not last row
+            # vertical connections if not last row
             if y < self.height - 1:
                 for x in range(self.width):
                     current = self.grid[y][x]
@@ -474,9 +551,9 @@ class HouseMap:
                     connector_str += connector
                     
                     if x < self.width - 1:
-                        connector_str += "  "  # Space between vertical connectors
+                        connector_str += "  "  # space between vertical connectors
                         
-                if connector_str.strip():  # Only print if there are actual connectors
+                if connector_str.strip():  # only print if there are actual connectors
                     print(connector_str)
                 connector_str = ""
 
@@ -485,25 +562,33 @@ class HouseMap:
         print("="*60)
 
     def _get_room_abbreviation(self, room_name: str) -> str:
-        """Get the first letter of room name with color coding"""
+        """
+            Get the first letter of room name with color coding
+
+                Args:
+                    room_name: The name of the room
+
+                Returns:
+                    The first letter of the room name with color coding applied
+        """
         if not room_name:
             return " "
         
-        # Get the color-coded full name
+        # get the color-coded full name
         colored_name = get_color_code(room_name)
         
-        # If it's the same as the input (no color applied), just return first letter
+        # if it's the same as the input (no color applied), just return first letter
         if colored_name == room_name.upper():
             return room_name[0]
         
-        # Extract the color code and apply it to just the first letter
-        # The format is: \033[XXm + NAME + \033[0m
-        # We want: \033[XXm + FIRST_LETTER + \033[0m
+        # extract the color code and apply it to just the first letter
+        # the format is: \033[XXm + NAME + \033[0m
+        # we want: \033[XXm + FIRST_LETTER + \033[0m
         if '\033[' in colored_name:
-            # Find the first reset code
+            # find the first reset code
             reset_pos = colored_name.find('\033[0m')
             if reset_pos != -1:
-                # Extract color code (everything before the room name)
+                # extract color code (everything before the room name)
                 color_start = colored_name.find('\033[')
                 color_end = colored_name.find('m', color_start) + 1
                 color_code = colored_name[color_start:color_end]
@@ -511,76 +596,119 @@ class HouseMap:
         
         return room_name[0]
 
-    def _get_horizontal_connector(self, left_room, right_room) -> str:
-        """Get the appropriate horizontal connector symbol between two rooms"""
+    def _get_horizontal_connector(self, left_room: Union[Room, None], right_room: Union[Room, None]) -> str:
+        """
+            Get the appropriate horizontal connector symbol between two rooms
+
+                Args:
+                    left_room: The room on the left side
+                    right_room: The room on the right side
+
+                Returns:
+                    The appropriate connector symbol string
+        """
         if not left_room or not right_room:
             return "  "
         
-        # Check if rooms have connecting doors
+        # check if rooms have connecting doors
         left_door = self._get_door_by_orientation(left_room, "E")
         right_door = self._get_door_by_orientation(right_room, "W")
         
         if not left_door or not right_door:
             return "  "
         
-        # Determine connector type based on door states
+        # determine connector type based on door states
         connector = self._get_door_connector_symbol(left_door, right_door, horizontal=True)
         return f"{connector} "
 
-    def _get_vertical_connector(self, top_room, bottom_room) -> str:
-        """Get the appropriate vertical connector symbol between two rooms"""
+    def _get_vertical_connector(self, top_room: Union[Room, None], bottom_room: Union[Room, None]) -> str:
+        """
+            Get the appropriate vertical connector symbol between two rooms
+
+                Args:
+                    top_room: The room on the top
+                    bottom_room: The room on the bottom
+
+                Returns:
+                    The appropriate connector symbol string
+        """
         if not top_room or not bottom_room:
             return "     "
         
-        # Check if rooms have connecting doors
+        # check if rooms have connecting doors
         top_door = self._get_door_by_orientation(top_room, "S")
         bottom_door = self._get_door_by_orientation(bottom_room, "N")
         
         if not top_door or not bottom_door:
             return "     "
         
-        # Determine connector type based on door states
+        # determine connector type based on door states
         connector = self._get_door_connector_symbol(top_door, bottom_door, horizontal=False)
         return f"  {connector}  "
 
-    def _get_door_by_orientation(self, room, orientation: str):
-        """Get a door from a room by its orientation"""
+    def _get_door_by_orientation(self, room: Union[Room, None], orientation: str) -> Union[Door, None]:
+        """
+            Get a door from a room by its orientation
+
+                Args:
+                    room: The room to search for doors
+                    orientation: The orientation of the door to find
+
+                Returns:
+                    The door with the specified orientation or None if not found
+        """
         if not room or not hasattr(room, 'doors'):
             return None
         return next((door for door in room.doors if door.orientation == orientation), None)
 
-    def _get_door_connector_symbol(self, door1, door2, horizontal: bool = True) -> str:
-        """Get the appropriate connector symbol based on door states"""
+    def _get_door_connector_symbol(self, door1: Union[Door, None], door2: Union[Door, None], horizontal: bool = True) -> str:
+        """
+            Get the appropriate connector symbol based on door states
+
+                Args:
+                    door1: The first door
+                    door2: The second door
+                    horizontal: Whether the connection is horizontal
+
+                Returns:
+                    The appropriate connector symbol
+        """
         if not door1 or not door2:
             return "X"
         
-        # Check for blocked connections
+        # check for blocked connections
         if (hasattr(door1, 'leads_to') and door1.leads_to == "BLOCKED") or \
            (hasattr(door2, 'leads_to') and door2.leads_to == "BLOCKED"):
             return "X"
         
-        # Check for unknown/unexplored doors
+        # check for unknown/unexplored doors
         if (hasattr(door1, 'leads_to') and door1.leads_to == "?") or \
            (hasattr(door2, 'leads_to') and door2.leads_to == "?"):
             return "?"
         
-        # Check for security doors
+        # check for security doors
         if (hasattr(door1, 'is_security') and str(door1.is_security).lower() == "true") or \
            (hasattr(door2, 'is_security') and str(door2.is_security).lower() == "true"):
             return "S"
         
-        # Check for locked doors
+        # check for locked doors
         if (hasattr(door1, 'locked') and str(door1.locked).lower() == "true") or \
            (hasattr(door2, 'locked') and str(door2.locked).lower() == "true"):
             return "L"
         
-        # Check for special unlocked passages (both doors explicitly unlocked)
+        # check for special unlocked passages (both doors explicitly unlocked)
         if (hasattr(door1, 'locked') and str(door1.locked).lower() == "false") and \
            (hasattr(door2, 'locked') and str(door2.locked).lower() == "false"):
             return "=" if horizontal else "|"
         
-        # Default open passage
+        # default open passage
         return "-" if horizontal else "|"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+            Return a string representation of the HouseMap
+
+                Returns:
+                    A string representation showing the dimensions of the house map
+        """
         return f"<HouseMap {self.width}x{self.height}>"
