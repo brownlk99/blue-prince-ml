@@ -15,8 +15,8 @@ def stock_shelves(reader: easyocr.Reader, current_room: ShopRoom):
         Capture items in stock within the current shop room
 
             Args:
-                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
-                current_room (ShopRoom): The current room object representing the shop
+                reader: Initialized EasyOCR reader for text recognition
+                current_room: The current room object representing the shop
     """
     if "SHOP" in current_room.type:
         items = {}

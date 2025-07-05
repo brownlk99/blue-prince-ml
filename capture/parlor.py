@@ -15,11 +15,11 @@ def capture_hint(reader: easyocr.Reader, editor_path: Optional[str] = None) -> s
         Capture and process a puzzle hint from the screen using OCR
 
             Args:
-                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
-                editor_path (Optional[str]): Path to text editor for manual editing
+                reader: Initialized EasyOCR reader for text recognition
+                editor_path: Path to text editor for manual editing
 
             Returns:
-                str: Processed and edited hint text
+                Processed and edited hint text
     """
     puzzle_hint_screenshot = ScreenCapture().run()
     puzzle_hint_screenshot = np.array(puzzle_hint_screenshot)

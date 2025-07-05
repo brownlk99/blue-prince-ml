@@ -5,13 +5,24 @@ from PIL import Image, ImageGrab
 
 
 class ScreenCapture:
+    """
+        Handles screen capture functionality with optional GUI selection interface
+
+            Attributes:
+                img: Captured image object
+                bbox: Bounding box coordinates for capture region
+                start_x: Starting x coordinate for selection
+                start_y: Starting y coordinate for selection
+                rect: Rectangle object for selection visualization
+    """
+    
     def __init__(self, bbox: Optional[tuple] = None) -> None:
         """
             Initialize screen capture with optional bounding box
 
                 Args:
-                    bbox (tuple): (left, top, right, bottom) — screen region to capture
-                                  If None, launch interactive snipping tool
+                    bbox: (left, top, right, bottom) — screen region to capture
+                          If None, launch interactive snipping tool
         """
         self.img = None
         self.bbox = bbox
@@ -24,7 +35,7 @@ class ScreenCapture:
             Capture a specific screen region and save it
 
                 Args:
-                    bbox (tuple): (left, top, right, bottom) coordinates for capture region
+                    bbox: (left, top, right, bottom) coordinates for capture region
         """
         self.img = ImageGrab.grab(bbox=bbox)
 
@@ -33,7 +44,7 @@ class ScreenCapture:
             Handle mouse button press to start selection rectangle
 
                 Args:
-                    event (tk.Event): Mouse event containing position information
+                    event: Mouse event containing position information
         """
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
@@ -47,7 +58,7 @@ class ScreenCapture:
             Handle mouse drag to update selection rectangle
 
                 Args:
-                    event (tk.Event): Mouse event containing position information
+                    event: Mouse event containing position information
         """
         if self.rect and self.start_x and self.start_y:
             cur_x, cur_y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
@@ -58,7 +69,7 @@ class ScreenCapture:
             Handle mouse button release to complete selection and capture region
 
                 Args:
-                    event (tk.Event): Mouse event containing position information
+                    event: Mouse event containing position information
         """
         if self.start_x and self.start_y:
             end_x = self.canvas.canvasx(event.x)
@@ -75,7 +86,7 @@ class ScreenCapture:
             Cancel capture on Escape key
 
                 Args:
-                    event (tk.Event): The keyboard event
+                    event: The keyboard event
         """
         self.img = None
         self.root.destroy()
@@ -111,7 +122,7 @@ class ScreenCapture:
             Execute the screen capture process
 
                 Returns:
-                    Optional[Image.Image]: Captured image or None if cancelled
+                    Captured image or None if cancelled
         """
         if self.bbox:
             self.grab_region(self.bbox)

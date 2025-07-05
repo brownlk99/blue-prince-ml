@@ -15,10 +15,10 @@ def capture_items(client: vision.ImageAnnotatorClient) -> Optional[Union[str, di
         Capture item information either through screenshot or manual entry
 
             Args:
-                client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+                client: Google Vision API client for OCR
 
             Returns:
-                Optional[Union[str, dict]]: Item details dictionary, cancellation message string, or None if failed
+                Item details dictionary, cancellation message string, or None if failed
     """
     print("1. Capture with screenshot")
     print("2. Enter manually")
@@ -54,7 +54,7 @@ def manually_obtain_item() -> Optional[dict]:
         Manually enter item information by selecting from available items
 
             Returns:
-                Optional[dict]: Item details dictionary or None if cancelled
+                Item details dictionary or None if cancelled
     """
     item_dict = DIRECTORY.get("ITEMS", {})
     print("Available items:")

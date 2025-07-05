@@ -15,11 +15,11 @@ def capture_lab_experiment_options(google_client: vision.ImageAnnotatorClient, e
         Capture options for the lab experiment
 
             Args:
-                google_client (vision.ImageAnnotatorClient): Google Vision API client
-                editor_path (Optional[str]): Path to the text editor to use
+                google_client: Google Vision API client
+                editor_path: Path to the text editor to use
 
             Returns:
-                dict: A dictionary containing the options for the lab experiment
+                A dictionary containing the options for the lab experiment
     """
     options = {"causes": [], "effects": []}
     for type, list in REGIONS["laboratory"].items():

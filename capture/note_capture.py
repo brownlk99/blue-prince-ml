@@ -16,6 +16,14 @@ from game.room import Room
 
 
 def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[str], editor_path: Optional[str] = None) -> None:
+    """
+        Capture and process a single page of a note using OCR
+
+            Args:
+                client: Google Vision API client for OCR
+                pages: List to append processed page content to
+                editor_path: Path to text editor for manual editing
+    """
     time.sleep(1)  # allow time so there's no overlap with clicking to activate and triggering the capture
     note_screenshot = ScreenCapture().run()
     if note_screenshot is None:
@@ -31,6 +39,17 @@ def capture_and_process_helper(client: vision.ImageAnnotatorClient, pages: list[
     print()
 
 def capture_note(client: vision.ImageAnnotatorClient, current_room: Room, editor_path: Optional[str] = None) -> Note:
+    """
+        Capture a multi-page note using mouse input for page navigation
+
+            Args:
+                client: Google Vision API client for OCR
+                current_room: Current room object where note is found
+                editor_path: Path to text editor for manual editing
+
+            Returns:
+                Note object containing captured and processed content
+    """
     print("Starting note capture with mouse input.")
     pages = []
 

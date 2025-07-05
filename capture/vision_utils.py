@@ -20,11 +20,11 @@ def best_match(text: str, options: Iterable[str]) -> Optional[str]:
         Find the best matching option for the given text using fuzzy matching
 
             Args:
-                text (str): Input text to match against options
-                options (Iterable[str]): Collection of valid options to match against
+                text: Input text to match against options
+                options: Collection of valid options to match against
 
             Returns:
-                Optional[str]: Best matching option or None if no good match found
+                Best matching option or None if no good match found
     """
     match = difflib.get_close_matches(text.upper(), options, n=1, cutoff=0.6)
     if len(match) > 1:
@@ -42,10 +42,10 @@ def generic_autocorrect(text: str) -> str:
         Apply autocorrection to text using TextBlob
 
             Args:
-                text (str): Input text to autocorrect
+                text: Input text to autocorrect
 
             Returns:
-                str: Autocorrected text
+                Autocorrected text
     """
     blob = TextBlob(text)
     corrected = blob.correct()
@@ -79,11 +79,11 @@ def get_current_room(reader: easyocr.Reader, house) -> Union[None, object]:
         Get the current room object based on OCR detection or house state
 
             Args:
-                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
+                reader: Initialized EasyOCR reader for text recognition
                 house: House map object containing room information
 
             Returns:
-                Union[None, object]: Current room object or None if not found
+                Current room object or None if not found
     """
     if house.count_occupied_rooms() == 2:  # default set up (no current room displayed when in Entrance Hall on a new run)
         current_room_obj = house.get_room_by_name("ENTRANCE HALL")
@@ -104,10 +104,10 @@ def get_current_room_name(reader: easyocr.Reader) -> str:
         Extract current room name from screen using OCR
 
             Args:
-                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
+                reader: Initialized EasyOCR reader for text recognition
 
             Returns:
-                str: Name of the current room
+                Name of the current room
     """
     bbox = REGIONS["other"]["current_room"]
     current_room_screenshot = ScreenCapture(bbox).run()

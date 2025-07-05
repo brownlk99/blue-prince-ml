@@ -22,13 +22,13 @@ def capture_drafting_options(reader: easyocr.Reader, google_client: vision.Image
         Capture and process drafting options from the screen, creating Room objects for each draft
 
             Args:
-                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
-                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
-                current_room (Union[Room, ShopRoom, PuzzleRoom, UtilityCloset, CoatCheck, SecretPassage]): Current room object
-                chosen_door (Door): Door object representing the entry door
+                reader: Initialized EasyOCR reader for text recognition
+                google_client: Google Vision API client for OCR
+                current_room: Current room object
+                chosen_door: Door object representing the entry door
 
             Returns:
-                List[Room]: List of room objects representing the drafting options
+                List of room objects representing the drafting options
     """
     drafting_options = []
     draft_regions = REGIONS["drafting"]  # regions for the left, center, and right drafts
@@ -107,12 +107,12 @@ def get_draft_room_name(reader: easyocr.Reader, img: np.ndarray, google_client: 
         Extract room name from a draft image using OCR
 
             Args:
-                reader (easyocr.Reader): Initialized EasyOCR reader for text recognition
-                img (np.ndarray): Draft image as numpy array
-                google_client (vision.ImageAnnotatorClient): Google Vision API client for OCR
+                reader: Initialized EasyOCR reader for text recognition
+                img: Draft image as numpy array
+                google_client: Google Vision API client for OCR
 
             Returns:
-                str: Detected room name or empty string if not found
+                Detected room name or empty string if not found
     """
     top_half_of_draft = img[:img.shape[0] // 2, :, :]
     results = easy_ocr(reader, top_half_of_draft, True, ALPHANUMERIC_ALLOWLIST)
@@ -138,11 +138,11 @@ def door_check(room_name: str, actual_number: int) -> bool:
         Checks if the actual number of doors in a room matches the expected number from the ROOM_LOOKUP directory
 
             Args:
-                room_name (str): The name of the room to check
-                actual_number (int): The actual number of doors detected (via OCR) in the room
+                room_name: The name of the room to check
+                actual_number: The actual number of doors detected (via OCR) in the room
 
             Returns:
-                bool: True if the actual number matches the expected number, False otherwise
+                True if the actual number matches the expected number, False otherwise
     """
     characteristics = ROOM_LOOKUP.get(room_name)
     if not characteristics:
@@ -164,13 +164,13 @@ def get_doors(img: np.ndarray, strip_length: int = 8, offset: int = 5, strip_hei
         Detects which sides of a room have doors by sampling brightness at the center of each wall
 
             Args:
-                img (np.ndarray): The room image as a NumPy array
-                strip_length (int): Width of the sampling strip along the wall
-                offset (int): Distance from the edge of the image to start sampling
-                strip_height (int): Height of the sampling strip
+                img: The room image as a NumPy array
+                strip_length: Width of the sampling strip along the wall
+                offset: Distance from the edge of the image to start sampling
+                strip_height: Height of the sampling strip
 
             Returns:
-                set: A set containing the directions ("top", "bottom", "left", "right") where doors are detected
+                A set containing the directions ("top", "bottom", "left", "right") where doors are detected
     """
     height, width, _ = img.shape
 
@@ -202,16 +202,14 @@ def get_doors(img: np.ndarray, strip_length: int = 8, offset: int = 5, strip_hei
 
 def get_orientation(chosen_door: Door, detected_doors: List[str]) -> List[str]:
     """
-        Maps detected door positions on the image to cardinal directions,
-        based on the direction the player entered the room
+        Determine the orientation of doors in a room based on the chosen door and detected doors
 
             Args:
-                chosen_door (Door): The Door object representing the entry door, with an 'orientation' attribute ("N", "S", "E", "W")
-                detected_doors (List[str]): Iterable of strings ("top", "bottom", "left", "right") indicating where doors were detected on the image
+                chosen_door: The door object that was chosen to access the room
+                detected_doors: List of detected door directions from the draft
 
             Returns:
-                List[str]: A list of cardinal directions ("N", "S", "E", "W") corresponding to the detected doors, 
-                adjusted for the entry orientation
+                List of door orientations for the room
     """
     entry_orientation = chosen_door.orientation.upper()
     detected_doors = [d.upper() for d in detected_doors]
@@ -252,15 +250,14 @@ def get_orientation(chosen_door: Door, detected_doors: List[str]) -> List[str]:
 
 def get_new_room_position(current_position: tuple, direction: str) -> tuple:
     """
-        Given a current (x, y) position and a cardinal direction,
-        returns the new (x, y) position after moving one step
+        Calculate the position of a new room based on the current position and direction
 
             Args:
-                current_position (tuple): Current (x, y) position
-                direction (str): Cardinal direction, must be one of: "N", "S", "E", "W"
+                current_position: Current position as (x, y) tuple
+                direction: Direction to move ("N", "S", "E", "W")
 
             Returns:
-                tuple: New (x, y) position after moving one step
+                New position as (x, y) tuple
     """
     x, y = current_position
     offsets = {
@@ -279,13 +276,13 @@ def get_new_room_position(current_position: tuple, direction: str) -> tuple:
 
 def get_unknown_room_gem_requirement(draft: str) -> int:
     """
-        Determine the gem requirement for an unknown room draft using template matching
+        Get the gem requirement for an unknown room by counting gems in the draft image
 
             Args:
-                draft (str): Draft position identifier (left, center, right)
+                draft: The draft position ("left", "center", or "right")
 
             Returns:
-                int: Number of gems required for the room
+                Number of gems required for the room
     """
     bbox = REGIONS["gem_requirement"][draft]
     gem_requirement_screenshot = ScreenCapture(bbox).run()
@@ -317,12 +314,12 @@ def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: 
         Count the number of gems in a draft image using template matching
 
             Args:
-                draft_img (np.ndarray): Draft image as numpy array
-                gem_template_paths (list[str]): List of paths to gem template images
-                threshold (float): Matching threshold for template matching
+                draft_img: The draft image containing gems
+                gem_template_paths: List of paths to gem template images
+                threshold: Matching threshold for template matching
 
             Returns:
-                int: Number of gems detected in the image
+                Number of gems found in the image
     """
     draft_filtered = isolate_pink(draft_img)
     draft_gray = cv2.cvtColor(draft_filtered, cv2.COLOR_BGR2GRAY)
@@ -348,16 +345,23 @@ def count_gems(draft_img: np.ndarray, gem_template_paths: list[str], threshold: 
 
 def isolate_pink(image: np.ndarray) -> np.ndarray:
     """
-        Isolate pink colored regions in an image using HSV color filtering
+        Isolate pink/magenta colored regions in an image
 
             Args:
-                image (np.ndarray): Input image as numpy array
+                image: Input image as numpy array
 
             Returns:
-                np.ndarray: Filtered image with only pink regions preserved
+                Binary image with pink regions highlighted
     """
+    # convert BGR to HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    
+    # define range for pink/magenta color
     lower_pink = np.array([140, 50, 50])
     upper_pink = np.array([170, 255, 255])
     mask = cv2.inRange(hsv, lower_pink, upper_pink)
-    return cv2.bitwise_and(image, image, mask=mask)
+    
+    # apply mask to original image
+    result = cv2.bitwise_and(image, image, mask=mask)
+    
+    return result

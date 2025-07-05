@@ -20,10 +20,10 @@ def image_hash(img: np.ndarray) -> str:
         Calculate MD5 hash of an image
 
             Args:
-                img (np.ndarray): Input image as numpy array
+                img: Input image as numpy array
 
             Returns:
-                str: MD5 hash of the image as hexadecimal string
+                MD5 hash of the image as hexadecimal string
     """
     return hashlib.md5(img.tobytes()).hexdigest()
 
@@ -32,10 +32,10 @@ def trim_template(template_img: np.ndarray) -> np.ndarray:
         Trim whitespace/background from template image
 
             Args:
-                template_img (np.ndarray): The template image to trim
+                template_img: The template image to trim
 
             Returns:
-                np.ndarray: The trimmed template image
+                The trimmed template image
     """
     # convert to grayscale if needed
     if len(template_img.shape) == 3:
@@ -59,12 +59,12 @@ def recognize_number(resource_img: np.ndarray, number_template_paths: list[str],
         Recognize the actual number in resource image using template matching
 
             Args:
-                resource_img (np.ndarray): The resource image containing the number
-                number_template_paths (list[str]): List of paths to number template images
-                threshold (float): Matching threshold for template matching
+                resource_img: The resource image containing the number
+                number_template_paths: List of paths to number template images
+                threshold: Matching threshold for template matching
 
             Returns:
-                Optional[int]: The recognized number, or None if no match found
+                The recognized number, or None if no match found
     """
     # check if image is already grayscale (single channel)
     if len(resource_img.shape) == 3:
@@ -117,13 +117,13 @@ def save_and_rename_template(resource_screenshot: np.ndarray, resource: str, tem
         Save a resource screenshot as a new template and prompt user for the number value
 
             Args:
-                resource_screenshot (np.ndarray): Screenshot of the resource as numpy array
-                resource (str): Name of the resource being captured
-                template_folder (str): Path to folder where templates are stored
-                prefix (str): Prefix for the filename if needed
+                resource_screenshot: Screenshot of the resource as numpy array
+                resource: Name of the resource being captured
+                template_folder: Path to folder where templates are stored
+                prefix: Prefix for the filename if needed
 
             Returns:
-                int: The number value provided by the user
+                The number value provided by the user
     """
     while True:
         user_number = input(f"\nWhat is the current value of {get_color_code(resource)} (or press Enter to skip): ").strip()
@@ -153,11 +153,11 @@ def capture_resources(client: vision.ImageAnnotatorClient, current_game_state_re
         Capture current resource values from the screen using OCR and template matching
 
             Args:
-                client (vision.ImageAnnotatorClient): Google Vision API client for OCR
-                current_game_state_resources (dict): Current game state resources for caching
+                client: Google Vision API client for OCR
+                current_game_state_resources: Current game state resources for caching
 
             Returns:
-                dict: Dictionary containing current resource values
+                Dictionary containing current resource values
     """
     available_resources = {}
     template_folder = "./capture/number_templates"
