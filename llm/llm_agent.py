@@ -28,7 +28,32 @@ SYSTEM_ASSISTANT = "You are a helpful assistant."
 SYSTEM_DEDUCTION = "You are an expert at deduction and you're trying to reason why the previous LLM decision could have been made."
 
 class BluePrinceAgent:
-    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:gpt-4o-mini", use_utility_model: bool = False):
+    """
+        AI agent for playing the Blue Prince game
+
+            Attributes:
+                llm_client: The main LLM client for game decisions
+                note_memory: Memory system for storing game notes
+                term_memory: Memory system for storing game terms and definitions
+                room_memory: Memory system for storing room information
+                previous_run_memory: Memory system for storing previous run information
+                decision_memory: Memory system for storing decision context
+                game_state: Current state of the game
+                previously_chosen_room: Previously chosen room name for drafting
+                previously_chosen_door: Previously chosen door direction for drafting
+                verbose: Whether to print verbose output
+                utility_client: Optional utility client for simple tasks
+    """
+    def __init__(self, game_state: Union[GameState, None] = None, verbose: bool = False, model_name: str = "openai:gpt-4o-mini", use_utility_model: bool = False) -> None:
+        """
+            Initialize a BluePrinceAgent instance
+
+                Args:
+                    game_state: The game state to use, creates new one if None
+                    verbose: Whether to print verbose output
+                    model_name: The LLM model name to use
+                    use_utility_model: Whether to use a utility model for simple tasks
+        """
         self.llm_client = LLMClient(model_name)
         self.note_memory = NoteMemory()
         self.term_memory = TermMemory()
@@ -46,7 +71,17 @@ class BluePrinceAgent:
             self.utility_client = None
 
     def _invoke(self, system_message: str, user_message: str, use_utility_model: bool = False) -> str:
-        """Invoke the LLM and handle usage tracking"""
+        """
+            Invoke the LLM and handle usage tracking
+
+                Args:
+                    system_message: The system message to send to the LLM
+                    user_message: The user message to send to the LLM
+                    use_utility_model: Whether to use the utility model
+
+                Returns:
+                    The LLM response text
+        """
         client = self.utility_client if (use_utility_model and self.utility_client) else self.llm_client
         response, usage = client.chat(system_message, user_message)
         
@@ -63,17 +98,17 @@ class BluePrinceAgent:
                      include_terms: bool = True, include_rooms: bool = True, 
                      include_notes: bool = True) -> str:
         """
-        Build a standardized user prompt with common sections
+            Build a standardized user prompt with common sections
         
-        Args:
-            context: Game state context
-            additional_sections: Dict of additional sections to include {section_name: content}
-            include_terms: Whether to include terms section
-            include_rooms: Whether to include rooms section  
-            include_notes: Whether to include notes section
+                Args:
+                    context: Game state context
+                    additional_sections: Dict of additional sections to include
+                    include_terms: Whether to include terms section
+                    include_rooms: Whether to include rooms section
+                    include_notes: Whether to include notes section
             
-        Returns:
-            str: Formatted prompt sections
+                Returns:
+                    Formatted prompt sections
         """
         sections = [f"GAME STATE:\n{context}"]
         
@@ -100,13 +135,13 @@ class BluePrinceAgent:
 
     def take_action(self, context: str) -> str:
         """
-            Decide the next action for the agent based on the current GAME STATE and RELEVANT NOTES.
+            Decide the next action for the agent based on the current GAME STATE and RELEVANT NOTES
 
                 Args:
-                    None
+                    context: Current game state context
                     
                 Returns:
-                    str: JSON string with the action to take.
+                    JSON string with the action to take
         """
         additional_sections = {
             "move_context": format_move_context(self.decision_memory.get_move_context()),
@@ -136,13 +171,13 @@ class BluePrinceAgent:
 
     def decide_move(self, context: str) -> str:
         """
-            Decide where to move and what action to take there.
+            Decide where to move and what action to take there
 
                 Args:
                     context: Current game state context
                     
                 Returns:
-                    str: JSON string with the move decision.
+                    JSON string with the move decision
         """
         prompt_base = self._build_prompt(context)
         
@@ -171,13 +206,13 @@ class BluePrinceAgent:
 
     def decide_door_to_open(self, context: str) -> str:
         """
-            Decide which door in the current room to open.
+            Decide which door in the current room to open
 
                 Args:
                     context: Current game state context
                     
                 Returns:
-                    str: JSON string with the door opening decision.
+                    JSON string with the door opening decision
         """
         additional_sections = {
             "special_items": format_special_items(self.game_state)
@@ -209,13 +244,13 @@ class BluePrinceAgent:
 
     def decide_purchase_item(self, context: str) -> str:
         """
-            Decide which item to purchase based on the current GAME STATE and available items in the shop.
-                
+            Decide which item to purchase based on the current GAME STATE and available items in the shop
+
                 Args:
-                    None
+                    context: Current game state context
 
                 Returns:
-                    str: JSON string with the item to purchase and quantity.
+                    JSON string with the item to purchase and quantity
         """
         additional_sections = {
             "shop_items": format_shop_items(self.game_state)
@@ -244,6 +279,16 @@ class BluePrinceAgent:
         return response
 
     def decide_drafting_option(self, draft_options: List[Room], context: str) -> str:
+        """
+            Decide which room to draft from the available options
+
+                Args:
+                    draft_options: List of rooms available for drafting
+                    context: Current game state context
+
+                Returns:
+                    JSON string with the drafting decision
+        """
         additional_sections = {
             "draft_options": f"You are choosing between 3 rooms to draft through the {self.previously_chosen_room} {self.previously_chosen_door} door.\nDrafting Options:\n{format_draft_summary(draft_options)}",
             "redraw_section": format_redraw_count(self.game_state)
@@ -278,6 +323,17 @@ class BluePrinceAgent:
         return response
 
     def solve_parlor_puzzle(self, reader: easyocr.Reader, context: str, editor_path: Optional[str] = None) -> str:
+        """
+            Solve the parlor puzzle using OCR and logical reasoning
+
+                Args:
+                    reader: EasyOCR reader for text recognition
+                    context: Current game state context
+                    editor_path: Optional path to editor for puzzle solving
+
+                Returns:
+                    JSON string with the puzzle solution
+        """
         if self.game_state.current_room and isinstance(self.game_state.current_room, PuzzleRoom):
             boxes = self.game_state.current_room.parlor_puzzle(reader, editor_path)
         else:
@@ -321,6 +377,15 @@ class BluePrinceAgent:
         return response
 
     def use_terminal(self, context: str) -> str:
+        """
+            Decide which terminal command to use
+
+                Args:
+                    context: Current game state context
+
+                Returns:
+                    JSON string with the terminal command decision
+        """
         additional_sections = {
             "terminal_menu": format_terminal_menu(self.game_state)
         }
@@ -346,13 +411,13 @@ class BluePrinceAgent:
 
     def guess_network_password(self, context: str) -> str:
         """
-        Have the LLM attempt to guess the network password based on context and notes.
-        
-        Args:
-            context: Current game state context
+            Have the LLM attempt to guess the network password based on context and notes
+
+                Args:
+                    context: Current game state context
             
-        Returns:
-            str: JSON string with the password guess and reasoning
+                Returns:
+                    JSON string with the password guess and reasoning
         """
         prompt_base = self._build_prompt(context)
         
@@ -377,14 +442,14 @@ class BluePrinceAgent:
 
     def decide_special_order(self, available_items: List[str], context: str) -> str:
         """
-        Decide which special order item to request from the commissary.
-        
-        Args:
-            available_items: List of items available for special order
-            context: Current game state context
+            Decide which special order item to request from the commissary
+
+                Args:
+                    available_items: List of items available for special order
+                    context: Current game state context
             
-        Returns:
-            str: JSON string with the special order decision
+                Returns:
+                    JSON string with the special order decision
         """
         items_list = "\n".join([f" - {item}" for item in available_items])
         
@@ -415,13 +480,13 @@ class BluePrinceAgent:
 
     def decide_security_level(self, context: str) -> str:
         """
-            Decide the security level for the estate based on the current GAME STATE and available security levels.
+            Decide the security level setting for the estate
 
                 Args:
-                    None
+                    context: Current game state context
 
                 Returns:
-                    str: JSON string with the chosen security level and explanation.
+                    JSON string with the security level decision
         """
         prompt_base = self._build_prompt(context, include_rooms=False, include_notes=False)
         
@@ -449,13 +514,13 @@ class BluePrinceAgent:
 
     def decide_mode(self, context: str) -> str:
         """
-            Decide the offline mode for security doors based on the current GAME STATE and available modes.
+            Decide the offline mode setting for security doors
 
                 Args:
-                    None
+                    context: Current game state context
 
                 Returns:
-                    str: JSON string with the chosen mode and explanation.
+                    JSON string with the mode decision
         """
         prompt_base = self._build_prompt(context, include_rooms=False, include_notes=False)
         
@@ -482,13 +547,14 @@ class BluePrinceAgent:
 
     def decide_lab_experiment(self, options: dict[str, list[str]], context: str) -> str:
         """
-            Choose a lab experiment based on the current GAME STATE and available experiments.
+            Decide which lab experiment to conduct
 
                 Args:
-                    options (dict): Dictionary of available experiments ('cause' and 'effect') with their details.
+                    options: Dictionary of available experiment options
+                    context: Current game state context
 
                 Returns:
-                    str: JSON string with the chosen experiment and explanation.
+                    JSON string with the lab experiment decision
         """
         additional_sections = {
             "lab_experiments": format_lab_experiment_section(options)
@@ -526,14 +592,14 @@ class BluePrinceAgent:
 
     def coat_check_prompt(self, action: str, context: str) -> str:
         """
-            Decide whether to store or retrieve an item from the coat check based on the current GAME STATE.
+            Decide which item to store or retrieve from the coat check
 
                 Args:
                     action: The action to perform (store/retrieve)
                     context: Current game state context
 
                 Returns:
-                    str: JSON string with the chosen action and explanation.
+                    JSON string with the coat check decision
         """
         additional_sections = {
             "action_prompt": f"Based on the above context, what item do you wish to {action}? (Choose 'None' if you no longer wish to {action} an item)"
@@ -560,13 +626,13 @@ class BluePrinceAgent:
 
     def open_secret_passage(self, context: str) -> str:
         """
-            Decide whether to open the secret passage based on the current GAME STATE.
+            Decide which room type to access through the secret passage
 
                 Args:
                     context: Current game state context
 
                 Returns:
-                    str: JSON string with the decision to open the secret passage and explanation.
+                    JSON string with the secret passage decision
         """
         # TODO: add more context here
         prompt_base = self._build_prompt(context, include_notes=False)
@@ -588,11 +654,16 @@ class BluePrinceAgent:
         with thinking_animation("LLM Taking Action: Deciding secret passage"):
             response = self._invoke(system_message, user_message)
         return response
-    
+
     def generate_note_title(self, note_content: str) -> str:
         """
-        Generate a title for the note based on its content.
-        This is a simple heuristic and can be improved with more complex logic.
+            Generate a concise title for a note based on its content
+
+                Args:
+                    note_content: The content of the note
+
+                Returns:
+                    JSON string with the generated title
         """
         system_message = SYSTEM_ASSISTANT
         user_message = (f"Give the following note a short descriptive title (no more than four words at most):\n\n{note_content}"
@@ -603,7 +674,11 @@ class BluePrinceAgent:
                   "Do NOT include any markdown or code block formatting (no triple backticks). Return ONLY the raw JSON object.\n"
         )
         
-        response = self._invoke(system_message, user_message, use_utility_model=True)
+        if self.verbose:
+            print("\nPrompt for LLM:\n" + user_message)
+        print("\n")
+        with thinking_animation("LLM Taking Action: Generating note title"):
+            response = self._invoke(system_message, user_message, use_utility_model=True)
         return response
 
     def manual_llm_follow_up(self) -> str:
