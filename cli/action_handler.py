@@ -1,6 +1,7 @@
 """
 Action handlers for LLM-based commands.
 """
+import sys
 import time
 from typing import Optional
 
@@ -91,7 +92,8 @@ class ActionHandler:
         elif action in ["toggle_keycard_entry_switch", "toggle_gymnasium_switch", "toggle_darkroom_switch", "toggle_garage_switch"]:
             return self._handle_switch_action(action)
         elif action == "call_it_a_day":
-            return self._handle_call_it_a_day()
+            self._handle_call_it_a_day(parsed_response["explanation"])
+            return True     # it will never get here because sys.exit(0) will exit the program.. but this will satisfy the type checker
         else:
             print(f"Unknown action: {action}")
             return False
@@ -331,18 +333,19 @@ class ActionHandler:
         return True
 
     @auto_save
-    def _handle_call_it_a_day(self) -> bool:
+    def _handle_call_it_a_day(self, reason_for_ending: Optional[str] = None) -> None:
         """
             End the current run and save progress to complete the day
 
-                Returns:
-                    True if day ending was handled successfully
+                Args:
+                    reason_for_ending: Reason for ending the run (if supplied by LLM)
         """
         
         # save the final state for this day
         self.agent.game_state.save(f'./jsons/runs/day_{self.agent.game_state.day}.json')
 
-        reason_for_ending = input("Reason for ending the run: ")
+        if reason_for_ending is None:
+            reason_for_ending = input("Reason for ending the run: ")
 
         # determine what item is in the coat check for the next run
         coat_check = self.agent.game_state.house.get_room_by_name("COAT CHECK")
@@ -366,4 +369,4 @@ class ActionHandler:
 
         self.agent.previous_run_memory.add_run(self.agent.game_state.day, reason_for_ending, stored_item)
         print(f"\nDay {self.agent.game_state.day} has ended. Run data saved.")
-        return True 
+        sys.exit(0)
