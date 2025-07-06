@@ -59,7 +59,7 @@ The LLM can choose from a variety of actions, each with a specific purpose in th
 -   **`open_secret_passage`**: The LLM decides which type of room to access via a `SecretPassage`.
 -   **`dig` / `open_trunk`**: The player manually informs the system how many dig spots or trunks are in the room.
 -   **`use_terminal`**: The LLM chooses a command to execute on a terminal in rooms like the `Security`, `Office`, or `Laboratory`.
--   **`store_item_in_coat_check` / `retrieve_item_from_coat_check`**: The LLM decides which item to store or retrieve from the `CoatCheck` room, allowing items to persist between runs.
+-   **`store_item_in_coat_check` / `retrieve_item_in_coat_check`**: The LLM decides which item to store or retrieve from the `CoatCheck` room, allowing items to persist between runs.
 -   **`toggle_*_switch`**: Flips a specific switch in the `UtilityCloset`.
 -   **`call_it_a_day`**: Ends the current session, saves all progress, and stores relevant information for the next run.
 
@@ -72,6 +72,132 @@ The LLM can choose from a variety of actions, each with a specific purpose in th
 -   **`/capture`**: Provides utilities for screen capture and Optical Character Recognition (OCR), enabling the agent to "see" the game.
 -   **`/jsons`**: Stores persistent data, including saved games (`current_run.json`), and the agent's long-term memory files.
 
+## Setup and Configuration
+
+Before running the application, you need to set up your environment and configure the necessary API keys.
+
+### 1. Virtual Environment
+
+It is highly recommended to use a Python virtual environment to manage dependencies. Create and activate a new environment:
+
+```bash
+# Create a new virtual environment (e.g., named 'venv')
+python -m venv venv
+
+# Activate the environment
+# On Windows
+.\venv\Scripts\activate
+
+# On macOS and Linux
+source venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+Install the required Python packages.
+
+```bash
+pip install -r requirements.txt
+```
+
+Alternatively, you can install the packages individually.
+
+### 3. API Key Configuration
+
+The application requires API keys for both Google Cloud Vision and the LLM providers you intend to use. You are responsible for managing your own API keys and ensuring they are set up correctly.
+
+#### Google Cloud Vision
+
+To use Google Cloud Vision for OCR, you need to set up a Google Cloud project, enable the API, and configure authentication.
+
+1.  **Create or Select a Google Cloud Project:**
+    *   Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    *   Create a new project or select an existing one.
+
+2.  **Enable the Cloud Vision API:**
+    *   In the Cloud Console, navigate to the **APIs & Services > Library**.
+    *   Search for "Cloud Vision API" and enable it for your project.
+    *   Alternatively, you can enable it using the `gcloud` command-line tool:
+        ```bash
+gcloud services enable vision.googleapis.com
+        ```
+
+3.  **Enable Billing:**
+    *   The Vision API requires billing to be enabled. You can set this up in the **Billing** section of the Cloud Console.
+    *   You can also link your project to a billing account using `gcloud`:
+        ```bash
+gcloud billing projects link YOUR_PROJECT_ID --billing-account=YOUR_BILLING_ACCOUNT_ID
+        ```
+
+4.  **Set Up Authentication:**
+    The application uses Application Default Credentials (ADC) to find your credentials automatically. You have two primary options:
+
+    *   **Option A: Authenticate with the Google Cloud SDK**
+        1.  [Install and initialize the Google Cloud SDK](https://cloud.google.com/sdk/docs/install).
+        2.  Run the following command to log in and set your application-default credentials:
+            ```bash
+gcloud auth application-default login
+            ```
+        The client library will automatically detect these credentials.
+
+    *   **Option B: Use a Service Account Key File**
+        1.  Follow the official Google Cloud documentation to [create a service account and download a JSON key file](https://cloud.google.com/vision/docs/setup).
+        2.  Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the absolute path of your JSON key file. For example:
+
+            ```bash
+# On Windows (Command Prompt)
+set GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\your\keyfile.json"
+
+# On Windows (PowerShell)
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\your\keyfile.json"
+
+# On macOS and Linux
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/keyfile.json"
+            ```
+
+#### LLM Providers
+
+You need to install the client library for each LLM provider you want to use and set the corresponding API key as an environment variable.
+
+-   **OpenAI:**
+    ```bash
+pip install openai
+# Set your API key
+export OPENAI_API_KEY="your-openai-api-key"
+    ```
+
+-   **Anthropic (Claude):**
+    ```bash
+pip install anthropic
+# Set your API key
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+    ```
+
+-   **Google (Gemini):
+    ```bash
+pip install google-genai google-generativeai
+# Set your API key
+export GEMINI_API_KEY="your-google-api-key"
+    ```
+
+    **Note:** The application checks for `GEMINI_API_KEY` first. If it is not found, it will check for `GOOGLE_API_KEY` as a legacy option.
+
+#### Google (Gemini) API
+
+If you plan to use Google Gemini models, you also need to ensure the Generative Language API is enabled in your Google Cloud project.
+
+1.  **Enable the Generative Language API:**
+    *   In the Cloud Console, navigate to the **APIs & Services > Library**.
+    *   Search for "Generative Language API" and enable it for your project.
+    *   Alternatively, you can enable it using the `gcloud` command-line tool:
+        ```bash
+gcloud services enable generativelanguage.googleapis.com
+        ```
+
+---
+
+**Important Note:** The information provided in this `README.md` regarding Google Cloud setup is accurate as of July 6, 2025. Google Cloud services and their setup procedures are subject to change. Always refer to the [official Google Cloud documentation](https://cloud.google.com/docs) for the most up-to-date and accurate instructions before performing any actions.
+
 ## Usage
 
 To run the Blue Prince ML agent, use the command line from the root directory.
@@ -83,7 +209,7 @@ To run the Blue Prince ML agent, use the command line from the root directory.
 -   `--model` or `-m` (optional): The LLM model to use (e.g., `openai:o4-mini`). Defaults to `o4-mini`.
 -   `--use_utility_model` or `-u` (optional): Use a smaller, faster utility model for simple tasks.
 -   `--verbose` or `-v` (optional): If set, the full prompts sent to the LLM will be displayed.
--   `--editor` or `-e` (optional): Path to a text editor for certain interactive tasks.
+-   `--editor` or `-e` (optional): Path to a text editor for certain interactive tasks. If not provided, the application will attempt to use the `EDITOR_PATH` environment variable. For example, to use VS Code as your editor, you can set `EDITOR_PATH="code"` (or the full path to `code.exe` on Windows).
 
 ### Example Commands
 
